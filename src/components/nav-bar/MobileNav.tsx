@@ -28,7 +28,7 @@ const MobileNav = ({ user }: { user: User | null }) => {
       </Link>
       <div className="flex-grow"></div>
       {user ? (
-        <LogoutBtn />
+        <></>
       ) : (
         <Link
           href="sign-in"
@@ -58,14 +58,28 @@ const MobileNav = ({ user }: { user: User | null }) => {
             </svg>
           </MenubarTrigger>
           <MenubarContent>
-            <MenubarItem>
-              New Tab <MenubarShortcut>⌘T</MenubarShortcut>
-            </MenubarItem>
+            <Link
+              href="/my-timers"
+              className="flex items-center space-x-2 py-2 border border-transparent hover:text-slate-700  transition "
+            >
+              <MenubarItem>
+                My Timers
+                <MenubarShortcut>⏰</MenubarShortcut>
+              </MenubarItem>
+            </Link>
             <MenubarItem>New Window</MenubarItem>
             <MenubarSeparator />
             <MenubarItem>Share</MenubarItem>
-            <MenubarSeparator />
-            <MenubarItem>Print</MenubarItem>
+            {user ? (
+              <div>
+                <MenubarSeparator />
+                <MenubarItem>
+                  <LogoutBtn />
+                </MenubarItem>
+              </div>
+            ) : (
+              <></>
+            )}
           </MenubarContent>
         </MenubarMenu>
       </Menubar>

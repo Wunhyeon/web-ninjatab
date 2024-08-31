@@ -38,8 +38,8 @@ const LogoutBtn = () => {
         <span>Logout</span>
       </Button>
       <Button
-        className="font-light sm:hidden"
-        variant={"outline"}
+        className="font-light sm:hidden p-0 h-full"
+        variant={"ghost"}
         onClick={handleLogout}
       >
         Logout
