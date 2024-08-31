@@ -17,7 +17,7 @@ const MainNav = ({ user }: { user: User | null }) => {
         />
       </Link>
       <Link
-        href="#"
+        href="/my-timers"
         className="flex items-center space-x-2 py-2 border border-transparent hover:text-slate-700 dark:hover:text-slate-200 transition text-slate-400 dark:text-slate-500"
       >
         <svg
