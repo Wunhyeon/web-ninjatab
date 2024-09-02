@@ -4,8 +4,9 @@ import React from "react";
 import { Button } from "../ui/button";
 import Image from "next/image";
 import LogoutBtn from "./LogoutBtn";
+import { createClient } from "@/utils/supabase/server";
 
-const MainNav = ({ user }: { user: User | null }) => {
+const MainNav = async ({ user }: { user: User | undefined }) => {
   return (
     <nav className="hidden sm:flex mt-4 font-bold items-center justify-center space-x-8 overflow-auto no-scrollbar w-full">
       <Link href="/">

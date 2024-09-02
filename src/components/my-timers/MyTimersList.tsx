@@ -63,9 +63,10 @@ export default function MyTimersList({
   data: {
     id: string;
     name: string;
-    notion_info: {
+    notion_database_info: {
       id: string;
-      database_name: string | null;
+      database_id: string;
+      database_name: string;
     }[];
   }[];
 }) {
@@ -75,41 +76,51 @@ export default function MyTimersList({
         <CardTitle>My Timers</CardTitle>
         <CardDescription>Manage your pomodoro timers.</CardDescription>
       </CardHeader>
-      <CreateTimerForm />
+      <div className="absolute top-3 right-3 flex gap-2">
+        <Button>Notion Connect</Button>
+        <CreateTimerForm />
+      </div>
 
       <CardContent>
         <Table>
           <TableBody>
             {data.map((el, idx) => (
               <TableRow key={el.id}>
-                {/* <TableCell className="font-medium">{idx + 1}</TableCell> */}
-                <TableCell className="font-medium">{el.name}</TableCell>
-                <TableCell>
-                  {/* <Badge variant="outline"> */}{" "}
-                  {el.notion_info.length && el.notion_info[0].database_name
-                    ? el.notion_info[0].database_name
-                    : "Not Connected Notion Database Yet"}
-                  {/* </Badge> */}
-                </TableCell>
+                <Link href={`/edit-timer/${el.id}`}>
+                  {/* <TableCell className="font-medium">{idx + 1}</TableCell> */}
+                  <TableCell className="font-medium">{el.name}</TableCell>
+                  <TableCell>
+                    {/* <Badge variant="outline"> */}{" "}
+                    {el.notion_database_info.length &&
+                    el.notion_database_info[0].database_name
+                      ? el.notion_database_info[0].database_name
+                      : "Not Connected Notion Database Yet"}
+                    {/* </Badge> */}
+                  </TableCell>
 
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button aria-haspopup="true" size="icon" variant="ghost">
-                        <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">
-                          {/* {el.notion_info[0].database_name} */}
-                          Active
-                        </span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuItem>Delete</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          aria-haspopup="true"
+                          size="icon"
+                          variant="ghost"
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                          <span className="sr-only">
+                            {/* {el.notion_info[0].database_name} */}
+                            Active
+                          </span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuItem>Edit</DropdownMenuItem>
+                        <DropdownMenuItem>Delete</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </Link>
               </TableRow>
             ))}
           </TableBody>
