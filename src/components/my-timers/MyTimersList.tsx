@@ -4,7 +4,7 @@ import Image from "next/image";
 import { MoreHorizontal } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -28,6 +28,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
+import { Label } from "../ui/label";
+import { Input } from "../ui/input";
+import CreateTimerForm from "./CreateTimerForm";
 const dummy: {
   id: string;
   name: string;
@@ -43,18 +57,30 @@ const dummy: {
     notion_info: [{ id: "notioninfo2", database_name: "dbname2" }],
   },
 ];
-export default function MyTimersList() {
+export default function MyTimersList({
+  data,
+}: {
+  data: {
+    id: string;
+    name: string;
+    notion_info: {
+      id: string;
+      database_name: string | null;
+    }[];
+  }[];
+}) {
   return (
     <Card className="relative">
       <CardHeader>
         <CardTitle>My Timers</CardTitle>
         <CardDescription>Manage your pomodoro timers.</CardDescription>
       </CardHeader>
-      <Button className="absolute top-3 right-3">Add Timer</Button>
+      <CreateTimerForm />
+
       <CardContent>
         <Table>
           <TableBody>
-            {dummy.map((el, idx) => (
+            {data.map((el, idx) => (
               <TableRow key={el.id}>
                 {/* <TableCell className="font-medium">{idx + 1}</TableCell> */}
                 <TableCell className="font-medium">{el.name}</TableCell>

@@ -7,11 +7,13 @@ const page = async () => {
 
   const { data, error } = await supabase
     .from("timers")
-    .select("id,name,notion_info(id,database_name)");
+    .select("id,name,notion_info(id,database_name)")
+    .order("created_at", { ascending: false });
+  console.log("data : ", data);
 
   return (
     <div>
-      <MyTimersList />
+      <MyTimersList data={data ? data : []} />
     </div>
   );
 };

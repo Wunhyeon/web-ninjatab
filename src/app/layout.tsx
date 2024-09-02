@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import Header from "@/components/nav-bar/Header";
 import { createClient } from "@/utils/supabase/server";
+import { Toaster } from "sonner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,7 +20,7 @@ export default async function RootLayout({
 }>) {
   const supabase = createClient();
   const user = await supabase.auth.getUser();
-  console.log("user : ", user);
+  // console.log("user : ", user);
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -34,6 +35,7 @@ export default async function RootLayout({
           <div className="py-4 px-2 lg:px-0 mx-auto w-full max-w-[1000px] flex-grow min-h-screen">
             {children}
           </div>
+          <Toaster richColors position="top-center" />
         </ThemeProvider>
       </body>
     </html>
