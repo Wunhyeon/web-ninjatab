@@ -19,7 +19,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const supabase = createClient();
-  const user = await supabase.auth.getUser();
+  // const user = await supabase.auth.getUser();
   // console.log("user : ", user);
 
   return (
@@ -31,7 +31,7 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Header user={user.data.user} />
+          <Header />
           <div className="py-4 px-2 lg:px-0 mx-auto w-full max-w-[1000px] flex-grow min-h-screen">
             {children}
           </div>

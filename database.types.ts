@@ -30,45 +30,33 @@ export type Database = {
         }
         Relationships: []
       }
-      notion_info: {
+      notion_database_info: {
         Row: {
-          access_token: string | null
           created_at: string
-          database_id: string | null
-          database_name: string | null
+          database_id: string
+          database_name: string
           deleted_at: string | null
           id: string
           timer_id: string
-          token_type: string | null
           updated_at: string | null
-          workspace_id: string | null
-          workspace_name: string | null
         }
         Insert: {
-          access_token?: string | null
           created_at?: string
-          database_id?: string | null
-          database_name?: string | null
+          database_id: string
+          database_name: string
           deleted_at?: string | null
           id?: string
           timer_id: string
-          token_type?: string | null
           updated_at?: string | null
-          workspace_id?: string | null
-          workspace_name?: string | null
         }
         Update: {
-          access_token?: string | null
           created_at?: string
-          database_id?: string | null
-          database_name?: string | null
+          database_id?: string
+          database_name?: string
           deleted_at?: string | null
           id?: string
           timer_id?: string
-          token_type?: string | null
           updated_at?: string | null
-          workspace_id?: string | null
-          workspace_name?: string | null
         }
         Relationships: [
           {
@@ -76,6 +64,50 @@ export type Database = {
             columns: ["timer_id"]
             isOneToOne: false
             referencedRelation: "timers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notion_info: {
+        Row: {
+          access_token: string
+          created_at: string
+          deleted_at: string | null
+          id: string
+          token_type: string
+          updated_at: string | null
+          user_id: string
+          workspace_id: string
+          workspace_name: string
+        }
+        Insert: {
+          access_token: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          token_type: string
+          updated_at?: string | null
+          user_id: string
+          workspace_id: string
+          workspace_name: string
+        }
+        Update: {
+          access_token?: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          token_type?: string
+          updated_at?: string | null
+          user_id?: string
+          workspace_id?: string
+          workspace_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notion_info_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]

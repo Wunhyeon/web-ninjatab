@@ -77,9 +77,7 @@ const CreateTimerForm = () => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="absolute top-3 right-3">
-          Create Timer
-        </Button>
+        <Button variant="outline">Create Timer</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>

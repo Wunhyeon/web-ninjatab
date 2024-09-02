@@ -4,7 +4,6 @@ import { createClient } from "@/utils/supabase/server";
 
 export const insertNewTimer = async (name: string) => {
   const supabase = createClient();
-  console.log("server action - name : ", name);
 
   try {
     const user = await supabase.auth.getUser();
@@ -24,3 +23,13 @@ export const insertNewTimer = async (name: string) => {
     return JSON.stringify({ success: false, err: err });
   }
 };
+
+// export const selectTimerInfo = async(id : string) => {
+//   const supabase = createClient();
+
+//   try{
+//     const timer =
+//   }catch(err){
+
+//   }
+// }

@@ -6,7 +6,10 @@ import { User } from "@supabase/supabase-js";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 
-const Header = ({ user }: { user: User | null }) => {
+const Header = async () => {
+  const supabase = createClient();
+  const user = await (await supabase.auth.getSession()).data.session?.user;
+
   return (
     <header>
       {/* Desktop */}

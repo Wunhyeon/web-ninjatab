@@ -14,8 +14,9 @@ import {
 import { cn } from "@/lib/utils";
 import { User } from "@supabase/supabase-js";
 import LogoutBtn from "./LogoutBtn";
+import { createClient } from "@/utils/supabase/server";
 
-const MobileNav = ({ user }: { user: User | null }) => {
+const MobileNav = async ({ user }: { user: User | undefined }) => {
   return (
     <nav className="relative flex sm:hidden items-center space-x-2 py-4 px-2 lg:px-0 mx-auto w-full max-w-[1000px]">
       <Link href="/">

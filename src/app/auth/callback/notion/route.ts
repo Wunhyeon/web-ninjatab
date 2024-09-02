@@ -1,3 +1,4 @@
+import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 // The client you created from the Server-Side Auth instructions
 
@@ -12,9 +13,9 @@ export async function GET(request: Request) {
   console.log("code : ", code);
 
   if (code) {
-    const clientId = process.env.OAUTH_CLIENT_ID;
-    const clientSecret = process.env.OAUTH_CLIENT_SECRET;
-    const redirectUri = process.env.OAUTH_REDIRECT_URI;
+    const clientId = process.env.NOTION_OAUTH_CLIENT_ID;
+    const clientSecret = process.env.NOTION_OAUTH_CLIENT_SECRET;
+    const redirectUri = process.env.NOTION_OAUTH_REDIRECT_URI;
 
     // encode in base 64
     const encoded = Buffer.from(`${clientId}:${clientSecret}`).toString(
@@ -35,12 +36,22 @@ export async function GET(request: Request) {
       }),
     });
 
+    console.log("clientId : ", clientId);
+    console.log("clientSecret : ", clientSecret);
+    console.log("redirectUri : ", redirectUri);
+    console.log("encoded : ", encoded);
+
     console.log("response : ", response);
     console.log("response : ", await response.json());
 
     // if (!error) {
     //   return NextResponse.redirect(`${origin}${next}`);
     // }
+
+    const supabase = createClient();
+    const user = await supabase.auth.getUser();
+
+    console.log("@@@@@ callbackroute - user : ", user.data.user?.id);
   }
 
   // return the user to an error page with instructions
