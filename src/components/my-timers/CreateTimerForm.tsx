@@ -51,7 +51,6 @@ const CreateTimerForm = () => {
   });
 
   const onSubmit = async (values: z.infer<typeof CreateTimerSchema>) => {
-    console.log("values : ", values);
     // 따닥방지.
 
     if (isLoadingRef.current) {

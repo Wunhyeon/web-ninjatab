@@ -1,3 +1,4 @@
+import { LOGIN_AGAIN } from "@/lib/constant";
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 // The client you created from the Server-Side Auth instructions
@@ -10,7 +11,6 @@ export async function GET(request: Request) {
   // if "next" is in param, use it as the redirect URL
   //   const next = searchParams.get("next") ?? "/";
   const next = "/";
-  console.log("code : ", code);
 
   if (code) {
     const clientId = process.env.NOTION_OAUTH_CLIENT_ID;
@@ -36,22 +36,77 @@ export async function GET(request: Request) {
       }),
     });
 
-    console.log("clientId : ", clientId);
-    console.log("clientSecret : ", clientSecret);
-    console.log("redirectUri : ", redirectUri);
-    console.log("encoded : ", encoded);
-
-    console.log("response : ", response);
-    console.log("response : ", await response.json());
+    const responseJson = await response.json();
+    console.log("responseJson : ", responseJson);
 
     // if (!error) {
     //   return NextResponse.redirect(`${origin}${next}`);
     // }
 
+    if (responseJson.owner.type != "user") {
+      // 개인유저가 아니라면 법인이나 이런 걸 껀데, 이거 처리해줘야함.
+      return NextResponse.redirect(
+        `${origin}/notion-connect?success=false&message=onlyPersonalUser`
+      );
+    }
+
     const supabase = createClient();
     const user = await supabase.auth.getUser();
 
-    console.log("@@@@@ callbackroute - user : ", user.data.user?.id);
+    if (!user.data.user) {
+      return NextResponse.redirect(
+        `${origin}/please-login?message=${LOGIN_AGAIN}`
+      );
+    }
+
+    const notionInfoByWorkspaceId = await supabase
+      .from("notion_info")
+      .select("id")
+      .eq("user_id", user.data.user.id)
+      .eq("workspace_id", responseJson.workspace_id);
+
+    if (
+      notionInfoByWorkspaceId.data &&
+      notionInfoByWorkspaceId.data.length > 0
+    ) {
+      // 기존에 workspaceId가 겹치는 notionInfo가 있다면 업데이트
+      const { data, error } = await supabase
+        .from("notion_info")
+        .update({
+          access_token: responseJson.access_token,
+          token_type: responseJson.token_type,
+          bot_id: responseJson.bot_id,
+          workspace_name: responseJson.workspace_name,
+        })
+        .eq("user_id", user.data.user.id)
+        .eq("workspace_id", responseJson.workspace_id);
+
+      if (error) {
+        // error handling
+        return NextResponse.redirect(
+          `${origin}/notion-connect?success=false&message=server-error`
+        );
+      }
+    } else {
+      // 기존에 workspaceIdrk 겹치는 notionInfo가 없다면 인서트. 혹시모르니 걍 upsert로 해줌.
+      const { data, error } = await supabase.from("notion_info").upsert({
+        access_token: responseJson.access_token,
+        token_type: responseJson.token_type,
+        bot_id: responseJson.bot_id,
+        workspace_id: responseJson.workspace_id,
+        workspace_name: responseJson.workspace_name,
+        user_id: user.data.user?.id,
+      });
+
+      if (error) {
+        // error handling
+        return NextResponse.redirect(
+          `${origin}/notion-connect?success=false&message=server-error`
+        );
+      }
+    }
+
+    return NextResponse.redirect(`${origin}/notion-connect?success=true`);
   }
 
   // return the user to an error page with instructions

@@ -11,8 +11,6 @@ const page = ({
     message: string;
   };
 }) => {
-  console.log("searchParams.message : ", searchParams.message);
-
   return (
     <div>
       <p>{searchParams.message === LOGIN_AGAIN ? LOGIN_AGAIN_MESSAGE : ""}</p>

@@ -14,7 +14,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
 import GoogleLoginBtnSVG from "../svg/GoogleLoginBtnSVG";
-import GoogleOneTapComponent from "./GoogleOneTapComponent";
 import { createClient } from "@/utils/supabase/client";
 
 export function LoginForm() {

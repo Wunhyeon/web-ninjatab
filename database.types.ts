@@ -37,8 +37,10 @@ export type Database = {
           database_name: string
           deleted_at: string | null
           id: string
+          notion_info_id: string
           timer_id: string
           updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -46,8 +48,10 @@ export type Database = {
           database_name: string
           deleted_at?: string | null
           id?: string
+          notion_info_id: string
           timer_id: string
           updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -55,10 +59,26 @@ export type Database = {
           database_name?: string
           deleted_at?: string | null
           id?: string
+          notion_info_id?: string
           timer_id?: string
           updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "notion_database_info_notion_info_id_fkey"
+            columns: ["notion_info_id"]
+            isOneToOne: false
+            referencedRelation: "notion_info"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notion_database_info_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "notion_info_timer_id_fkey"
             columns: ["timer_id"]
@@ -71,6 +91,7 @@ export type Database = {
       notion_info: {
         Row: {
           access_token: string
+          bot_id: string
           created_at: string
           deleted_at: string | null
           id: string
@@ -82,6 +103,7 @@ export type Database = {
         }
         Insert: {
           access_token: string
+          bot_id: string
           created_at?: string
           deleted_at?: string | null
           id?: string
@@ -93,6 +115,7 @@ export type Database = {
         }
         Update: {
           access_token?: string
+          bot_id?: string
           created_at?: string
           deleted_at?: string | null
           id?: string
