@@ -27,10 +27,8 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Header />
-          <div className="py-4 px-2 lg:px-0 mx-auto w-full max-w-[1000px] flex-grow min-h-screen">
-            {children}
-          </div>
+          {children}
+
           <Toaster richColors position="top-center" />
         </ThemeProvider>
       </body>

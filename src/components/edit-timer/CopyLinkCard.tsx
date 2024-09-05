@@ -18,7 +18,7 @@ const CopyLinkCard = ({
   databaseName,
 }: {
   timerId: string;
-  databaseName: string;
+  databaseName: string | null;
 }) => {
   console.log("card - databaseName : ", databaseName);
 
@@ -40,7 +40,13 @@ const CopyLinkCard = ({
             </div>
           </div>
         </form> */}
-        <div>Connected Database : {databaseName}</div>
+        {databaseName ? (
+          <div>
+            Connected Database : <Button disabled>{databaseName}</Button>
+          </div>
+        ) : (
+          "Not Connected Database"
+        )}
         <div className="flex items-center space-x-2 w-full">
           <Input
             type="text"
