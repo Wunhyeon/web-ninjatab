@@ -56,7 +56,11 @@ export default async function page({ params }: { params: { id: string } }) {
       <h2>{timerInfo.data![0].name}</h2>
       <CopyLinkCard
         timerId={params.id}
-        databaseName={timerInfo.data[0].notion_database_info[0].database_name}
+        databaseName={
+          timerInfo.data[0].notion_database_info.length
+            ? timerInfo.data[0].notion_database_info[0].database_name
+            : null
+        }
       />
       <EditTimerFrame
         timerId={params.id}
