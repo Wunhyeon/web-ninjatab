@@ -1,5 +1,7 @@
-import NotionConnect from "@/components/edit-timer/NotionConnect";
-import NotionConnectLink from "@/components/NotionConnectLink";
+import { getNotionInfo } from "@/action/timerAction";
+import CopyLinkCard from "@/components/edit-timer/CopyLinkCard";
+import DatabaseInfo from "@/components/edit-timer/DatabaseInfo";
+import EditTimerFrame from "@/components/edit-timer/EditTimerFrame";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,9 +19,7 @@ import { redirect } from "next/navigation";
 import React from "react";
 import { toast } from "sonner";
 
-const page = async ({ params }: { params: { id: string } }) => {
-  console.log("params : ", params);
-
+export default async function page({ params }: { params: { id: string } }) {
   const supabase = createClient();
   const user = await supabase.auth.getUser();
   if (!user.data.user) {
@@ -29,65 +29,39 @@ const page = async ({ params }: { params: { id: string } }) => {
   //   timer Info
   const timerInfo = await supabase
     .from("timers")
-    .select("*, notion_database_info(*)")
+    .select("*, notion_database_info(id,database_name, notion_info_id)")
     .eq("id", params.id)
     .eq("user_id", user.data.user.id);
 
-  console.log("data : ", timerInfo);
+  if (timerInfo.error) {
+    // error handling
+    redirect("/");
+  }
 
-  const notionInfo = await supabase
+  // const notionInfo = await supabase
+  //   .from("notion_info")
+  //   .select("id, workspace_name")
+  //   .eq("user_id", user.data.user.id)
+  //   .is("deleted_at", null); // access_token, workspace_id, database_id는 극비로 한다. 극도로 조심해서 다뤄야 함.
+
+  // const initialNotionInfo = await getNotionInfo();
+  const userNotionInfo = await supabase
     .from("notion_info")
-    .select("*")
-    .eq("user_id", user.data.user.id);
-
-  console.log("notionInfo : ", notionInfo);
+    .select("id, workspace_name")
+    .eq("user_id", user.data.user.id)
+    .is("deleted_at", null); // access_token, workspace_id, database_id는 극비로 한다. 극도로 조심해서 다뤄야 함.
 
   return (
-    <Card className="relative">
-      <CardHeader>
-        <CardTitle>Edit Timer</CardTitle>
-        <CardDescription>Manage your pomodoro timers.</CardDescription>
-      </CardHeader>
-
-      <CardContent>
-        {/* notion */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Database</CardTitle>
-            <CardDescription>Database Connected Timer</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {notionInfo.data?.length === 0 ? (
-              <div>
-                <p>Notion is Not Connected</p>
-                <NotionConnectLink content="Notion Connect" />
-              </div>
-            ) : (
-              <div className="grid gap-6">
-                <div className="grid gap-3">
-                  <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="name"
-                    type="text"
-                    className="w-full"
-                    defaultValue="Gamer Gear Pro Controller"
-                  />
-                </div>
-                <div className="grid gap-3">
-                  <Label htmlFor="description">Description</Label>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </CardContent>
-      <CardFooter>
-        {/* <div className="text-xs text-muted-foreground">
-          Showing <strong>1-10</strong> of <strong>32</strong> products
-        </div> */}
-      </CardFooter>
-    </Card>
+    <div className="flex-col">
+      <h2>{timerInfo.data![0].name}</h2>
+      <CopyLinkCard
+        timerId={params.id}
+        databaseName={timerInfo.data[0].notion_database_info[0].database_name}
+      />
+      <EditTimerFrame
+        timerId={params.id}
+        userNotionInfo={userNotionInfo.data?.length ? userNotionInfo.data : []}
+      />
+    </div>
   );
-};
-
-export default page;
+}

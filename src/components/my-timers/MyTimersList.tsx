@@ -30,33 +30,10 @@ import {
 } from "@/components/ui/table";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../ui/dialog";
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
+
 import CreateTimerForm from "./CreateTimerForm";
-const dummy: {
-  id: string;
-  name: string;
-  notion_info: {
-    id: string;
-    database_name: string | null;
-  }[];
-}[] = [
-  { id: "111", name: "111", notion_info: [] },
-  {
-    id: "222",
-    name: "222",
-    notion_info: [{ id: "notioninfo2", database_name: "dbname2" }],
-  },
-];
+import { useRouter } from "next/navigation";
+
 export default function MyTimersList({
   data,
 }: {
@@ -70,6 +47,8 @@ export default function MyTimersList({
     }[];
   }[];
 }) {
+  const router = useRouter();
+
   return (
     <Card className="relative">
       <CardHeader>
@@ -85,42 +64,44 @@ export default function MyTimersList({
         <Table>
           <TableBody>
             {data.map((el, idx) => (
-              <TableRow key={el.id}>
-                <Link href={`/edit-timer/${el.id}`}>
-                  {/* <TableCell className="font-medium">{idx + 1}</TableCell> */}
-                  <TableCell className="font-medium">{el.name}</TableCell>
-                  <TableCell>
-                    {/* <Badge variant="outline"> */}{" "}
-                    {el.notion_database_info.length &&
-                    el.notion_database_info[0].database_name
-                      ? el.notion_database_info[0].database_name
-                      : "Not Connected Notion Database Yet"}
-                    {/* </Badge> */}
-                  </TableCell>
+              <TableRow
+                key={el.id}
+                className="cursor-pointer"
+                onClick={() => {
+                  router.push(`/edit-timer/${el.id}`);
+                }}
+              >
+                {/* <Link href={`/edit-timer/${el.id}`} legacyBehavior> */}
+                {/* <TableCell className="font-medium">{idx + 1}</TableCell> */}
+                <TableCell className="font-medium">{el.name}</TableCell>
+                <TableCell>
+                  {/* <Badge variant="outline"> */}{" "}
+                  {el.notion_database_info.length &&
+                  el.notion_database_info[0].database_name
+                    ? el.notion_database_info[0].database_name
+                    : "Not Connected Notion Database Yet"}
+                  {/* </Badge> */}
+                </TableCell>
 
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          aria-haspopup="true"
-                          size="icon"
-                          variant="ghost"
-                        >
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">
-                            {/* {el.notion_info[0].database_name} */}
-                            Active
-                          </span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem>Delete</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </Link>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button aria-haspopup="true" size="icon" variant="ghost">
+                        <MoreHorizontal className="h-4 w-4" />
+                        <span className="sr-only">
+                          {/* {el.notion_info[0].database_name} */}
+                          Active
+                        </span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuItem>Edit</DropdownMenuItem>
+                      <DropdownMenuItem>Delete</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+                {/* </Link> */}
               </TableRow>
             ))}
           </TableBody>
