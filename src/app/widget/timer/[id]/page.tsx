@@ -1,3 +1,4 @@
+import Pomodoro from "@/components/pomodoro/Pomodoro";
 import { createClient } from "@/utils/supabase/server";
 import React from "react";
 
@@ -7,8 +8,25 @@ const page = async ({ params }: { params: { id: string } }) => {
   const timerInfo = await supabase.from("timers").select("*").eq("id", timerId);
 
   console.log("timerInfo : ", timerInfo);
+  /* Todo
+   * 결제안된 유저일때 제일 처음 1개만.
+   * 결제 기한 지났을 때 어떻게 처리해줄 것인지.
+   * 보안 철저히.
+   */
+  if (timerInfo.error) {
+    return { message: "server error" };
+  }
+  const data = timerInfo.data;
 
-  return <div>timer</div>;
+  return (
+    <div>
+      <Pomodoro
+        timerId={timerId}
+        savedWorkMinutes={data[0].worktime!}
+        savedBreakMinuts={data[0].breaktime!}
+      />
+    </div>
+  );
 };
 
 export default page;

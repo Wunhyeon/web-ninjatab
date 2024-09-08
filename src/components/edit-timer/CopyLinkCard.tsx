@@ -50,7 +50,7 @@ const CopyLinkCard = ({
         <div className="flex items-center space-x-2 w-full">
           <Input
             type="text"
-            defaultValue={`${ORIGIN}/timer/${timerId}`}
+            defaultValue={`${ORIGIN}/widget/timer/${timerId}`}
             className=" flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-gray-600 dark:focus:ring-gray-600"
             disabled
           />

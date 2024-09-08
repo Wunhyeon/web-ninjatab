@@ -31,7 +31,8 @@ export default async function page({ params }: { params: { id: string } }) {
     .from("timers")
     .select("*, notion_database_info(id,database_name, notion_info_id)")
     .eq("id", params.id)
-    .eq("user_id", user.data.user.id);
+    .eq("user_id", user.data.user.id)
+    .is("deleted_at", null);
 
   if (timerInfo.error) {
     // error handling
