@@ -6,6 +6,7 @@ import {
   LOGIN_AGAIN,
 } from "@/lib/constant";
 import { createClient } from "@/utils/supabase/server";
+import { Client } from "@notionhq/client";
 import { redirect } from "next/navigation";
 
 /**
@@ -176,4 +177,139 @@ export const upsertNotionDatabaseInfo = async (
   } catch (err) {
     return JSON.stringify({ success: false, err: (err as Error).message });
   }
+};
+
+const getHeatmapInfo = async (timerId: string) => {
+  const supabase = createClient();
+  try {
+    const timerInfo = await supabase
+      .from("timers")
+      .select(
+        "*,notion_database_info(id,database_id,notion_info(id,access_token))"
+      )
+      .eq("id", timerId);
+
+    if (timerInfo.error) {
+      throw new Error(
+        JSON.stringify({
+          statusCode: 500,
+          title: "can not insert notion_database_info",
+        })
+      );
+    }
+
+    const data = timerInfo.data;
+
+    const notionDatabaseInfo = data[0].notion_database_info;
+
+    const databaseId = notionDatabaseInfo[0].database_id;
+    const accessToken = notionDatabaseInfo[0].notion_info?.access_token;
+
+    const notion = new Client({ auth: accessToken });
+
+    const response = await notion.databases.query({
+      database_id: databaseId,
+      sorts: [
+        {
+          property: "Date",
+          direction: "ascending",
+        },
+      ],
+    });
+
+    return JSON.stringify({ success: true, data: response });
+  } catch (err) {
+    return JSON.stringify({ success: false, err: (err as Error).message });
+  }
+};
+
+export const getHeatmapInfoMap = async (timerId: string) => {
+  const res = await getHeatmapInfo(timerId);
+  const parseData = JSON.parse(res);
+  const data = parseData.data;
+
+  const todayDate = new Date();
+  let minYear = todayDate.getFullYear();
+  let maxYear = todayDate.getFullYear();
+  let maxCount = 0;
+
+  const results: {
+    object: string;
+    id: string;
+    parent: { type: string; database_id: string };
+    properties: {
+      Date: {
+        id: string;
+        type: string;
+        date: { start: string; end: string | null };
+      };
+      Name: {
+        id: string;
+        type: string;
+        title: { plain_text: string; type: string }[];
+      };
+    };
+  }[] = data.results;
+
+  const mp = new Map<
+    string,
+    { count: number; object: { name: string; id: string }[] }
+  >();
+  results.forEach((el) => {
+    if (
+      !el.properties ||
+      !el.properties.Date ||
+      !el.properties.Date.date ||
+      !el.properties.Date.date.start
+    ) {
+      return;
+    }
+    const date = el.properties.Date.date.start.split("T")[0];
+    const mpGet = mp.get(date);
+    if (mpGet) {
+      mpGet.count++;
+      mpGet.object.push({
+        name:
+          el.properties.Name.title.length &&
+          el.properties.Name.title[0].plain_text
+            ? el.properties.Name.title[0].plain_text
+            : "",
+        id: el.id,
+      });
+
+      if (mpGet.count > maxCount) {
+        maxCount = mpGet.count;
+      }
+    } else {
+      mp.set(date, {
+        count: 1,
+        object: [
+          {
+            name:
+              el.properties.Name.title.length &&
+              el.properties.Name.title[0].plain_text
+                ? el.properties.Name.title[0].plain_text
+                : "",
+            id: el.id,
+          },
+        ],
+      });
+
+      if (1 > maxCount) {
+        maxCount = 1;
+      }
+    }
+
+    const dateSplit = date.split("-");
+    const dateYear = dateSplit[0];
+    const numDateYear = Number(dateYear);
+    if (numDateYear < minYear) {
+      minYear = numDateYear;
+    }
+    if (numDateYear > maxYear) {
+      maxYear = numDateYear;
+    }
+  });
+
+  return { map: mp, minYear, maxYear };
 };
