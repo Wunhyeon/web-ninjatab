@@ -25,10 +25,16 @@ const Timer = ({ timerId }: { timerId: string }) => {
   const modeRef = useRef(mode);
   const subjRef = useRef(subject);
   const startDateRef: React.MutableRefObject<Date | undefined> = useRef();
+  const alarmSoundRef = useRef<HTMLAudioElement | null>(null);
+  const tickingSoundRef = useRef<HTMLAudioElement | null>(null);
+
+  const pauseTicking = () => {
+    if (tickingSoundRef.current) {
+      tickingSoundRef.current.pause();
+    }
+  };
 
   const initTimer = () => {
-    console.log("init mode : ", mode, ",modeRef : ", modeRef.current);
-
     setSecondsLeft(settingsInfo.workMinutes * 60);
     secondsLeftRef.current = settingsInfo.workMinutes * 60;
   };
@@ -55,6 +61,9 @@ const Timer = ({ timerId }: { timerId: string }) => {
     // settingsInfo.setWorkMinutes(secondsLeftRef.current * 60);
     // setSecondsLeft(secondsLeftRef.current);
     setSecondsLeft((prev) => prev - 1);
+    if (tickingSoundRef.current) {
+      tickingSoundRef.current.play();
+    }
   };
 
   const someF = async () => {
@@ -109,10 +118,18 @@ const Timer = ({ timerId }: { timerId: string }) => {
 
       if (secondsLeftRef.current === 0) {
         someF();
+        if (tickingSoundRef.current) {
+          tickingSoundRef.current.pause();
+        }
+        if (alarmSoundRef.current) {
+          console.log("IN IN alarmSoundRef.current : ", alarmSoundRef.current);
+
+          alarmSoundRef.current.play();
+        }
         return switchMode();
       }
       tick();
-    }, 10);
+    }, 1000);
 
     return () => {
       clearInterval(interval);
@@ -161,9 +178,17 @@ const Timer = ({ timerId }: { timerId: string }) => {
             startDateRef={startDateRef}
           />
         ) : (
-          <PauseButton isPausedRef={isPausedRef} setIsPaused={setIsPaused} />
+          <PauseButton
+            isPausedRef={isPausedRef}
+            setIsPaused={setIsPaused}
+            pauseTicking={pauseTicking}
+          />
         )}
       </div>
+      {/* alarm sound */}
+      <audio ref={alarmSoundRef} src="/alarm.wav" />
+      {/* ticking sound */}
+      <audio ref={tickingSoundRef} src="/ticking.wav" loop />
       <div className="mt-5">
         <SettingsButton />
       </div>

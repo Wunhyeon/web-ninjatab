@@ -3,9 +3,11 @@ import React from "react";
 const PauseButton = ({
   isPausedRef,
   setIsPaused,
+  pauseTicking,
 }: {
   isPausedRef: React.MutableRefObject<boolean>;
   setIsPaused: (paused: boolean) => void;
+  pauseTicking: () => void;
 }) => {
   return (
     <button
@@ -13,6 +15,7 @@ const PauseButton = ({
       onClick={() => {
         isPausedRef.current = true;
         setIsPaused(true);
+        pauseTicking();
       }}
     >
       <svg
