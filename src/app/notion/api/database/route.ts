@@ -47,16 +47,24 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // res.results.forEach((el) => console.log("el : ", el));
+    res.results.forEach((el) => console.log("el : ", el));
 
     const databaseList = (res.results as DatabaseObjectResponse[]).map((el) => {
-      return { id: el.id, title: el.title[0].plain_text };
+      return {
+        id: el.id,
+        title:
+          el.title && el.title.length > 0 && el.title[0].plain_text
+            ? el.title[0].plain_text
+            : "Untitled",
+      };
     });
     console.log("databaseList : ", databaseList);
 
     // const accessToken = data[]
     return NextResponse.json({ success: true, databaseList: databaseList });
   } catch (err) {
-    return NextResponse.json({ success: false, err });
+    console.log("notion/api/database - GET - err : ", err);
+
+    return NextResponse.json({ success: false, err: (err as Error).message });
   }
 }
