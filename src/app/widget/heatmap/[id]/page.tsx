@@ -2,8 +2,10 @@ import { getHeatmapInfoMap } from "@/action/timerAction";
 import { Heatmap } from "@/components/heatmap/Heatmap";
 import HeatmapFrame from "@/components/heatmap/HeatmapFrame";
 import Pomodoro from "@/components/pomodoro/Pomodoro";
+import { buttonVariants } from "@/components/ui/button";
 import { createClient } from "@/utils/supabase/server";
 import { Client } from "@notionhq/client";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import React from "react";
 
@@ -13,17 +15,41 @@ const page = async ({ params }: { params: { id: string } }) => {
 
   const timerId = params.id;
 
-  const { map, minYear, maxYear } = await getHeatmapInfoMap(timerId);
+  const { map, minYear, maxYear, success, err } = await getHeatmapInfoMap(
+    timerId
+  );
+
+  let errMessage = "";
+  if (
+    err &&
+    err.split(":")[0] === "Could not find sort property with name or id"
+  ) {
+    errMessage = `Please Make the ${err.split(":")[1]} Column in Database`;
+  }
 
   return (
     <div>
       HeatMap
-      <HeatmapFrame
-        mp={map}
-        minYear={minYear}
-        maxYear={maxYear}
-        timerId={timerId}
-      />
+      {success && !err && map && minYear && maxYear ? (
+        <HeatmapFrame
+          mp={map}
+          minYear={minYear}
+          maxYear={maxYear}
+          timerId={timerId}
+        />
+      ) : (
+        <div>
+          <h3>Something went wrong</h3>
+          {errMessage}
+          <Link
+            className={buttonVariants({ variant: "default" })}
+            href={`/edit-timer/${timerId}`}
+            target="_blank"
+          >
+            Go to Edit timer page
+          </Link>
+        </div>
+      )}
     </div>
   );
 };

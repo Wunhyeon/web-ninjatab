@@ -12,6 +12,8 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
 import { ORIGIN } from "@/lib/constant";
+import { CopyToClipboard } from "react-copy-to-clipboard";
+import { toast } from "sonner";
 
 const CopyLinkCard = ({
   timerId,
@@ -55,17 +57,24 @@ const CopyLinkCard = ({
             className=" flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-gray-600 dark:focus:ring-gray-600"
             disabled
           />
-          <Button
-            variant="outline"
-            size="sm"
-            className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
-            onClick={() => {
-              //   navigator.clipboard.writeText("https://example.com");
+          <CopyToClipboard
+            text={`${ORIGIN}/widget/timer/${timerId}`}
+            onCopy={() => {
+              toast.info("coppied!");
             }}
           >
-            {/* <CopyIcon className="h-4 w-4" /> */}
-            <span>Copy</span>
-          </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+              onClick={() => {
+                //   navigator.clipboard.writeText("https://example.com");
+              }}
+            >
+              {/* <CopyIcon className="h-4 w-4" /> */}
+              <span>Copy</span>
+            </Button>
+          </CopyToClipboard>
         </div>
         <div className="flex items-center space-x-2 w-full">
           Heat Map
@@ -75,17 +84,24 @@ const CopyLinkCard = ({
             className=" flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-gray-600 dark:focus:ring-gray-600"
             disabled
           />
-          <Button
-            variant="outline"
-            size="sm"
-            className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
-            onClick={() => {
-              //   navigator.clipboard.writeText("https://example.com");
+          <CopyToClipboard
+            text={`${ORIGIN}/widget/heatmap/${timerId}`}
+            onCopy={() => {
+              toast.info("coppied!");
             }}
           >
-            {/* <CopyIcon className="h-4 w-4" /> */}
-            <span>Copy</span>
-          </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+              onClick={() => {
+                //   navigator.clipboard.writeText("https://example.com");
+              }}
+            >
+              {/* <CopyIcon className="h-4 w-4" /> */}
+              <span>Copy</span>
+            </Button>
+          </CopyToClipboard>
         </div>
       </CardContent>
       <CardFooter className="flex justify-between"></CardFooter>

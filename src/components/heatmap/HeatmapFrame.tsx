@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation";
 import { getHeatmapInfoMap } from "@/action/timerAction";
 import { Spinner } from "../Spinner";
 import RefreshIcon from "../RefreshIcon";
+import { toast } from "sonner";
 
 const HeatmapFrame = ({
   mp,
@@ -63,7 +64,13 @@ const HeatmapFrame = ({
     }
     isLoadingRef.current = true;
     reRender();
-    const { map, minYear, maxYear } = await getHeatmapInfoMap(timerId);
+    const { map, minYear, maxYear, success, err } = await getHeatmapInfoMap(
+      timerId
+    );
+    if (!success || !map || !minYear) {
+      toast.error("Server Error", {});
+      return;
+    }
     // 여기 고민좀 해보자. 새로고침 하는 부분.
     mp = map;
 
