@@ -8,7 +8,12 @@ import {
 import { createClient } from "@/utils/supabase/server";
 import { Client } from "@notionhq/client";
 import { QueryDatabaseResponse } from "@notionhq/client/build/src/api-endpoints";
+import { error } from "console";
 import { redirect } from "next/navigation";
+
+interface notionError extends Error {
+  body: string;
+}
 
 /**
  * getUser. 유저 객체를 돌려준다. 유저 객체가 없으면 please-login page로 리다이렉트 시킨다.
@@ -59,24 +64,42 @@ export const insertNewTimer = async (name: string) => {
 
 /**
  * getTimerInfo
- * edit-timer에서 사용할 것
+ * export 하지 말고 여기서만 사용할 것.
  * @returns timer의 모든 정보, notion_database_info의 id, database_name. 그리고 workspace등의 id를 저장한 notion_info_id
  */
-export const getTimerInfo = async (timerId: string) => {
-  // edit-timer 에서 사용할 것
+const getTimerInfo = async (timerId: string) => {
   const supabase = createClient();
 
   try {
-    const user = await supabase.auth.getUser();
-    if (!user.data.user) {
-      throw new Error(JSON.stringify({ statusCode: 401 }));
-    }
-    const { data, error } = await supabase
+    const timerInfo = await supabase
       .from("timers")
-      .select("*, notion_database_info(id,database_name, notion_info_id)")
+      .select(
+        "id,notion_database_info(id,database_id,notion_info(id,access_token))"
+      )
       .eq("id", timerId)
-      .eq("user_id", user.data.user.id);
-  } catch (err) {}
+      .is("deleted_at", null) // timers의 deleted_at이 null인지 확인
+      .filter("notion_database_info.deleted_at", "is", null) // notion_database_info의 deleted_at이 null인지 확인
+      .filter("notion_database_info.notion_info.deleted_at", "is", null); // notion_info의 deleted_at이 null인지 확인
+
+    if (timerInfo.error || !timerInfo.data || timerInfo.data.length === 0) {
+      // error handling
+      return;
+    }
+    const notionDatabaseInfo = timerInfo.data[0].notion_database_info;
+
+    if (!notionDatabaseInfo || notionDatabaseInfo.length === 0) {
+      // error handling
+      return;
+    }
+    if (!notionDatabaseInfo[0].notion_info) {
+      // error handling
+      return;
+    }
+
+    return timerInfo;
+  } catch (err) {
+    return null;
+  }
 };
 
 /**
@@ -324,4 +347,243 @@ export const getHeatmapInfoMap = async (timerId: string) => {
   });
 
   return { map: mp, minYear, maxYear, success: true, err: null };
+};
+
+/**
+ * DB에 새로운 page row를 넣는 함수. 만들어진 page의 id를 반환한다. Date를 넣지 않는다.
+ * @param timerId
+ * @param pageName
+ * @returns
+ */
+export const insertNewPageToDBWithoutDate = async (
+  timerId: string,
+  pageName: string
+) => {
+  const supabase = createClient();
+  try {
+    const timerInfo = await getTimerInfo(timerId);
+
+    if (!timerInfo) {
+      // error handling
+      return;
+    }
+
+    const notionDatabaseInfo = timerInfo.data[0].notion_database_info;
+
+    if (!notionDatabaseInfo[0].notion_info) {
+      // error handling
+      return;
+    }
+
+    const notion = new Client({
+      auth: notionDatabaseInfo[0].notion_info.access_token,
+    });
+    const dbId = notionDatabaseInfo[0].database_id;
+
+    const newPage = await notion.pages.create({
+      parent: {
+        type: "database_id",
+        database_id: dbId,
+      },
+      properties: {
+        Name: {
+          title: [
+            {
+              text: {
+                content: pageName,
+              },
+            },
+          ],
+        },
+      },
+      children: [
+        {
+          object: "block",
+          heading_2: {
+            rich_text: [
+              {
+                text: {
+                  content: pageName,
+                },
+              },
+            ],
+          },
+        },
+      ],
+    });
+
+    return JSON.stringify({ success: true, err: null, pageId: newPage.id });
+  } catch (err) {
+    return JSON.stringify({ success: false, err, pageId: null });
+  }
+};
+
+/**
+ * DB에 새로운 page row를 넣는 함수. 만들어진 page의 id를 반환한다. Date를 포함한다.
+ * @param timerId
+ * @param pageName
+ * @returns
+ */
+export const insertNewPageToDBWithDate = async (
+  timerId: string,
+  pageName: string,
+  startTime: Date,
+  endTime: Date,
+  timeZone: string
+) => {
+  const supabase = createClient();
+  try {
+    const timerInfo = await getTimerInfo(timerId);
+
+    if (!timerInfo) {
+      // error handling
+      return;
+    }
+
+    const notionDatabaseInfo = timerInfo.data[0].notion_database_info;
+
+    if (!notionDatabaseInfo[0].notion_info) {
+      // error handling
+      return;
+    }
+
+    const notion = new Client({
+      auth: notionDatabaseInfo[0].notion_info.access_token,
+    });
+    const dbId = notionDatabaseInfo[0].database_id;
+
+    const newPage = await notion.pages.create({
+      parent: {
+        type: "database_id",
+        database_id: dbId,
+      },
+      properties: {
+        Name: {
+          title: [
+            {
+              text: {
+                content: pageName,
+              },
+            },
+          ],
+        },
+        Date: {
+          date: {
+            start: startTime,
+            end: endTime,
+            time_zone: timeZone,
+          },
+        },
+      },
+      children: [
+        {
+          object: "block",
+          heading_2: {
+            rich_text: [
+              {
+                text: {
+                  content: pageName,
+                },
+              },
+            ],
+          },
+        },
+      ],
+    });
+    console.log("insertNewPageToDBWithDate - pageName: ", pageName);
+    console.log("insertNewPageToDBWithDate : ", newPage);
+
+    return { success: true, err: null, pageId: newPage.id };
+  } catch (err) {
+    return { success: false, err, pageId: null };
+  }
+};
+
+export const updatePageDate = async (
+  timerId: string,
+  pageId: string,
+  pageName: string,
+  startDate: Date,
+  endDate: Date,
+  timeZone: string
+) => {
+  // 만약 pageId가 있으면 pageID를 업데이트 하지만, 없다면 새로운 page를 만들어 넣는다.
+  const supabase = createClient();
+  try {
+    const timerInfo = await getTimerInfo(timerId);
+    console.log("@@@ timerInfo : ", timerInfo);
+
+    if (!timerInfo) {
+      // error handling
+      return;
+    }
+
+    const notionDatabaseInfo = timerInfo.data[0].notion_database_info;
+
+    if (!notionDatabaseInfo[0].notion_info) {
+      // error handling
+      return;
+    }
+
+    const notion = new Client({
+      auth: notionDatabaseInfo[0].notion_info.access_token,
+    });
+    const dbId = notionDatabaseInfo[0].database_id;
+
+    const page = await notion.pages.retrieve({
+      page_id: pageId,
+    });
+    console.log("@@@ page : ", page);
+    // update
+    const response = await notion.pages.update({
+      page_id: pageId,
+      properties: {
+        Date: {
+          date: {
+            start: startDate,
+            end: endDate,
+            time_zone: timeZone,
+          },
+        },
+      },
+    });
+    console.log("### response : ", response);
+    return { success: true, err: null, property: null };
+  } catch (err) {
+    console.log("@@@ err : ", err);
+
+    if ((err as notionError).body) {
+      const errBody = JSON.parse((err as notionError).body);
+      if (errBody.status === 404) {
+        // pageId가 없을 시 새로 넣음.
+        return await insertNewPageToDBWithDate(
+          timerId,
+          pageName,
+          startDate,
+          endDate,
+          timeZone
+        );
+      }
+
+      const message: string = errBody.message;
+      const messageToArr = message.split(" ");
+      const messageBackPart =
+        messageToArr[1] +
+        messageToArr[2] +
+        messageToArr[3] +
+        messageToArr[4] +
+        messageToArr[5] +
+        messageToArr[6];
+
+      if (messageBackPart === "isnotapropertythatexists.") {
+        return {
+          success: false,
+          err: "missingProperty",
+          property: messageToArr[0],
+        };
+      }
+    }
+
+    return { success: false };
+  }
 };
