@@ -2,6 +2,10 @@ import { createClient } from "@/utils/supabase/server";
 import { Client } from "@notionhq/client";
 import { NextRequest, NextResponse } from "next/server";
 
+interface notionError extends Error {
+  body: string;
+}
+
 export const POST = async (req: NextRequest) => {
   const searchParams = req.nextUrl.searchParams;
   const timerId = searchParams.get("timer");
@@ -96,8 +100,8 @@ export const POST = async (req: NextRequest) => {
     // return NextResponse.json(newPage);
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.log("@@@@ err : ", err.body);
-    const errBody = JSON.parse(err.body);
+    // console.log("@@@@ err : ", err as notionError);
+    const errBody = JSON.parse((err as notionError).body);
     const message: string = errBody.message;
     const messageToArr = message.split(" ");
     const messageBackPart =

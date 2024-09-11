@@ -8,4 +8,5 @@ export const NOTION_AUTHORIZATION_URL =
 export const ERROR_USER_NOT_AUTHORIZED = "user not authorized";
 export const ERROR_SERVER_500 = "server error";
 
-export const ORIGIN = "http://localhost:3000";
+// export const ORIGIN = "http://localhost:3000";
+export const ORIGIN = "https://fc16-1-215-227-114.ngrok-free.app";

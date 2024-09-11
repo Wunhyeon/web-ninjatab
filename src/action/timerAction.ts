@@ -7,6 +7,7 @@ import {
 } from "@/lib/constant";
 import { createClient } from "@/utils/supabase/server";
 import { Client } from "@notionhq/client";
+import { QueryDatabaseResponse } from "@notionhq/client/build/src/api-endpoints";
 import { redirect } from "next/navigation";
 
 /**
@@ -225,7 +226,18 @@ const getHeatmapInfo = async (timerId: string) => {
 
 export const getHeatmapInfoMap = async (timerId: string) => {
   const res = await getHeatmapInfo(timerId);
-  const parseData = JSON.parse(res);
+  const parseData: { success: boolean; err: string | undefined; data: any } =
+    JSON.parse(res);
+
+  if (parseData.success === false) {
+    if (parseData.err) {
+      const errSplit = parseData.err.split(":");
+      if (errSplit[0] === "Could not find sort property with name or id") {
+        return { success: false, err: parseData.err };
+      }
+    }
+  }
+
   const data = parseData.data;
 
   const todayDate = new Date();
@@ -311,5 +323,5 @@ export const getHeatmapInfoMap = async (timerId: string) => {
     }
   });
 
-  return { map: mp, minYear, maxYear };
+  return { map: mp, minYear, maxYear, success: true, err: null };
 };
