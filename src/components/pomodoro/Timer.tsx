@@ -12,6 +12,10 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { buttonVariants } from "../ui/button";
 import { cn } from "@/lib/utils";
+import {
+  insertNewPageToDBWithoutDate,
+  updatePageDate,
+} from "@/action/timerAction";
 
 const Timer = ({ timerId }: { timerId: string }) => {
   const red = "#f54e4e";
@@ -22,6 +26,7 @@ const Timer = ({ timerId }: { timerId: string }) => {
   const [mode, setMode] = useState("work"); // work, break, null
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [subject, setSubject] = useState("");
+  const [isNewSubjectStart, setIsNewSubjectStart] = useState(true); // 각 task가 시작될 때, 처음 시작되는 start. pause 하고 다시 실행하는게 아니라.
 
   const secondsLeftRef = useRef(secondsLeft);
   const isPausedRef = useRef(isPaused);
@@ -30,6 +35,36 @@ const Timer = ({ timerId }: { timerId: string }) => {
   const startDateRef: React.MutableRefObject<Date | undefined> = useRef();
   const alarmSoundRef = useRef<HTMLAudioElement | null>(null);
   const tickingSoundRef = useRef<HTMLAudioElement | null>(null);
+  const pageIdRef = useRef("");
+
+  const timerStart = async () => {
+    isPausedRef.current = false;
+    setIsPaused(false);
+
+    if (isNewSubjectStart) {
+      // 새로운 task 가 시작될 때.
+      startDateRef.current = new Date();
+      setIsNewSubjectStart(false);
+      // 데이터베이스에 page 넣고 page id 받아오기. 타이머가 다 되서 멈출 때, 이 페이지의 date에 시작시간과 끝시간을 업데이트 한다.
+      const result = await insertNewPageToDBWithoutDate(
+        timerId,
+        subjRef.current
+      );
+      if (!result) {
+        toast.error("Failed to Create Page Row. Please Try Again 🙇‍♂️", {
+          duration: Infinity,
+        });
+        return;
+      }
+      const parseResult: { success: boolean; pageId: string; err: unknown } =
+        JSON.parse(result);
+      if (!parseResult.success) {
+        // error handling
+        return;
+      }
+      pageIdRef.current = parseResult.pageId;
+    }
+  };
 
   const pauseTicking = () => {
     if (tickingSoundRef.current) {
@@ -51,6 +86,10 @@ const Timer = ({ timerId }: { timerId: string }) => {
     setMode(nextMode);
     alert(`switchMode! - currentMode : ${mode}, nextMode : ${nextMode}`);
 
+    if (nextMode == "work") {
+      setIsNewSubjectStart(true);
+    }
+
     modeRef.current = nextMode;
     setSecondsLeft(nextSeconds);
     secondsLeftRef.current = nextSeconds;
@@ -59,10 +98,7 @@ const Timer = ({ timerId }: { timerId: string }) => {
   };
 
   const tick = () => {
-    // secondsLeftRef.current = secondsLeftRef.current - 1;
     secondsLeftRef.current--;
-    // settingsInfo.setWorkMinutes(secondsLeftRef.current * 60);
-    // setSecondsLeft(secondsLeftRef.current);
     setSecondsLeft((prev) => prev - 1);
     if (tickingSoundRef.current) {
       tickingSoundRef.current.play();
@@ -70,34 +106,51 @@ const Timer = ({ timerId }: { timerId: string }) => {
   };
 
   const someF = async () => {
-    alert(`some Function. subject : ${subject}, subjRef : ${subjRef.current}`);
+    // alert(`some Function. subject : ${subject}, subjRef : ${subjRef.current}`);
     const endTime = new Date();
     const offset = endTime.getTimezoneOffset() * 60000;
     const start = new Date(startDateRef.current!.getTime() - offset);
     const end = new Date(endTime.getTime() - offset);
-    const createPageresult = await fetch(
-      `${ORIGIN}/notion/api/database/addTimerSubjectPage?timer=${timerId}`,
-      {
-        method: "POST",
-        body: JSON.stringify({
-          subject: subjRef.current,
-          startTime: start,
-          endTime: end,
-          timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        }),
-      }
+    const updateResult = await updatePageDate(
+      timerId,
+      pageIdRef.current,
+      subjRef.current,
+      start,
+      end,
+      Intl.DateTimeFormat().resolvedOptions().timeZone
     );
-    const resultJson = await createPageresult.json();
-    console.log("@@@@@@@@@@ resultJson : ", resultJson);
 
-    if (!resultJson.success && resultJson.error === "missingProperty") {
-      toast.error(`Please make ${resultJson.property} column`, {
+    if (!updateResult?.success && updateResult?.err === "missingProperty") {
+      // toast.error(`Please make ${updateResult.property} column`, {
+      //   duration: Infinity,
+      //   closeButton: true,
+      // });
+
+      toast.error("Please Check 'Name' and 'Date' Column in Database", {
         duration: Infinity,
         closeButton: true,
       });
     }
+    // const createPageresult = await fetch(
+    //   `${ORIGIN}/notion/api/database/addTimerSubjectPage?timer=${timerId}`,
+    //   {
+    //     method: "POST",
+    //     body: JSON.stringify({
+    //       subject: subjRef.current,
+    //       startTime: start,
+    //       endTime: end,
+    // timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    //     }),
+    //   }
+    // );
+    // const resultJson = await createPageresult.json();
 
-    console.log(Intl.DateTimeFormat().resolvedOptions().timeZone);
+    // if (!resultJson.success && resultJson.error === "missingProperty") {
+    //   toast.error(`Please make ${resultJson.property} column`, {
+    //     duration: Infinity,
+    //     closeButton: true,
+    //   });
+    // }
   };
 
   useEffect(() => {
@@ -112,7 +165,6 @@ const Timer = ({ timerId }: { timerId: string }) => {
       if (isPausedRef.current) {
         return;
       }
-      console.log("aaa : ", secondsLeftRef.current);
 
       if (secondsLeftRef.current === 0) {
         someF();
@@ -125,7 +177,7 @@ const Timer = ({ timerId }: { timerId: string }) => {
         return switchMode();
       }
       tick();
-    }, 1000);
+    }, 10);
 
     return () => {
       clearInterval(interval);
@@ -137,7 +189,6 @@ const Timer = ({ timerId }: { timerId: string }) => {
       ? settingsInfo.workMinutes * 60
       : settingsInfo.breakMinutes * 60;
   const percentage = (secondsLeft / totalSeconds) * 100;
-  console.log("percentage : ", percentage);
 
   const minutes = Math.floor(secondsLeft / 60);
   let numberSeconds = Math.floor(secondsLeft % 60);
@@ -168,11 +219,7 @@ const Timer = ({ timerId }: { timerId: string }) => {
       />
       <div className="mt-5">
         {isPaused ? (
-          <PlayButton
-            isPausedRef={isPausedRef}
-            setIsPaused={setIsPaused}
-            startDateRef={startDateRef}
-          />
+          <PlayButton timerStart={timerStart} />
         ) : (
           <PauseButton
             isPausedRef={isPausedRef}

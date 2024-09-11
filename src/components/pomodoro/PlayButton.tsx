@@ -1,24 +1,14 @@
 import React, { useContext } from "react";
 import SettingsContext from "./SettingsContext";
 
-const PlayButton = ({
-  isPausedRef,
-  setIsPaused,
-  startDateRef,
-}: {
-  isPausedRef: React.MutableRefObject<boolean>;
-  setIsPaused: (paused: boolean) => void;
-  startDateRef: React.MutableRefObject<Date | undefined>;
-}) => {
+const PlayButton = ({ timerStart }: { timerStart: () => void }) => {
   const settingsInfo = useContext(SettingsContext);
 
   return (
     <button
       className="bg-transparent border-0 inline-block w-24"
       onClick={() => {
-        isPausedRef.current = false;
-        setIsPaused(false);
-        startDateRef.current = new Date();
+        timerStart();
       }}
     >
       <svg
