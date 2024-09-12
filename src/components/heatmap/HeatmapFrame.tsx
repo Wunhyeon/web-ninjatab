@@ -205,7 +205,7 @@ const HeatmapFrame = ({
           {isLoadingRef.current ? <Spinner /> : <RefreshIcon />}
         </Button>
       </div>
-      <Heatmap data={calendarData} />
+      <Heatmap data={calendarData} mp={mp} />
     </Card>
   );
 };
