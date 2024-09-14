@@ -167,7 +167,9 @@ const Timer = ({ timerId }: { timerId: string }) => {
       }
 
       if (secondsLeftRef.current === 0) {
-        someF();
+        if (modeRef.current === "work") {
+          someF();
+        }
         if (tickingSoundRef.current) {
           tickingSoundRef.current.pause();
         }

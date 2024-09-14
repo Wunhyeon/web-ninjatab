@@ -30,8 +30,6 @@ export const Heatmap = ({
     dark: ["#383838", "#4D455D", "#7DB9B6", "#F5E9CF", "#E96479"],
   };
 
-  console.log("mp : ", mp.get("2024-09-12"));
-
   return (
     <div className="text-3x">
       <ActivityCalendar

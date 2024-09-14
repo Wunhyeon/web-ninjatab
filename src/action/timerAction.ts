@@ -490,8 +490,6 @@ export const insertNewPageToDBWithDate = async (
         },
       ],
     });
-    console.log("insertNewPageToDBWithDate - pageName: ", pageName);
-    console.log("insertNewPageToDBWithDate : ", newPage);
 
     return { success: true, err: null, pageId: newPage.id };
   } catch (err) {
@@ -511,7 +509,6 @@ export const updatePageDate = async (
   const supabase = createClient();
   try {
     const timerInfo = await getTimerInfo(timerId);
-    console.log("@@@ timerInfo : ", timerInfo);
 
     if (!timerInfo) {
       // error handling
@@ -533,7 +530,6 @@ export const updatePageDate = async (
     const page = await notion.pages.retrieve({
       page_id: pageId,
     });
-    console.log("@@@ page : ", page);
     // update
     const response = await notion.pages.update({
       page_id: pageId,
@@ -547,7 +543,6 @@ export const updatePageDate = async (
         },
       },
     });
-    console.log("### response : ", response);
     return { success: true, err: null, property: null };
   } catch (err) {
     console.log("@@@ err : ", err);
