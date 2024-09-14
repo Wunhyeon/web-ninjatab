@@ -10,6 +10,7 @@ import { Client } from "@notionhq/client";
 import { QueryDatabaseResponse } from "@notionhq/client/build/src/api-endpoints";
 import { error } from "console";
 import { redirect } from "next/navigation";
+import { TimeZone } from "@/lib/types";
 
 interface notionError extends Error {
   body: string;
@@ -429,7 +430,7 @@ export const insertNewPageToDBWithDate = async (
   pageName: string,
   startTime: Date,
   endTime: Date,
-  timeZone: string
+  timeZone: TimeZone
 ) => {
   const supabase = createClient();
   try {
@@ -469,8 +470,8 @@ export const insertNewPageToDBWithDate = async (
         },
         Date: {
           date: {
-            start: startTime,
-            end: endTime,
+            start: startTime.toISOString(),
+            end: endTime.toISOString(),
             time_zone: timeZone,
           },
         },
@@ -503,7 +504,7 @@ export const updatePageDate = async (
   pageName: string,
   startDate: Date,
   endDate: Date,
-  timeZone: string
+  timeZone: TimeZone
 ) => {
   // 만약 pageId가 있으면 pageID를 업데이트 하지만, 없다면 새로운 page를 만들어 넣는다.
   const supabase = createClient();
@@ -536,8 +537,8 @@ export const updatePageDate = async (
       properties: {
         Date: {
           date: {
-            start: startDate,
-            end: endDate,
+            start: startDate.toISOString(),
+            end: endDate.toISOString(),
             time_zone: timeZone,
           },
         },
