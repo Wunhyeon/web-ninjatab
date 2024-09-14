@@ -50,6 +50,19 @@ const HeatmapFrame = ({
   const [calendarData, setCalendarData] = useState<
     { date: string; count: number; level: number }[]
   >([]);
+  const [calendarDataMp, setCalendarDataMp] = useState<
+    Map<
+      string,
+      {
+        count: number;
+        object: {
+          name: string;
+          id: string;
+        }[];
+      }
+    >
+  >(mp);
+
   const [yearList, setYearList] = useState<string[]>([]);
   const router = useRouter();
 
@@ -73,7 +86,7 @@ const HeatmapFrame = ({
     }
     // 여기 고민좀 해보자. 새로고침 하는 부분.
     mp = map;
-
+    setCalendarDataMp(mp);
     // select에 들어갈 년도들
     const date = new Date();
     const thisYear = date.getFullYear();
@@ -205,7 +218,7 @@ const HeatmapFrame = ({
           {isLoadingRef.current ? <Spinner /> : <RefreshIcon />}
         </Button>
       </div>
-      <Heatmap data={calendarData} mp={mp} />
+      <Heatmap data={calendarData} mp={calendarDataMp} />
     </Card>
   );
 };
