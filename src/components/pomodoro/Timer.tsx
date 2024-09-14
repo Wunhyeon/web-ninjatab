@@ -16,6 +16,7 @@ import {
   insertNewPageToDBWithoutDate,
   updatePageDate,
 } from "@/action/timerAction";
+import { TimeZone } from "@/lib/types";
 
 const Timer = ({ timerId }: { timerId: string }) => {
   const red = "#f54e4e";
@@ -117,7 +118,7 @@ const Timer = ({ timerId }: { timerId: string }) => {
       subjRef.current,
       start,
       end,
-      Intl.DateTimeFormat().resolvedOptions().timeZone
+      Intl.DateTimeFormat().resolvedOptions().timeZone as TimeZone
     );
 
     if (!updateResult?.success && updateResult?.err === "missingProperty") {
