@@ -7,10 +7,13 @@ import {
 } from "@/lib/constant";
 import { createClient } from "@/utils/supabase/server";
 import { Client } from "@notionhq/client";
-import { QueryDatabaseResponse } from "@notionhq/client/build/src/api-endpoints";
+import {
+  GetPageResponse,
+  QueryDatabaseResponse,
+} from "@notionhq/client/build/src/api-endpoints";
 import { error } from "console";
 import { redirect } from "next/navigation";
-import { TimeZone } from "@/lib/types";
+import { GetPageResponseWithInTrashAndArchived, TimeZone } from "@/lib/types";
 
 interface notionError extends Error {
   body: string;
@@ -117,9 +120,6 @@ export const getNotionInfo = async () => {
       .select("id, workspace_name")
       .eq("user_id", user.id)
       .is("deleted_at", null); // access_token, workspace_id, database_id는 극비로 한다. 극도로 조심해서 다뤄야 함.
-
-    console.log("Timer Action! - getNotionInfo - data :  ", data);
-    console.log("Timer Action! - getNotionInfo - error :  ", error);
 
     if (error) {
       throw new Error(
@@ -294,6 +294,7 @@ export const getHeatmapInfoMap = async (timerId: string) => {
   results.forEach((el) => {
     if (
       !el.properties ||
+      !el.properties.Name ||
       !el.properties.Date ||
       !el.properties.Date.date ||
       !el.properties.Date.date.start
@@ -306,6 +307,8 @@ export const getHeatmapInfoMap = async (timerId: string) => {
       mpGet.count++;
       mpGet.object.push({
         name:
+          el.properties.Name &&
+          el.properties.Name.title &&
           el.properties.Name.title.length &&
           el.properties.Name.title[0].plain_text
             ? el.properties.Name.title[0].plain_text
@@ -322,6 +325,8 @@ export const getHeatmapInfoMap = async (timerId: string) => {
         object: [
           {
             name:
+              el.properties.Name &&
+              el.properties.Name.title &&
               el.properties.Name.title.length &&
               el.properties.Name.title[0].plain_text
                 ? el.properties.Name.title[0].plain_text
@@ -351,6 +356,85 @@ export const getHeatmapInfoMap = async (timerId: string) => {
 };
 
 /**
+ * Notion 데이터베이스의 정보들을 얻기 위해. 주로 properties가 뭐가 있는지 알기 위해. (없으면 추가해주려고)
+ * @param databaseId
+ * @param accessToken
+ */
+const getDBInfo = async (databaseId: string, accessToken: string) => {
+  try {
+    const notion = new Client({
+      auth: accessToken,
+    });
+    const response = await notion.databases.retrieve({
+      database_id: databaseId,
+    });
+    return response;
+  } catch (err) {}
+};
+
+/**
+ * Date Property의 타입이 date가 아닐 때, 타입을 date 타입으로 바꿔주기
+ * @param notion
+ * @param databaseId
+ */
+const updateDatePropertyType = async (notion: Client, databaseId: string) => {
+  try {
+    const response = await notion.databases.update({
+      database_id: databaseId,
+      properties: { Date: { type: "date", date: {} } },
+    });
+
+    console.log("updateDatePropertyType - response : ", response);
+  } catch (err) {
+    console.log("updateDatePropertyType - err : ", err);
+  }
+};
+
+/**
+ * database에  Date Property가 없을때 추가해주는 함수.
+ * @param databaseId
+ * @param name
+ * @param startTime
+ * @param endTime
+ * @param timeZone
+ */
+const upsertProperties = async (
+  notion: Client,
+  databaseId: string,
+  nullProperty: {
+    date?: {
+      startTime: string;
+      endTime: string;
+      timeZone: string;
+    };
+  }
+) => {
+  try {
+    const properties: any = {};
+
+    // startTime, endTime, timeZone 모두 있을 경우에만 Date 프로퍼티 추가
+    if (nullProperty.date) {
+      properties.Date = {
+        date: {
+          start: nullProperty.date.startTime,
+          end: nullProperty.date.endTime,
+          time_zone: nullProperty.date.timeZone,
+        },
+      };
+    }
+
+    const response = await notion.databases.update({
+      database_id: databaseId,
+      properties: properties,
+    });
+    // const responseJson = await response.json();
+    console.log("@@@@@ responseJson : ", response);
+  } catch (err) {
+    console.log("addProperty - Error : ", err);
+  }
+};
+
+/**
  * DB에 새로운 page row를 넣는 함수. 만들어진 page의 id를 반환한다. Date를 넣지 않는다.
  * @param timerId
  * @param pageName
@@ -360,7 +444,6 @@ export const insertNewPageToDBWithoutDate = async (
   timerId: string,
   pageName: string
 ) => {
-  const supabase = createClient();
   try {
     const timerInfo = await getTimerInfo(timerId);
 
@@ -381,13 +464,34 @@ export const insertNewPageToDBWithoutDate = async (
     });
     const dbId = notionDatabaseInfo[0].database_id;
 
+    await notion.databases.update({ database_id: dbId, properties: {} });
+
+    const dbInfo = await getDBInfo(
+      dbId,
+      notionDatabaseInfo[0].notion_info.access_token
+    );
+
+    if (!dbInfo) {
+      // error handling.
+      // dbInfo 가 없다는 건 문제가 있다. DB가 아예 삭제됬을 가능성.
+      return;
+    }
+
+    // title 속성을 찾아 주제를 넣어준다.
+    let titlePropertyName = "";
+    for (let item in dbInfo.properties) {
+      if (dbInfo.properties[item].id === "title") {
+        titlePropertyName = item;
+      }
+    }
+
     const newPage = await notion.pages.create({
       parent: {
         type: "database_id",
         database_id: dbId,
       },
       properties: {
-        Name: {
+        [titlePropertyName]: {
           title: [
             {
               text: {
@@ -426,13 +530,14 @@ export const insertNewPageToDBWithoutDate = async (
  * @returns
  */
 export const insertNewPageToDBWithDate = async (
+  notion: Client,
   timerId: string,
+  titlePropertyName: string,
   pageName: string,
   startTime: Date,
   endTime: Date,
   timeZone: TimeZone
 ) => {
-  const supabase = createClient();
   try {
     const timerInfo = await getTimerInfo(timerId);
 
@@ -448,9 +553,6 @@ export const insertNewPageToDBWithDate = async (
       return;
     }
 
-    const notion = new Client({
-      auth: notionDatabaseInfo[0].notion_info.access_token,
-    });
     const dbId = notionDatabaseInfo[0].database_id;
 
     const newPage = await notion.pages.create({
@@ -459,7 +561,7 @@ export const insertNewPageToDBWithDate = async (
         database_id: dbId,
       },
       properties: {
-        Name: {
+        [titlePropertyName]: {
           title: [
             {
               text: {
@@ -507,7 +609,6 @@ export const updatePageDate = async (
   timeZone: TimeZone
 ) => {
   // 만약 pageId가 있으면 pageID를 업데이트 하지만, 없다면 새로운 page를 만들어 넣는다.
-  const supabase = createClient();
   try {
     const timerInfo = await getTimerInfo(timerId);
 
@@ -528,22 +629,85 @@ export const updatePageDate = async (
     });
     const dbId = notionDatabaseInfo[0].database_id;
 
-    const page = await notion.pages.retrieve({
-      page_id: pageId,
-    });
-    // update
-    const response = await notion.pages.update({
-      page_id: pageId,
-      properties: {
-        Date: {
-          date: {
-            start: startDate.toISOString(),
-            end: endDate.toISOString(),
-            time_zone: timeZone,
+    const page: GetPageResponseWithInTrashAndArchived =
+      await notion.pages.retrieve({
+        page_id: pageId,
+      });
+
+    console.log("### page : ", page);
+    // page가 존재 할 때. 존재하지 않을때
+    const dbInfo = await getDBInfo(
+      dbId,
+      notionDatabaseInfo[0].notion_info.access_token
+    );
+
+    if (!dbInfo) {
+      // error handling.
+      // dbInfo 가 없다는 건 문제가 있다. DB가 아예 삭제됬을 가능성.
+      return;
+    }
+
+    // title 속성을 찾아 주제를 넣어준다.
+    // Date 속성이 없거나, 이름은 Date 속성이지만 실제 속성이 date가 아닐때 처리.
+    // Date 속성이 없다면 추가해주고, 이름은 Date 속성이지만 실제 속성이 date가 아니면 속성을 변경해준다.
+    let titlePropertyName = "";
+    let isDateFlag = false;
+    for (let item in dbInfo.properties) {
+      if (dbInfo.properties[item].id === "title") {
+        titlePropertyName = item;
+      }
+      if (item === "Date") {
+        isDateFlag = true;
+
+        if (dbInfo.properties[item].type !== "date") {
+          // Date 속성을 date로 업데이트
+          await updateDatePropertyType(notion, dbId);
+        }
+      }
+    }
+
+    console.log("%%%%% isDateFlag : ", isDateFlag);
+    if (!isDateFlag) {
+      await updateDatePropertyType(notion, dbId);
+    }
+
+    if (page.archived && page.in_trash) {
+      // insert
+      await insertNewPageToDBWithDate(
+        notion,
+        timerId,
+        titlePropertyName,
+        pageName,
+        startDate,
+        endDate,
+        timeZone
+      );
+    } else {
+      // update
+      const response = await notion.pages.update({
+        page_id: pageId,
+        properties: {
+          [titlePropertyName]: {
+            title: [
+              {
+                text: {
+                  content: pageName,
+                },
+              },
+            ],
+          },
+          Date: {
+            type: "date",
+            date: {
+              start: startDate.toISOString(),
+              end: endDate.toISOString(),
+              time_zone: timeZone,
+            },
           },
         },
-      },
-    });
+      });
+    }
+
     return { success: true, err: null, property: null };
   } catch (err) {
     console.log("@@@ err : ", err);
@@ -552,13 +716,7 @@ export const updatePageDate = async (
       const errBody = JSON.parse((err as notionError).body);
       if (errBody.status === 404) {
         // pageId가 없을 시 새로 넣음.
-        return await insertNewPageToDBWithDate(
-          timerId,
-          pageName,
-          startDate,
-          endDate,
-          timeZone
-        );
+        return;
       }
 
       const message: string = errBody.message;
