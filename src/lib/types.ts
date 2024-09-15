@@ -1,3 +1,11 @@
+import { GetPageResponse } from "@notionhq/client/build/src/api-endpoints";
+
+// export type GetPageResponseWithInTrashAndArchived extends GetPageResponse  {archived : boolean, in_trash : boolean}
+export type GetPageResponseWithInTrashAndArchived = {
+  archived?: boolean;
+  in_trash?: boolean;
+} & GetPageResponse;
+
 export type TimeZone =
   | "Africa/Abidjan"
   | "Africa/Accra"
