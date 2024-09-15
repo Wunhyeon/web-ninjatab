@@ -29,7 +29,7 @@ export const POST = async (req: NextRequest) => {
       )
       .eq("id", timerId);
 
-    console.log("timerInfo : ", timerInfo);
+    // console.log("timerInfo : ", timerInfo);
 
     if (timerInfo.error || !timerInfo.data || timerInfo.data.length === 0) {
       // error handling
