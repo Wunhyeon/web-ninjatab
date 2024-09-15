@@ -7,11 +7,6 @@ import {
 } from "@/lib/constant";
 import { createClient } from "@/utils/supabase/server";
 import { Client } from "@notionhq/client";
-import {
-  GetPageResponse,
-  QueryDatabaseResponse,
-} from "@notionhq/client/build/src/api-endpoints";
-import { error } from "console";
 import { redirect } from "next/navigation";
 import { GetPageResponseWithInTrashAndArchived, TimeZone } from "@/lib/types";
 
@@ -60,8 +55,6 @@ export const insertNewTimer = async (name: string) => {
 
     return JSON.stringify({ success: true, err: null });
   } catch (err) {
-    console.log("err in insertNewTimer : ", err);
-
     return JSON.stringify({ success: false, err: err });
   }
 };
@@ -148,7 +141,6 @@ export const upsertNotionDatabaseInfo = async (
       .select("id, timers(id,user_id)")
       .eq("timer_id", timerId)
       .eq("timers.user_id", user.id);
-    console.log("res :", res);
 
     if (res.error) {
       throw new Error(
@@ -185,8 +177,6 @@ export const upsertNotionDatabaseInfo = async (
         });
 
       if (error) {
-        console.log("error : ", error);
-
         throw new Error(
           JSON.stringify({
             statusCode: 500,
@@ -197,8 +187,6 @@ export const upsertNotionDatabaseInfo = async (
 
       return JSON.stringify({ success: true });
     }
-
-    console.log("res : ", res);
   } catch (err) {
     return JSON.stringify({ success: false, err: (err as Error).message });
   }
@@ -250,6 +238,7 @@ const getHeatmapInfo = async (timerId: string) => {
 
 export const getHeatmapInfoMap = async (timerId: string) => {
   const res = await getHeatmapInfo(timerId);
+
   const parseData: { success: boolean; err: string | undefined; data: any } =
     JSON.parse(res);
 
@@ -373,7 +362,7 @@ const getDBInfo = async (databaseId: string, accessToken: string) => {
 };
 
 /**
- * Date Property의 타입이 date가 아닐 때, 타입을 date 타입으로 바꿔주기
+ * Date Property의 타입이 date가 아닐 때, 타입을 date 타입으로 바꿔주기 or Date Property 추가.
  * @param notion
  * @param databaseId
  */
@@ -383,10 +372,32 @@ const updateDatePropertyType = async (notion: Client, databaseId: string) => {
       database_id: databaseId,
       properties: { Date: { type: "date", date: {} } },
     });
-
-    console.log("updateDatePropertyType - response : ", response);
   } catch (err) {
     console.log("updateDatePropertyType - err : ", err);
+  }
+};
+
+/**
+ * title type인 property의 이름이 Name이 아닐 때, property의 이름을 Name으로 바꿔주는 함수.
+ * @param notion
+ * @param databaseId
+ * @param titleTypePropertyId
+ */
+const updateTitleTypePropertyName = async (
+  notion: Client,
+  databaseId: string
+) => {
+  try {
+    const response = await notion.databases.update({
+      database_id: databaseId,
+      properties: {
+        title: {
+          name: "Name",
+        },
+      },
+    });
+  } catch (err) {
+    console.log("updateTitleTypePropertyName - err : ", err);
   }
 };
 
@@ -427,8 +438,6 @@ const upsertProperties = async (
       database_id: databaseId,
       properties: properties,
     });
-    // const responseJson = await response.json();
-    console.log("@@@@@ responseJson : ", response);
   } catch (err) {
     console.log("addProperty - Error : ", err);
   }
@@ -464,8 +473,6 @@ export const insertNewPageToDBWithoutDate = async (
     });
     const dbId = notionDatabaseInfo[0].database_id;
 
-    await notion.databases.update({ database_id: dbId, properties: {} });
-
     const dbInfo = await getDBInfo(
       dbId,
       notionDatabaseInfo[0].notion_info.access_token
@@ -477,11 +484,11 @@ export const insertNewPageToDBWithoutDate = async (
       return;
     }
 
-    // title 속성을 찾아 주제를 넣어준다.
-    let titlePropertyName = "";
     for (let item in dbInfo.properties) {
-      if (dbInfo.properties[item].id === "title") {
-        titlePropertyName = item;
+      if (dbInfo.properties[item].type === "title") {
+        if (item !== "Name") {
+          await updateTitleTypePropertyName(notion, dbId);
+        }
       }
     }
 
@@ -491,7 +498,7 @@ export const insertNewPageToDBWithoutDate = async (
         database_id: dbId,
       },
       properties: {
-        [titlePropertyName]: {
+        Name: {
           title: [
             {
               text: {
@@ -532,7 +539,6 @@ export const insertNewPageToDBWithoutDate = async (
 export const insertNewPageToDBWithDate = async (
   notion: Client,
   timerId: string,
-  titlePropertyName: string,
   pageName: string,
   startTime: Date,
   endTime: Date,
@@ -561,7 +567,7 @@ export const insertNewPageToDBWithDate = async (
         database_id: dbId,
       },
       properties: {
-        [titlePropertyName]: {
+        Name: {
           title: [
             {
               text: {
@@ -634,7 +640,6 @@ export const updatePageDate = async (
         page_id: pageId,
       });
 
-    console.log("### page : ", page);
     // page가 존재 할 때. 존재하지 않을때
     const dbInfo = await getDBInfo(
       dbId,
@@ -650,11 +655,12 @@ export const updatePageDate = async (
     // title 속성을 찾아 주제를 넣어준다.
     // Date 속성이 없거나, 이름은 Date 속성이지만 실제 속성이 date가 아닐때 처리.
     // Date 속성이 없다면 추가해주고, 이름은 Date 속성이지만 실제 속성이 date가 아니면 속성을 변경해준다.
-    let titlePropertyName = "";
     let isDateFlag = false;
     for (let item in dbInfo.properties) {
-      if (dbInfo.properties[item].id === "title") {
-        titlePropertyName = item;
+      if (dbInfo.properties[item].type === "title") {
+        if (item !== "Name") {
+          await updateTitleTypePropertyName(notion, dbId);
+        }
       }
       if (item === "Date") {
         isDateFlag = true;
@@ -666,7 +672,6 @@ export const updatePageDate = async (
       }
     }
 
-    console.log("%%%%% isDateFlag : ", isDateFlag);
     if (!isDateFlag) {
       await updateDatePropertyType(notion, dbId);
     }
@@ -676,7 +681,6 @@ export const updatePageDate = async (
       await insertNewPageToDBWithDate(
         notion,
         timerId,
-        titlePropertyName,
         pageName,
         startDate,
         endDate,
@@ -687,7 +691,7 @@ export const updatePageDate = async (
       const response = await notion.pages.update({
         page_id: pageId,
         properties: {
-          [titlePropertyName]: {
+          Name: {
             title: [
               {
                 text: {
@@ -710,8 +714,6 @@ export const updatePageDate = async (
 
     return { success: true, err: null, property: null };
   } catch (err) {
-    console.log("@@@ err : ", err);
-
     if ((err as notionError).body) {
       const errBody = JSON.parse((err as notionError).body);
       if (errBody.status === 404) {
