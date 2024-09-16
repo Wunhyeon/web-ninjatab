@@ -239,8 +239,29 @@ const getHeatmapInfo = async (timerId: string) => {
 export const getHeatmapInfoMap = async (timerId: string) => {
   const res = await getHeatmapInfo(timerId);
 
-  const parseData: { success: boolean; err: string | undefined; data: any } =
-    JSON.parse(res);
+  const parseData: {
+    success: boolean;
+    err: string | undefined;
+    data: {
+      results: {
+        object: string;
+        id: string;
+        parent: { type: string; database_id: string };
+        properties: {
+          Date: {
+            id: string;
+            type: string;
+            date: { start: string; end: string | null };
+          };
+          Name: {
+            id: string;
+            type: string;
+            title: { plain_text: string; type: string }[];
+          };
+        };
+      }[];
+    };
+  } = JSON.parse(res);
 
   if (parseData.success === false) {
     if (parseData.err) {
@@ -251,6 +272,30 @@ export const getHeatmapInfoMap = async (timerId: string) => {
     }
   }
 
+  let nameFlag = false;
+  let dateFlag = false;
+
+  for (let item in parseData.data.results[0].properties) {
+    if (
+      item === "Name" &&
+      parseData.data.results[0].properties.Name.type === "title"
+    ) {
+      nameFlag = true;
+    }
+    if (item === "Date") {
+      dateFlag = true;
+    }
+  }
+
+  if (!nameFlag || !dateFlag) {
+    return {
+      success: false,
+      err: `Could not find sort property with name or id:${
+        !nameFlag ? "Name" : ""
+      } ${!dateFlag ? "Date" : ""}`,
+    };
+  }
+
   const data = parseData.data;
 
   const todayDate = new Date();
@@ -258,23 +303,7 @@ export const getHeatmapInfoMap = async (timerId: string) => {
   let maxYear = todayDate.getFullYear();
   let maxCount = 0;
 
-  const results: {
-    object: string;
-    id: string;
-    parent: { type: string; database_id: string };
-    properties: {
-      Date: {
-        id: string;
-        type: string;
-        date: { start: string; end: string | null };
-      };
-      Name: {
-        id: string;
-        type: string;
-        title: { plain_text: string; type: string }[];
-      };
-    };
-  }[] = data.results;
+  const results = data.results;
 
   const mp = new Map<
     string,
@@ -402,6 +431,30 @@ const updateTitleTypePropertyName = async (
 };
 
 /**
+ * 기존에 type이 title이 아닌 Property의 이름이 Name이라면 이름을 바꿔준다.
+ * @param notion
+ * @param databaseId
+ * @param nameId
+ */
+const updateRenameNamePropertyToOther = async (
+  notion: Client,
+  databaseId: string,
+  nameId: string
+) => {
+  try {
+    const date = new Date();
+    const response = await notion.databases.update({
+      database_id: databaseId,
+      properties: {
+        [nameId]: { name: "Name" + date.getTime() },
+      },
+    });
+  } catch (err) {
+    console.log("updateTitleTypePropertyName - err : ", err);
+  }
+};
+
+/**
  * database에  Date Property가 없을때 추가해주는 함수.
  * @param databaseId
  * @param name
@@ -482,6 +535,19 @@ export const insertNewPageToDBWithoutDate = async (
       // error handling.
       // dbInfo 가 없다는 건 문제가 있다. DB가 아예 삭제됬을 가능성.
       return;
+    }
+    // Name이라는 이름의 다른 Property가 있다면, 이를 다른이름으로 바꿔주고 title type의 property의 이름을 Name으로 바꿔줘야 한다.
+    for (let item in dbInfo.properties) {
+      if (item === "Name") {
+        if (dbInfo.properties[item].type !== "title") {
+          // type이 title이 아닌 Name Property의 이름을 Name이 아닌 다른걸로 바꿔주기.
+          await updateRenameNamePropertyToOther(
+            notion,
+            dbId,
+            dbInfo.properties[item].id
+          );
+        }
+      }
     }
 
     for (let item in dbInfo.properties) {
@@ -652,9 +718,24 @@ export const updatePageDate = async (
       return;
     }
 
-    // title 속성을 찾아 주제를 넣어준다.
+    // Name이라는 이름의 다른 Property가 있다면, 이를 다른이름으로 바꿔주고 title type의 property의 이름을 Name으로 바꿔줘야 한다.
+
     // Date 속성이 없거나, 이름은 Date 속성이지만 실제 속성이 date가 아닐때 처리.
     // Date 속성이 없다면 추가해주고, 이름은 Date 속성이지만 실제 속성이 date가 아니면 속성을 변경해준다.
+
+    for (let item in dbInfo.properties) {
+      if (item === "Name") {
+        if (dbInfo.properties[item].type !== "title") {
+          // type이 title이 아닌 Name Property의 이름을 Name이 아닌 다른걸로 바꿔주기.
+          await updateRenameNamePropertyToOther(
+            notion,
+            dbId,
+            dbInfo.properties[item].id
+          );
+        }
+      }
+    }
+
     let isDateFlag = false;
     for (let item in dbInfo.properties) {
       if (dbInfo.properties[item].type === "title") {
