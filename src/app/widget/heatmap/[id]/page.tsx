@@ -20,11 +20,29 @@ const page = async ({ params }: { params: { id: string } }) => {
   );
 
   let errMessage = "";
-  if (
-    err &&
-    err.split(":")[0] === "Could not find sort property with name or id"
-  ) {
-    errMessage = `Please Make the ${err.split(":")[1]} Column in Database`;
+  if (err) {
+    if (err.split(":")[0] === "Could not find sort property with name or id") {
+      const errSplit = err.split(":");
+      console.log("errSplit : ", errSplit);
+
+      const errColumns = [];
+      for (let i = 0; i < errSplit.length; i++) {
+        if (i === 0) {
+          continue;
+        }
+        console.log("errSplit[i] : ", errSplit[i]);
+
+        errColumns.push(errSplit[i]);
+      }
+      errMessage = `Please Make the ${errColumns} Column in Database.`;
+      console.log(errColumns.indexOf("Name"));
+
+      if (errColumns.indexOf("Name") !== -1) {
+        errMessage +=
+          "If Name Column Exists, Please Name Change Name Columns type to title";
+      }
+    }
+    console.log("errMessage : ", errMessage);
   }
 
   return (
