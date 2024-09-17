@@ -57,7 +57,13 @@ export default function MyTimersList({
       </CardHeader>
       <div className="absolute top-3 right-3 flex gap-2">
         <Button>Notion Connect</Button>
-        <CreateTimerForm />
+        {/* <CreateTimerForm /> */}
+        <Link
+          className={buttonVariants({ variant: "outline" })}
+          href={"/create-timer"}
+        >
+          Create Timer
+        </Link>
       </div>
 
       <CardContent>

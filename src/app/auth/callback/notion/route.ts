@@ -3,6 +3,8 @@ import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 // The client you created from the Server-Side Auth instructions
 
+// Notion 연결 Callback 처리하는 부분!!!
+
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
@@ -65,6 +67,7 @@ export async function GET(request: Request) {
       .eq("user_id", user.data.user.id)
       .eq("workspace_id", responseJson.workspace_id);
 
+    // 기존에 workspaceId가 겹치는 게 없다면 notionInfo를 저장하고, 있다면 update해준다!!!
     if (
       notionInfoByWorkspaceId.data &&
       notionInfoByWorkspaceId.data.length > 0
