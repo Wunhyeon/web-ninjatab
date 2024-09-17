@@ -9,6 +9,7 @@ import { createClient } from "@/utils/supabase/server";
 import { Client } from "@notionhq/client";
 import { redirect } from "next/navigation";
 import { GetPageResponseWithInTrashAndArchived, TimeZone } from "@/lib/types";
+import { revalidatePath } from "next/cache";
 
 interface notionError extends Error {
   body: string;
@@ -189,6 +190,48 @@ export const upsertNotionDatabaseInfo = async (
     }
   } catch (err) {
     return JSON.stringify({ success: false, err: (err as Error).message });
+  }
+};
+
+export const createTimerWithNotionDatabaseInfo = async (
+  name: string,
+  notionInfoId: string,
+  databaseId: string,
+  databaseName: string
+) => {
+  const supabase = createClient();
+  const user = await getUser();
+
+  try {
+    // timer 생성
+    const createTimerResult = await supabase
+      .from("timers")
+      .insert({ name, user_id: user.id })
+      .select();
+
+    if (!createTimerResult.data || createTimerResult.data.length === 0) {
+      return { success: false, message: "createTimer Error" };
+    }
+    const createdTimerId = createTimerResult.data[0].id;
+
+    // notion_database_info 생성
+    const createNotionDatabaseInfo = await supabase
+      .from("notion_database_info")
+      .insert({
+        user_id: user.id,
+        timer_id: createdTimerId,
+        notion_info_id: notionInfoId,
+        database_id: databaseId,
+        database_name: databaseName,
+      });
+
+    if (createNotionDatabaseInfo.error) {
+      return { success: false, message: "createNotionDatabaseInfo Error" };
+    }
+    revalidatePath("/my-timers");
+    return { success: true, createdTimerId: createdTimerId };
+  } catch (err) {
+    return { success: false };
   }
 };
 
@@ -821,6 +864,82 @@ export const updatePageDate = async (
       }
     }
 
+    return { success: false };
+  }
+};
+
+/**
+ * Notion Database의 Sync를 맞춰주는 함수. (Name Property를 title type으로. Date Property를 datd type으로)
+ * @param notionInfoId
+ * @param databaseId
+ * @returns
+ */
+export const syncDatabase = async (
+  notionInfoId: string,
+  databaseId: string
+) => {
+  const supabase = createClient();
+  const user = await getUser();
+  try {
+    const notionInfo = await supabase
+      .from("notion_info")
+      .select("id,access_token")
+      .eq("user_id", user.id)
+      .eq("id", notionInfoId);
+
+    if (notionInfo.error || !notionInfo.data || notionInfo.data.length === 0) {
+      throw Error();
+    }
+
+    const accessToken = notionInfo.data[0].access_token;
+    const notion = new Client({ auth: accessToken });
+
+    const dbInfo = await getDBInfo(databaseId, accessToken);
+
+    if (!dbInfo) {
+      // error handling.
+      // dbInfo 가 없다는 건 문제가 있다. DB가 아예 삭제됬을 가능성.
+      return;
+    }
+
+    // Name이라는 이름의 다른 Property가 있다면, 이를 다른이름으로 바꿔주고 title type의 property의 이름을 Name으로 바꿔줘야 한다.
+    // Date 속성이 없거나, 이름은 Date 속성이지만 실제 속성이 date가 아닐때 처리.
+    // Date 속성이 없다면 추가해주고, 이름은 Date 속성이지만 실제 속성이 date가 아니면 속성을 변경해준다.
+    for (let item in dbInfo.properties) {
+      if (item === "Name") {
+        if (dbInfo.properties[item].type !== "title") {
+          // type이 title이 아닌 Name Property의 이름을 Name이 아닌 다른걸로 바꿔주기.
+          await updateRenameNamePropertyToOther(
+            notion,
+            databaseId,
+            dbInfo.properties[item].id
+          );
+        }
+      }
+    }
+
+    let isDateFlag = false;
+    for (let item in dbInfo.properties) {
+      if (dbInfo.properties[item].type === "title") {
+        if (item !== "Name") {
+          await updateTitleTypePropertyName(notion, databaseId);
+        }
+      }
+      if (item === "Date") {
+        isDateFlag = true;
+
+        if (dbInfo.properties[item].type !== "date") {
+          // Date 속성을 date로 업데이트
+          await updateDatePropertyType(notion, databaseId);
+        }
+      }
+    }
+
+    if (!isDateFlag) {
+      await updateDatePropertyType(notion, databaseId);
+    }
+    return { success: true };
+  } catch (err) {
     return { success: false };
   }
 };

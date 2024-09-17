@@ -47,8 +47,6 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    res.results.forEach((el) => console.log("el : ", el));
-
     const databaseList = (res.results as DatabaseObjectResponse[]).map((el) => {
       return {
         id: el.id,
@@ -56,9 +54,10 @@ export async function GET(request: NextRequest) {
           el.title && el.title.length > 0 && el.title[0].plain_text
             ? el.title[0].plain_text
             : "Untitled",
+        url: el.url,
       };
     });
-    console.log("databaseList : ", databaseList);
+    // console.log("databaseList : ", databaseList);
 
     // const accessToken = data[]
     return NextResponse.json({ success: true, databaseList: databaseList });
