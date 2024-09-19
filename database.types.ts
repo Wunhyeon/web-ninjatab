@@ -161,11 +161,62 @@ export type Database = {
           },
         ]
       }
+      plans: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          interval: string | null
+          interval_count: number | null
+          is_usage_based: boolean | null
+          name: string
+          price: string
+          product_id: number
+          product_name: string | null
+          sort: number | null
+          trial_interval: string | null
+          trial_interval_count: number | null
+          variant_id: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          interval?: string | null
+          interval_count?: number | null
+          is_usage_based?: boolean | null
+          name: string
+          price: string
+          product_id: number
+          product_name?: string | null
+          sort?: number | null
+          trial_interval?: string | null
+          trial_interval_count?: number | null
+          variant_id: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          interval?: string | null
+          interval_count?: number | null
+          is_usage_based?: boolean | null
+          name?: string
+          price?: string
+          product_id?: number
+          product_name?: string | null
+          sort?: number | null
+          trial_interval?: string | null
+          trial_interval_count?: number | null
+          variant_id?: number
+        }
+        Relationships: []
+      }
       timers: {
         Row: {
           alarm_sound_id: string | null
           alarm_sound_volume: number
-          breaktime: number | null
+          breaktime: number
           created_at: string
           deleted_at: string | null
           id: string
@@ -173,12 +224,12 @@ export type Database = {
           time_zone: string | null
           updated_at: string | null
           user_id: string
-          worktime: number | null
+          worktime: number
         }
         Insert: {
           alarm_sound_id?: string | null
           alarm_sound_volume?: number
-          breaktime?: number | null
+          breaktime?: number
           created_at?: string
           deleted_at?: string | null
           id?: string
@@ -186,12 +237,12 @@ export type Database = {
           time_zone?: string | null
           updated_at?: string | null
           user_id: string
-          worktime?: number | null
+          worktime?: number
         }
         Update: {
           alarm_sound_id?: string | null
           alarm_sound_volume?: number
-          breaktime?: number | null
+          breaktime?: number
           created_at?: string
           deleted_at?: string | null
           id?: string
@@ -199,7 +250,7 @@ export type Database = {
           time_zone?: string | null
           updated_at?: string | null
           user_id?: string
-          worktime?: number | null
+          worktime?: number
         }
         Relationships: [
           {
