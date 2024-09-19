@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       throw new Error(error.message);
     }
 
-    console.log("data : ", data);
+    // console.log("data : ", data);
 
     const notion = new Client({ auth: data[0].access_token });
 

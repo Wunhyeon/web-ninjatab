@@ -1,5 +1,6 @@
 import { NewPlan } from "@/lib/types";
 import React from "react";
+import { SignupButton } from "./SignupButton";
 
 const Plan = ({ plan }: { plan: NewPlan }) => {
   const { description, product_name, name, price } = plan;
@@ -20,6 +21,7 @@ const Plan = ({ plan }: { plan: NewPlan }) => {
       ) : null}
 
       <p>${price}</p>
+      <SignupButton plan={plan} />
     </div>
   );
 };

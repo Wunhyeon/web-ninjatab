@@ -880,6 +880,7 @@ export const syncDatabase = async (
 ) => {
   const supabase = createClient();
   const user = await getUser();
+
   try {
     const notionInfo = await supabase
       .from("notion_info")
