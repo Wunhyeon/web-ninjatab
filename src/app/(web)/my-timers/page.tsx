@@ -17,7 +17,6 @@ const page = async () => {
     .select("id,name,notion_database_info(id,database_name,database_id)")
     .eq("user_id", user.data.user?.id)
     .order("created_at", { ascending: false });
-  console.log("data : ", data);
 
   return (
     <div>

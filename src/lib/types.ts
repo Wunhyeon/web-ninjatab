@@ -1,4 +1,5 @@
 import { GetPageResponse } from "@notionhq/client/build/src/api-endpoints";
+import { Json } from "../../database.types";
 
 // export type GetPageResponseWithInTrashAndArchived extends GetPageResponse  {archived : boolean, in_trash : boolean}
 export type GetPageResponseWithInTrashAndArchived = {
@@ -21,6 +22,34 @@ export type NewPlan = {
   trial_interval_count?: number | null;
   sort?: number | null;
   // created_at: string;
+};
+
+export type NewWebhookEvent = {
+  id: string;
+  body: unknown;
+  event_name: string;
+  // created_at?: Date;
+  processed?: boolean | null;
+  processing_error?: string | null;
+};
+
+export type NewSubscription = {
+  email: string;
+  ends_at: string | null;
+  id?: string;
+  is_paused: boolean | null;
+  is_usage_based: boolean | null;
+  lemon_squeezy_id: string;
+  name: string;
+  order_id: number;
+  plan_id: string;
+  price: string;
+  renews_at: string | null;
+  status: string;
+  status_formatted: string;
+  subscription_item_id: number;
+  trial_ends_at: string | null;
+  user_id: string;
 };
 
 export type TimeZone =
