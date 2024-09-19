@@ -6,6 +6,23 @@ export type GetPageResponseWithInTrashAndArchived = {
   in_trash?: boolean;
 } & GetPageResponse;
 
+export type NewPlan = {
+  product_id: number;
+  name: string;
+  variant_id: number;
+  price: string;
+  id?: string;
+  product_name?: string | null;
+  description?: string | null;
+  is_usage_based?: boolean | null;
+  interval?: string | null;
+  interval_count?: number | null;
+  trial_interval?: string | null;
+  trial_interval_count?: number | null;
+  sort?: number | null;
+  // created_at: string;
+};
+
 export type TimeZone =
   | "Africa/Abidjan"
   | "Africa/Accra"

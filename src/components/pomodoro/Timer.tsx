@@ -180,7 +180,7 @@ const Timer = ({ timerId }: { timerId: string }) => {
         return switchMode();
       }
       tick();
-    }, 10);
+    }, 1000);
 
     return () => {
       clearInterval(interval);
