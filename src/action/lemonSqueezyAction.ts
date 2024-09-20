@@ -102,8 +102,10 @@ export async function syncPlans() {
     if (productVariantsResult.error || !productVariantsResult.data) {
       // error handling
 
-      return;
+      throw new Error();
+      // return;
     }
+
     const productVariants: NewPlan[] = productVariantsResult.data;
 
     // Helper function to add a variant to the productVariants array and sync it with the database.
@@ -171,7 +173,6 @@ export async function syncPlans() {
         if (!isSubscription) {
           continue;
         }
-        console.log("priceString : ", priceString);
 
         const res = await _addVariant({
           name: variant.name,
@@ -192,6 +193,8 @@ export async function syncPlans() {
     }
     return productVariants;
   } catch (err) {
+    console.log("err in syncPlan : ", err);
+
     return null;
   }
 }

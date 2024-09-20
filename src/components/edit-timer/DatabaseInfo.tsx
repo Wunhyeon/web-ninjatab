@@ -1,16 +1,9 @@
 "use client";
 
 import React, { useCallback, useRef, useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../ui/card";
-import { Label } from "../ui/label";
+import { Card, CardContent, CardDescription, CardHeader } from "../ui/card";
 import { Button } from "../ui/button";
-import { getNotionInfo, upsertNotionDatabaseInfo } from "@/action/timerAction";
+import { syncDatabase, upsertNotionDatabaseInfo } from "@/action/timerAction";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import {
@@ -29,17 +22,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { Link } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { NotionDatabaseInfoSchema } from "@/zodSchema/NotionDatabaseInfoSchema";
 import { z } from "zod";
-import { toast } from "@/hooks/use-toast";
 import RefreshIcon from "../RefreshIcon";
 import { Spinner } from "../Spinner";
 import { ORIGIN } from "@/lib/constant";
-import { useSonner } from "sonner";
+import { toast } from "sonner";
 import { Input } from "../ui/input";
+import Link from "next/link";
 
 const DatabaseInfo = ({
   timerId,
@@ -55,13 +47,18 @@ const DatabaseInfo = ({
   const [databaseNameState, setDatabaseNameState] = useState<string>(""); // 이거 받아온 걸로 바꿔줘야함.
 
   const [databaseInfoState, setDatabaseInfoState] = useState<
-    { id: string; title: string }[]
+    { id: string; title: string; url: string }[]
   >([]);
-  // const [notionInfoIdState, setNotionInfoIdState] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [notionInfoIdState, setNotionInfoIdState] = useState<string>("");
+  const [databaseIdState, setDatabaseIdState] = useState<string>(""); //  이거도 받아온 걸로 바꿔줘야함.
+  const [databaseUrlState, setDatabaseUrlState] = useState<string>("");
 
   const databaseIsLoadingRef = useRef(false);
   const [databaseIsLoadingState, setDatabaseIsLoadingState] = useState(false);
   const notionInfoIdRef = useRef("");
+  const syncButtonIsLoadingRef = useRef(false);
+
   const router = useRouter();
   // -----------------------------------
 
@@ -121,14 +118,8 @@ const DatabaseInfo = ({
   });
 
   async function onSubmit(data: z.infer<typeof NotionDatabaseInfoSchema>) {
-    // toast({
-    //   title: "You submitted the following values:",
-    //   description: (
-    //     <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-    //       <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-    //     </pre>
-    //   ),
-    // });
+    setIsLoading(true);
+    reRender();
 
     const result = await upsertNotionDatabaseInfo(
       data.timerId,
@@ -137,10 +128,13 @@ const DatabaseInfo = ({
       data.databaseName
     );
 
-    console.log("result : ", result);
     if (JSON.parse(result).success) {
+      toast.success("Connected Databas Changed!");
       router.refresh();
     }
+
+    setIsLoading(false);
+    reRender();
   }
 
   const refreshDatabaseList = async (notionInfoId: string) => {
@@ -149,6 +143,7 @@ const DatabaseInfo = ({
     }
     databaseIsLoadingRef.current = true;
     setDatabaseIsLoadingState(true);
+    setIsLoading(true);
     reRender();
     const res = await fetch(
       `${ORIGIN}/notion/api/database?notionInfoId=${notionInfoId}`
@@ -159,155 +154,194 @@ const DatabaseInfo = ({
       router.refresh();
     }
     const databaseList = await res.json();
-    console.log("Client - databaseList : ", databaseList);
-    console.log("databaseIsLoading.current : ", databaseIsLoadingRef.current);
 
     const list = databaseList.databaseList;
+    console.log("list : ", list);
+
     setDatabaseInfoState(list);
     databaseIsLoadingRef.current = false;
     setDatabaseIsLoadingState(false);
+    setIsLoading(false);
+    reRender();
+  };
+
+  /**
+   * Notion Database의 Sync를 맞춰주기. notion Database의 Property를 Name : title type, Date : date type으로 바꿔준다.
+   * @returns
+   */
+  const handleSyncDatabase = async () => {
+    if (syncButtonIsLoadingRef.current) {
+      return;
+    }
+    syncButtonIsLoadingRef.current = true;
+    setIsLoading(true);
+    reRender();
+
+    const result = await syncDatabase(notionInfoIdState, databaseIdState);
+    if (result?.success) {
+      toast.success("Database Synchronized");
+    }
+
+    syncButtonIsLoadingRef.current = false;
+    setIsLoading(false);
     reRender();
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Database</CardTitle>
-        <CardDescription>Database Connected Timer</CardDescription>
-      </CardHeader>
-      <CardContent>
-        {userNotionInfoState.length === 0 ? (
-          <div>
-            <p>Notion is Not Connected</p>
-            <Button onClick={handleLinkClick}>Notion Connect</Button>
-          </div>
-        ) : (
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="w-2/3 space-y-6"
-            >
-              {/* Workspace */}
-              <FormField
-                control={form.control}
-                name="notionInfoId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Workspace</FormLabel>
-                    <div className="flex items-center space-x-2">
-                      <Select
-                        onValueChange={(event) => {
-                          field.onChange(event);
-                          // notionInfo Id를 가지고 그 안에 있는 accessToken을 가지고 노션 api에 database 목록을 요청해야한다.
-                          refreshDatabaseList(event);
-                          notionInfoIdRef.current = event;
-                        }}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a workspace to connect" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {userNotionInfoState.map((el) => (
-                            <SelectItem key={el.id} value={el.id}>
-                              {el.workspace_name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <Button variant={"ghost"} onClick={handleLinkClick}>
-                        +
-                      </Button>
-                    </div>
-                    <FormDescription>
-                      Notion Workspace that connect to Timer
-                      {/* <Link href="/examples/forms">email settings</Link>. */}
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Database */}
-              <FormField
-                control={form.control}
-                name="databaseId"
-                render={({ field }) => {
-                  return (
-                    <FormItem className="relative">
-                      <FormLabel>Database</FormLabel>
+    <div className="relative">
+      <Card
+        className={`relative ${
+          isLoading ? "filter blur-sm pointer-events-none" : ""
+        }`}
+      >
+        <CardHeader>
+          {/* <CardTitle>Database</CardTitle> */}
+          <CardDescription>Database Connected Timer</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {userNotionInfoState.length === 0 ? (
+            <div>
+              <p>Notion is Not Connected</p>
+              <Button onClick={handleLinkClick}>Notion Connect</Button>
+            </div>
+          ) : (
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="w-2/3 space-y-6"
+              >
+                {/* Workspace */}
+                <FormField
+                  control={form.control}
+                  name="notionInfoId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Workspace</FormLabel>
                       <div className="flex items-center space-x-2">
                         <Select
                           onValueChange={(event) => {
                             field.onChange(event);
-                            setDatabaseNameState(event);
-                            let databaseName = "";
-                            for (let i = 0; i < databaseInfoState.length; i++) {
-                              if (databaseInfoState[i].id === event) {
-                                databaseName = databaseInfoState[i].title;
-                                break;
-                              }
-                            }
-                            form.setValue("databaseName", databaseName);
+                            // notionInfo Id를 가지고 그 안에 있는 accessToken을 가지고 노션 api에 database 목록을 요청해야한다.
+                            refreshDatabaseList(event);
+                            notionInfoIdRef.current = event;
+                            setNotionInfoIdState(event);
                           }}
                           defaultValue={field.value}
                         >
-                          <FormControl className="flex-grow">
+                          <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select a Database to connect to Timer" />
+                              <SelectValue placeholder="Select a workspace to connect" />
                             </SelectTrigger>
                           </FormControl>
-
                           <SelectContent>
-                            {databaseInfoState.map((el) => (
+                            {userNotionInfoState.map((el) => (
                               <SelectItem key={el.id} value={el.id}>
-                                {el.title}
+                                {el.workspace_name}
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
-                        <Button
-                          disabled={databaseIsLoadingRef.current}
-                          className="ml-4"
-                          variant={"ghost"}
-                          onClick={() => {
-                            if (notionInfoIdRef.current) {
-                              refreshDatabaseList(notionInfoIdRef.current);
-                            }
-                          }}
-                        >
-                          {databaseIsLoadingRef.current === true ? (
-                            <Spinner />
-                          ) : (
-                            <RefreshIcon />
-                          )}
+                        <Button variant={"ghost"} onClick={handleLinkClick}>
+                          +
                         </Button>
                       </div>
                       <FormDescription>
-                        Connect your databases with Focus&Record: open a
-                        database in Notion, click the &apos;...&apos; button in
-                        the top-right corner → Connections → Add connections →
-                        Focus&Record.
+                        Notion Workspace that connect to Timer
                         {/* <Link href="/examples/forms">email settings</Link>. */}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
-                  );
-                }}
-              />
+                  )}
+                />
 
-              {/* Timer Id */}
-              <FormField
-                control={form.control}
-                name="timerId"
-                render={({ field }) => (
-                  <Input {...field} type="hidden" value={timerId} />
-                )}
-              />
-              {/* Database Name */}
-              {/* <FormField
+                {/* Database */}
+                <FormField
+                  control={form.control}
+                  name="databaseId"
+                  render={({ field }) => {
+                    return (
+                      <FormItem className="relative">
+                        <FormLabel>Database</FormLabel>
+                        <div className="flex items-center space-x-2">
+                          <Select
+                            onValueChange={(event) => {
+                              field.onChange(event);
+                              setDatabaseNameState(event);
+                              let databaseName = "";
+                              let databaseUrl = "";
+                              for (
+                                let i = 0;
+                                i < databaseInfoState.length;
+                                i++
+                              ) {
+                                if (databaseInfoState[i].id === event) {
+                                  databaseName = databaseInfoState[i].title;
+                                  databaseUrl = databaseInfoState[i].url;
+                                  break;
+                                }
+                              }
+                              form.setValue("databaseName", databaseName);
+                              setDatabaseIdState(event);
+                              console.log("databaseUrl : ", databaseUrl);
+
+                              setDatabaseUrlState(databaseUrl);
+                            }}
+                            defaultValue={field.value}
+                          >
+                            <FormControl className="flex-grow">
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a Database to connect to Timer" />
+                              </SelectTrigger>
+                            </FormControl>
+
+                            <SelectContent>
+                              {databaseInfoState.map((el) => (
+                                <SelectItem key={el.id} value={el.id}>
+                                  {el.title}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            disabled={databaseIsLoadingRef.current}
+                            className="ml-4"
+                            variant={"ghost"}
+                            onClick={() => {
+                              if (notionInfoIdRef.current) {
+                                refreshDatabaseList(notionInfoIdRef.current);
+                              }
+                            }}
+                          >
+                            {databaseIsLoadingRef.current === true ? (
+                              <Spinner />
+                            ) : (
+                              <RefreshIcon />
+                            )}
+                          </Button>
+                        </div>
+                        <FormDescription>
+                          Connect your databases with Focus&Record: open a
+                          database in Notion, click the &apos;...&apos; button
+                          in the top-right corner → Connections → Add
+                          connections → Focus&Record.
+                          {/* <Link href="/examples/forms">email settings</Link>. */}
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
+                />
+
+                {/* Timer Id */}
+                <FormField
+                  control={form.control}
+                  name="timerId"
+                  render={({ field }) => (
+                    <Input {...field} type="hidden" value={timerId} />
+                  )}
+                />
+                {/* Database Name */}
+                {/* <FormField
                 control={form.control}
                 name="databaseName"
                 render={({ field }) => (
@@ -315,12 +349,49 @@ const DatabaseInfo = ({
                 )}
               /> */}
 
-              <Button type="submit">Submit</Button>
-            </form>
-          </Form>
-        )}
-      </CardContent>
-    </Card>
+                {databaseIdState && databaseUrlState && notionInfoIdState ? (
+                  <div>
+                    <p>
+                      ⚠️ The database must include a Name property of type
+                      &apos;title&apos; and a Date property of type
+                      &apos;date&apos;
+                    </p>
+                    <Button
+                      onClick={handleSyncDatabase}
+                      type="button"
+                      disabled={syncButtonIsLoadingRef.current}
+                    >
+                      {syncButtonIsLoadingRef.current === true ? (
+                        <Spinner />
+                      ) : (
+                        "Sync Database"
+                      )}
+                    </Button>
+                    <Link
+                      href={databaseUrlState}
+                      target="_blank"
+                      className="bg-blue-200"
+                    >
+                      Check Database
+                    </Link>
+                  </div>
+                ) : (
+                  <></>
+                )}
+
+                <Button type="submit">Submit</Button>
+              </form>
+            </Form>
+          )}
+        </CardContent>
+      </Card>
+      {/* 스피너를 화면 위에 고정 */}
+      {isLoading && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="w-10 h-10 border-4 border-t-transparent border-black rounded-full animate-spin"></div>
+        </div>
+      )}
+    </div>
   );
 };
 

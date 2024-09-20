@@ -22,15 +22,7 @@ export function SignupButton(props: {
 
   // Make sure Lemon.js is loaded, you need to enqueue the Lemon Squeezy SDK in your app first.
   useEffect(() => {
-    console.log("useEffect - out : ", typeof window.createLemonSqueezy);
-    console.log("useEffect - out - typeof window : ", typeof window);
-
     if (typeof window.createLemonSqueezy === "function") {
-      console.log(
-        "IN - typeof window.createLemonSqueezy  : ",
-        typeof window.createLemonSqueezy
-      );
-
       window.createLemonSqueezy();
     }
   }, []);
