@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import Header from "@/components/nav-bar/Header";
 import { createClient } from "@/utils/supabase/server";
 import { Toaster } from "sonner";
+import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,6 +21,12 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <Script
+          src="https://app.lemonsqueezy.com/js/lemon.js"
+          strategy="beforeInteractive"
+        />
+      </head>
       <body className={inter.className}>
         <ThemeProvider
           attribute="class"

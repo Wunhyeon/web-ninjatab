@@ -800,7 +800,7 @@ export const updatePageDate = async (
       await updateDatePropertyType(notion, dbId);
     }
 
-    if (page.archived && page.in_trash) {
+    if (!page || (page.archived && page.in_trash)) {
       // insert
       await insertNewPageToDBWithDate(
         notion,
@@ -815,15 +815,15 @@ export const updatePageDate = async (
       const response = await notion.pages.update({
         page_id: pageId,
         properties: {
-          Name: {
-            title: [
-              {
-                text: {
-                  content: pageName,
-                },
-              },
-            ],
-          },
+          // Name: {
+          //   title: [
+          //     {
+          //       text: {
+          //         content: pageName,
+          //       },
+          //     },
+          //   ],
+          // },
           Date: {
             type: "date",
             date: {

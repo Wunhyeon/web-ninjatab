@@ -11,13 +11,15 @@ import {
   createCheckout,
   getPrice,
   getProduct,
+  getSubscription,
   lemonSqueezySetup,
   listPrices,
   listProducts,
   updateSubscription,
   Variant,
 } from "@lemonsqueezy/lemonsqueezy.js";
-import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
+import { notFound, redirect } from "next/navigation";
 import crypto, { randomUUID } from "node:crypto";
 
 /**
@@ -43,6 +45,17 @@ const getUser = async () => {
   }
 };
 
+export const getAllPlan = async () => {
+  const supabase = createClient();
+  try {
+    const planRes = await supabase.from("plans").select("*");
+    if (planRes.error) {
+      throw new Error();
+    }
+    return planRes.data;
+  } catch (err) {}
+};
+
 /**
  * This action will sync the product variants from Lemon Squeezy with the
  * Plans database model. It will only sync the 'subscription' variants.
@@ -58,10 +71,14 @@ async function _addVariant(variant: NewPlan) {
     //     .insert(plans)
     //     .values(variant)
     //     .onConflictDoUpdate({ target: plans.variantId, set: variant });
-    const { data, error } = await supabase.from("plans").upsert(variant);
+    const { data, error } = await supabase
+      .from("plans")
+      .upsert(variant, { onConflict: "variant_id" });
 
-    console.log("data : ", data);
-    console.log("error  : ", error);
+    if (error) {
+      // error handling
+      throw new Error();
+    }
 
     /* eslint-disable no-console -- allow */
     console.log(`${variant.name} synced with the database...`);
@@ -250,12 +267,15 @@ export async function storeWebhookEvent(
 
     const returnedValueRes = await supabase
       .from("webhook_event")
-      .upsert({
-        id: randomUUID(),
-        event_name: eventName,
-        processed: false,
-        body,
-      })
+      .upsert(
+        {
+          id: randomUUID(),
+          event_name: eventName,
+          processed: false,
+          body,
+        },
+        { onConflict: "id", ignoreDuplicates: true }
+      )
       .select();
 
     if (returnedValueRes.error) {
@@ -294,7 +314,11 @@ export async function processWebhookEvent(webhookEvent: NewWebhookEvent) {
       );
     }
 
-    if (!process.env.WEBHOOK_URL) {
+    if (!process.env.LEMONSQUEEZY_WEBHOOK_URL) {
+      console.log(
+        "!process.env.LEMONSQUEEZY_WEBHOOK_URL - ",
+        process.env.LEMONSQUEEZY_WEBHOOK_URL
+      );
       throw new Error(
         "Missing required WEBHOOK_URL env variable. Please, set it in your .env file."
       );
@@ -372,11 +396,11 @@ export async function processWebhookEvent(webhookEvent: NewWebhookEvent) {
             //     set: updateData,
             //   });
 
-            const insertRes = await supabase
+            const upsertRes = await supabase
               .from("subscription")
-              .upsert(updateData);
+              .upsert(updateData, { onConflict: "lemon_squeezy_id" });
 
-            if (insertRes.error) {
+            if (upsertRes.error) {
               throw new Error();
             }
           } catch (error) {
@@ -406,5 +430,244 @@ export async function processWebhookEvent(webhookEvent: NewWebhookEvent) {
         .update({ processed: true, processing_error: processingError })
         .eq("id", webhookEvent.id);
     }
-  } catch (err) {}
+  } catch (err) {
+    console.log("err in processWebhookEvent : ", err);
+  }
+}
+
+/**
+ * This action will get the subscriptions for the current user.
+ */
+export async function getUserSubscriptions() {
+  const supabase = createServiceRoleClient();
+  const user = await getUser();
+
+  if (!user) {
+    notFound();
+  }
+
+  try {
+    // const userSubscriptions: NewSubscription[] = await db
+    //   .select()
+    //   .from(subscriptions)
+    //   .where(eq(subscriptions.userId, userId));
+
+    const userSubscriptionsRes = await supabase
+      .from("subscription")
+      .select("*")
+      .eq("user_id", user.id);
+
+    if (userSubscriptionsRes.error) {
+      throw new Error();
+    }
+
+    const userSubscriptions: NewSubscription[] = userSubscriptionsRes.data;
+
+    revalidatePath("/");
+
+    return userSubscriptions;
+  } catch (err) {
+    console.log("err in getUserSubscriptions - ", err);
+  }
+}
+
+/**
+ * This action will get the subscription URLs (update_payment_method and
+ * customer_portal) for the given subscription ID.
+ *
+ */
+export async function getSubscriptionURLs(id: string) {
+  configureLemonSqueezy();
+  const subscription = await getSubscription(id);
+
+  if (subscription.error) {
+    throw new Error(subscription.error.message);
+  }
+
+  revalidatePath("/");
+
+  return subscription.data.data.attributes.urls;
+}
+
+/**
+ * This action will cancel a subscription on Lemon Squeezy.
+ *  주의할점: DB 업데이트를 할 때 subscription 테이블의 id가 아니라 lemon_squeezy의 id임!!
+ */
+export async function cancelSub(id: string) {
+  configureLemonSqueezy();
+
+  // Get user subscriptions
+  const userSubscriptions = await getUserSubscriptions();
+  if (!userSubscriptions) {
+    // error handling. user의 구독정보가 없는데 취소하려고 한거니깐.
+    throw new Error();
+  }
+
+  // Check if the subscription exists
+  const subscription = userSubscriptions.find(
+    (sub) => sub.lemon_squeezy_id === id
+  );
+
+  if (!subscription) {
+    throw new Error(`Subscription #${id} not found.`);
+  }
+
+  const cancelledSub = await cancelSubscription(id);
+
+  if (cancelledSub.error) {
+    throw new Error(cancelledSub.error.message);
+  }
+
+  const supabase = createServiceRoleClient();
+  // Update the db
+  try {
+    // await db
+    //   .update(subscriptions)
+    //   .set({
+    //     status: cancelledSub.data.data.attributes.status,
+    //     statusFormatted: cancelledSub.data.data.attributes.status_formatted,
+    //     endsAt: cancelledSub.data.data.attributes.ends_at,
+    //   })
+    //   .where(eq(subscriptions.lemonSqueezyId, id));
+
+    const { error, data } = await supabase
+      .from("subscription")
+      .update({
+        status: cancelledSub.data.data.attributes.status,
+        status_formatted: cancelledSub.data.data.attributes.status_formatted,
+        ends_at: cancelledSub.data.data.attributes.ends_at,
+      })
+      .eq("lemon_squeezy_id", id);
+    if (error) {
+      throw new Error();
+    }
+  } catch (error) {
+    throw new Error(`Failed to cancel Subscription #${id} in the database.`);
+  }
+
+  revalidatePath("/");
+
+  return cancelledSub;
+}
+
+/**
+ * This action will pause a subscription on Lemon Squeezy.
+ * 주의할점: DB 업데이트를 할 때 subscription 테이블의 id가 아니라 lemon_squeezy의 id임!!
+ */
+export async function pauseUserSubscription(id: string) {
+  configureLemonSqueezy();
+
+  // Get user subscriptions
+  const userSubscriptions = await getUserSubscriptions();
+  if (!userSubscriptions) {
+    // error handling. user의 구독정보가 없는 상태.
+    throw new Error();
+  }
+
+  // Check if the subscription exists
+  const subscription = userSubscriptions.find(
+    (sub) => sub.lemon_squeezy_id === id
+  );
+
+  if (!subscription) {
+    throw new Error(`Subscription #${id} not found.`);
+  }
+
+  const returnedSub = await updateSubscription(id, {
+    pause: {
+      mode: "void",
+    },
+  });
+
+  // Update the db
+  const supabase = createServiceRoleClient();
+  try {
+    // await db
+    //   .update(subscriptions)
+    //   .set({
+    //     status: returnedSub.data?.data.attributes.status,
+    //     statusFormatted: returnedSub.data?.data.attributes.status_formatted,
+    //     endsAt: returnedSub.data?.data.attributes.ends_at,
+    //     isPaused: returnedSub.data?.data.attributes.pause !== null,
+    //   })
+    //   .where(eq(subscriptions.lemonSqueezyId, id));
+
+    const { error, data } = await supabase
+      .from("subscription")
+      .update({
+        status: returnedSub.data?.data.attributes.status,
+        status_formatted: returnedSub.data?.data.attributes.status_formatted,
+        ends_at: returnedSub.data?.data.attributes.ends_at,
+        is_paused: returnedSub.data?.data.attributes.pause !== null,
+      })
+      .eq("lemon_squeezy_id", id);
+    if (error) {
+      throw new Error();
+    }
+  } catch (error) {
+    throw new Error(`Failed to pause Subscription #${id} in the database.`);
+  }
+
+  revalidatePath("/");
+
+  return returnedSub;
+}
+
+/**
+ * This action will unpause a subscription on Lemon Squeezy.
+ * 주의할점: DB 업데이트를 할 때 subscription 테이블의 id가 아니라 lemon_squeezy의 id임!!
+ */
+export async function unpauseUserSubscription(id: string) {
+  configureLemonSqueezy();
+
+  // Get user subscriptions
+  const userSubscriptions = await getUserSubscriptions();
+  if (!userSubscriptions) {
+    // error handling. user의 구독정보가 없는 상태.
+    throw new Error();
+  }
+
+  // Check if the subscription exists
+  const subscription = userSubscriptions.find(
+    (sub) => sub.lemon_squeezy_id === id
+  );
+
+  if (!subscription) {
+    throw new Error(`Subscription #${id} not found.`);
+  }
+
+  const returnedSub = await updateSubscription(id, { pause: null });
+
+  // Update the db
+  const supabase = createServiceRoleClient();
+  try {
+    // await db
+    //   .update(subscriptions)
+    //   .set({
+    //     status: returnedSub.data?.data.attributes.status,
+    //     statusFormatted: returnedSub.data?.data.attributes.status_formatted,
+    //     endsAt: returnedSub.data?.data.attributes.ends_at,
+    //     isPaused: returnedSub.data?.data.attributes.pause !== null,
+    //   })
+    //   .where(eq(subscriptions.lemonSqueezyId, id));
+    const { error, data } = await supabase
+      .from("subscription")
+      .update({
+        status: returnedSub.data?.data.attributes.status,
+        status_formatted: returnedSub.data?.data.attributes.status_formatted,
+        ends_at: returnedSub.data?.data.attributes.ends_at,
+        is_paused: returnedSub.data?.data.attributes.pause !== null,
+      })
+      .eq("lemon_squeezy_id", id);
+
+    if (error) {
+      throw new Error();
+    }
+  } catch (error) {
+    throw new Error(`Failed to pause Subscription #${id} in the database.`);
+  }
+
+  revalidatePath("/");
+
+  return returnedSub;
 }
