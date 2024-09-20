@@ -1,9 +1,10 @@
+// server component
 import React from "react";
 import Plan from "./Plan";
 import { syncPlans } from "@/action/lemonSqueezyAction";
 import { createClient } from "@/utils/supabase/server";
 import { NewPlan } from "@/lib/types";
-
+// server component
 const PlanList = async () => {
   const supabase = createClient();
   // let allPlans: NewPlan[] = await db.select().from(plans)

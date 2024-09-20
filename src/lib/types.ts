@@ -1,5 +1,9 @@
 import { GetPageResponse } from "@notionhq/client/build/src/api-endpoints";
 import { Json } from "../../database.types";
+import { type Subscription } from "@lemonsqueezy/lemonsqueezy.js";
+
+export type SubscriptionStatusType =
+  Subscription["data"]["attributes"]["status"];
 
 // export type GetPageResponseWithInTrashAndArchived extends GetPageResponse  {archived : boolean, in_trash : boolean}
 export type GetPageResponseWithInTrashAndArchived = {
