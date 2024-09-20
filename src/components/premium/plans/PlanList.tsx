@@ -25,8 +25,12 @@ const PlanList = async () => {
     }
     allPlans = syncPlanRes;
   }
+  // plan 새로 생겼을때 이거 해주자.
+  // const syncPlanRes = await syncPlans();
+  // allPlans = syncPlanRes;
+  // console.log("allPlan : ", allPlans);
 
-  if (!allPlans.length) {
+  if (!allPlans || !allPlans.length) {
     return <p>No plans available.</p>;
   }
 
