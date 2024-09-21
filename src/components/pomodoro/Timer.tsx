@@ -18,10 +18,18 @@ import {
 } from "@/action/timerAction";
 import { TimeZone } from "@/lib/types";
 
-const Timer = ({ timerId }: { timerId: string }) => {
+const Timer = ({
+  timerId,
+  workMinutes,
+  breakMinutes,
+}: {
+  timerId: string;
+  workMinutes: number;
+  breakMinutes: number;
+}) => {
   const red = "#f54e4e";
   const green = "#4aec8c";
-  const settingsInfo = useContext(SettingsContext);
+  // const settingsInfo = useContext(SettingsContext);
 
   const [isPaused, setIsPaused] = useState(true);
   const [mode, setMode] = useState("work"); // work, break, null
@@ -74,16 +82,13 @@ const Timer = ({ timerId }: { timerId: string }) => {
   };
 
   const initTimer = () => {
-    setSecondsLeft(settingsInfo.workMinutes * 60);
-    secondsLeftRef.current = settingsInfo.workMinutes * 60;
+    setSecondsLeft(workMinutes * 60);
+    secondsLeftRef.current = workMinutes * 60;
   };
 
   const switchMode = () => {
     const nextMode = modeRef.current === "work" ? "break" : "work";
-    const nextSeconds =
-      (nextMode === "work"
-        ? settingsInfo.workMinutes
-        : settingsInfo.breakMinutes) * 60;
+    const nextSeconds = (nextMode === "work" ? workMinutes : breakMinutes) * 60;
     setMode(nextMode);
     alert(`switchMode! - currentMode : ${mode}, nextMode : ${nextMode}`);
 
@@ -156,7 +161,7 @@ const Timer = ({ timerId }: { timerId: string }) => {
 
   useEffect(() => {
     initTimer();
-  }, [settingsInfo.workMinutes, settingsInfo.breakMinutes]);
+  }, [workMinutes, breakMinutes]);
 
   useEffect(() => {
     // initTimer();
@@ -187,10 +192,7 @@ const Timer = ({ timerId }: { timerId: string }) => {
     };
   }, [isPausedRef]);
 
-  const totalSeconds =
-    mode === "work"
-      ? settingsInfo.workMinutes * 60
-      : settingsInfo.breakMinutes * 60;
+  const totalSeconds = mode === "work" ? workMinutes * 60 : breakMinutes * 60;
   const percentage = (secondsLeft / totalSeconds) * 100;
 
   const minutes = Math.floor(secondsLeft / 60);

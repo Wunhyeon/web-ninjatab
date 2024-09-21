@@ -30,6 +30,8 @@ const EditTimerFrame = ({
   timerName,
   userNotionInfo,
   databaseName,
+  workTime,
+  breakTime,
 }: {
   timerId: string;
   timerName: string;
@@ -38,12 +40,14 @@ const EditTimerFrame = ({
     workspace_name: string;
   }[];
   databaseName: string | null;
+  workTime: number;
+  breakTime: number;
 }) => {
   return (
     <Card className="relative">
       <CardHeader>
         <CardTitle className="text-4xl font-extrabold">{timerName}</CardTitle>
-        <CardDescription>Manage your pomodoro timers.</CardDescription>
+        <CardDescription>Manage your pomodoro timer.</CardDescription>
       </CardHeader>
 
       <div className="absolute top-5 right-3">
@@ -106,7 +110,11 @@ const EditTimerFrame = ({
               </div>
             </AccordionTrigger>
             <AccordionContent>
-              <TimerEditCard />
+              <TimerEditCard
+                timerId={timerId}
+                workTime={workTime}
+                breakTime={breakTime}
+              />
             </AccordionContent>
           </AccordionItem>
 
@@ -130,9 +138,7 @@ const EditTimerFrame = ({
                 Sound
               </div>
             </AccordionTrigger>
-            <AccordionContent>
-              <TimerEditCard />
-            </AccordionContent>
+            <AccordionContent>{/* <TimerEditCard /> */}</AccordionContent>
           </AccordionItem>
 
           <AccordionItem value="theme">
@@ -155,9 +161,7 @@ const EditTimerFrame = ({
                 Theme
               </div>
             </AccordionTrigger>
-            <AccordionContent>
-              <TimerEditCard />
-            </AccordionContent>
+            <AccordionContent>{/* <TimerEditCard /> */}</AccordionContent>
           </AccordionItem>
 
           <AccordionItem value="database">
@@ -190,6 +194,11 @@ const EditTimerFrame = ({
         {/* <div className="text-xs text-muted-foreground">
           Showing <strong>1-10</strong> of <strong>32</strong> products
         </div> */}
+        <div className="text-gray-500 text-sm">
+          After Setting, Please Refresh the notion page. <br />
+          Window : Ctrl + R<br />
+          Mac : CMD + R
+        </div>
       </CardFooter>
     </Card>
   );

@@ -944,3 +944,31 @@ export const syncDatabase = async (
     return { success: false };
   }
 };
+
+export const updateTimerTime = async (
+  timerId: string,
+  workTime: number,
+  breakTime: number
+) => {
+  const supabase = createClient();
+  const user = await getUser();
+  try {
+    const { data, error } = await supabase
+      .from("timers")
+      .update({ worktime: workTime, breaktime: breakTime })
+      .eq("user_id", user.id)
+      .eq("id", timerId);
+
+    if (error) {
+      throw new Error();
+    }
+
+    console.log("data : ", data);
+
+    return { success: true };
+  } catch (err) {
+    console.log("error : ", err);
+
+    return { success: false };
+  }
+};

@@ -30,7 +30,11 @@ const Pomodoro = ({
       > */}
       {/* {showSettings ? <Settings /> : <Timer timerId={timerId} />} */}
       {/* </SettingsContext.Provider> */}
-      <Timer timerId={timerId} />
+      <Timer
+        timerId={timerId}
+        workMinutes={workMinutes}
+        breakMinutes={breakMinutes}
+      />
     </main>
   );
 };

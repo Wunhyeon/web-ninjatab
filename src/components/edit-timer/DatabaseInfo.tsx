@@ -1,7 +1,13 @@
 "use client";
 
 import React, { useCallback, useRef, useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader } from "../ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
 import { Button } from "../ui/button";
 import { syncDatabase, upsertNotionDatabaseInfo } from "@/action/timerAction";
 import { createClient } from "@/utils/supabase/client";
@@ -195,7 +201,7 @@ const DatabaseInfo = ({
         }`}
       >
         <CardHeader>
-          {/* <CardTitle>Database</CardTitle> */}
+          <CardTitle>Database</CardTitle>
           <CardDescription>Database Connected Timer</CardDescription>
         </CardHeader>
         <CardContent>
