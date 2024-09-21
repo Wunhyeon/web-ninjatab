@@ -18,6 +18,8 @@ const page = async ({ params }: { params: { id: string } }) => {
   }
   const data = timerInfo.data;
 
+  console.log("data : ", data);
+
   return (
     <div>
       <Pomodoro

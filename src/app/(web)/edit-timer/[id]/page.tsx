@@ -52,6 +52,8 @@ export default async function page({ params }: { params: { id: string } }) {
             ? timerInfo.data[0].notion_database_info[0].database_name
             : null
         }
+        workTime={timerInfo.data[0].worktime}
+        breakTime={timerInfo.data[0].breaktime}
       />
     </div>
   );
