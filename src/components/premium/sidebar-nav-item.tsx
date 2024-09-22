@@ -37,7 +37,7 @@ export const SidebarNavItem = forwardRef<
 
           !isCurrentPage &&
             "text-surface-700 hover:bg-surface-700/10 hover:text-surface-900 [&_svg]:text-surface-500",
-          className,
+          className
         )}
         {...otherProps}
       >
@@ -52,3 +52,5 @@ export const SidebarNavItem = forwardRef<
     </li>
   );
 });
+
+SidebarNavItem.displayName = "SidebarNavItem";
