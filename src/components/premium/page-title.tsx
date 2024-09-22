@@ -29,3 +29,5 @@ export const PageTitle = forwardRef<
     </header>
   );
 });
+
+PageTitle.displayName = "PageTitle";
