@@ -307,6 +307,8 @@ export async function processWebhookEvent(webhookEvent: NewWebhookEvent) {
       .select("*")
       .eq("id", webhookEvent.id);
 
+    console.log("dbwebhookEventRes : ", dbwebhookEventRes);
+
     if (
       dbwebhookEventRes.error ||
       !dbwebhookEventRes.data ||
@@ -399,9 +401,14 @@ export async function processWebhookEvent(webhookEvent: NewWebhookEvent) {
             //     set: updateData,
             //   });
 
+            console.log("updateData : ", updateData);
+
             const upsertRes = await supabase
               .from("subscription")
-              .upsert(updateData, { onConflict: "lemon_squeezy_id" });
+              .upsert(updateData, { onConflict: "lemon_squeezy_id" })
+              .select("*");
+
+            console.log("upsertRes : ", upsertRes);
 
             if (upsertRes.error) {
               throw new Error();
@@ -673,4 +680,81 @@ export async function unpauseUserSubscription(id: string) {
   revalidatePath("/");
 
   return returnedSub;
+}
+
+/**
+ * This action will change the plan of a subscription on Lemon Squeezy.
+ */
+export async function changePlan(currentPlanId: string, newPlanId: string) {
+  configureLemonSqueezy();
+
+  const supabase = createServiceRoleClient();
+  try {
+    // Get user subscriptions
+    const userSubscriptions = await getUserSubscriptions();
+    if (!userSubscriptions) {
+      throw new Error();
+    }
+
+    // Check if the subscription exists
+    const subscription = userSubscriptions.find(
+      (sub) => sub.plan_id === currentPlanId
+    );
+
+    if (!subscription) {
+      throw new Error(
+        `No subscription with plan id #${currentPlanId} was found.`
+      );
+    }
+
+    // Get the new plan details from the database.
+    // const newPlan = await db
+    //   .select()
+    //   .from(plans)
+    //   .where(eq(plans.id, newPlanId))
+    //   .then(takeUniqueOrThrow);
+    const { data: newPlan, error } = await supabase
+      .from("plans")
+      .select("*")
+      .eq("id", newPlanId)
+      .single();
+
+    if (error) {
+      throw new Error("Plan not found");
+    }
+
+    // Send request to Lemon Squeezy to change the subscription.
+    const updatedSub = await updateSubscription(subscription.lemon_squeezy_id, {
+      variantId: newPlan.variant_id,
+    });
+
+    // Save in db
+    try {
+      // await db
+      //   .update(subscriptions)
+      //   .set({
+      //     planId: newPlanId,
+      //     price: newPlan.price,
+      //     endsAt: updatedSub.data?.data.attributes.ends_at,
+      //   })
+      //   .where(eq(subscriptions.lemonSqueezyId, subscription.lemonSqueezyId));
+
+      await supabase
+        .from("subscription")
+        .update({
+          plan_id: newPlanId,
+          price: newPlan.price,
+          ends_at: updatedSub.data?.data.attributes.ends_at,
+        })
+        .eq("lemon_squeezy_id", subscription.lemon_squeezy_id);
+    } catch (error) {
+      throw new Error(
+        `Failed to update Subscription #${subscription.lemon_squeezy_id} in the database.`
+      );
+    }
+
+    revalidatePath("/");
+
+    return updatedSub;
+  } catch (err) {}
 }

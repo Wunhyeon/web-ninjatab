@@ -1,3 +1,4 @@
+import { Pause } from "lucide-react";
 import React from "react";
 
 const PauseButton = ({
@@ -11,24 +12,28 @@ const PauseButton = ({
 }) => {
   return (
     <button
-      className="bg-transparent border-0 inline-block w-24"
+      // className="bg-transparent border-0 inline-block w-24"
+      className="bg-transparent text-white p-3 rounded-full hover:bg-gray-300 transition-colors duration-200"
+      aria-label="Pause"
       onClick={() => {
         isPausedRef.current = true;
         setIsPaused(true);
         pauseTicking();
       }}
     >
-      <svg
+      {/* <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
-        fill="#dfdcdc"
+        fill="black"
+        className="size-6"
       >
         <path
           fillRule="evenodd"
-          d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12ZM9 8.25a.75.75 0 0 0-.75.75v6c0 .414.336.75.75.75h.75a.75.75 0 0 0 .75-.75V9a.75.75 0 0 0-.75-.75H9Zm5.25 0a.75.75 0 0 0-.75.75v6c0 .414.336.75.75.75H15a.75.75 0 0 0 .75-.75V9a.75.75 0 0 0-.75-.75h-.75Z"
+          d="M6.75 5.25a.75.75 0 0 1 .75-.75H9a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H7.5a.75.75 0 0 1-.75-.75V5.25Zm7.5 0A.75.75 0 0 1 15 4.5h1.5a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H15a.75.75 0 0 1-.75-.75V5.25Z"
           clipRule="evenodd"
         />
-      </svg>
+      </svg> */}
+      <Pause size={32} color="black" />
     </button>
   );
 };

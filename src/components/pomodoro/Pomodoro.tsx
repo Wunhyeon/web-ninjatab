@@ -17,7 +17,7 @@ const Pomodoro = ({
   const [breakMinutes, setBreakMinutes] = useState(savedBreakMinuts);
 
   return (
-    <main className="py-12 h-full w-full my-0 mx-auto text-center bg-blue-900 ">
+    <main className="h-screen">
       {/* <SettingsContext.Provider
         value={{
           workMinutes,
