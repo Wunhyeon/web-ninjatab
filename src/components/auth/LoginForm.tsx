@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import Image from "next/image";
 import GoogleLoginBtnSVG from "../svg/GoogleLoginBtnSVG";
 import { createClient } from "@/utils/supabase/client";
+import { ORIGIN } from "@/lib/constant";
 
 export function LoginForm() {
   const googleLogin = async () => {
@@ -22,7 +23,7 @@ export function LoginForm() {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `http://localhost:3000/auth/callback/google`,
+        redirectTo: `${ORIGIN}/auth/callback/google`,
         queryParams: {
           access_type: "offline",
           prompt: "consent",
