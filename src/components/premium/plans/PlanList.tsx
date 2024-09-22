@@ -1,6 +1,6 @@
 // server component
 import React from "react";
-import Plan from "./Plan";
+import Plan, { InfoMessage, NoPlans } from "./Plan";
 import { syncPlans } from "@/action/lemonSqueezyAction";
 import { createClient } from "@/utils/supabase/server";
 import { NewPlan } from "@/lib/types";
@@ -31,18 +31,22 @@ const PlanList = async () => {
   // console.log("allPlan : ", allPlans);
 
   if (!allPlans || !allPlans.length) {
-    return <p>No plans available.</p>;
+    return <NoPlans />;
   }
 
   return (
     <div>
-      <h2>Plans</h2>
+      <h2 className='flex items-center after:ml-5 after:h-px after:grow after:bg-surface-100 after:content-[""]'>
+        Plans
+      </h2>
 
       <div className="mb-5 mt-3 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-5">
         {allPlans.map((plan, index) => {
           return <Plan key={`plan-${index}`} plan={plan} />;
         })}
       </div>
+
+      <InfoMessage />
     </div>
   );
 };
