@@ -47,7 +47,6 @@ const page = async ({ params }: { params: { id: string } }) => {
 
   return (
     <div>
-      HeatMap
       {success && !err && map && minYear && maxYear ? (
         <HeatmapFrame
           mp={map}

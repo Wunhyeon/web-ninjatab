@@ -1,0 +1,41 @@
+import Image from "next/image";
+import Link from "next/link";
+import Balancer from "react-wrap-balancer";
+
+import { Button } from "@/components/ui/button";
+import { Section, Container } from "@/components/craft";
+// import Placeholder from "@/public/placeholder.jpg";
+
+const Feature = () => {
+  return (
+    <Section>
+      <Container className="grid items-stretch">
+        <h3 className="!mt-0 text-5xl">
+          Use the Pomodoro timer to focus on your work and keep a record of your
+          progress
+        </h3>
+        <p className="text-muted-foreground my-6">
+          <Balancer>
+            Automatically logs your progress in a Notion database, and you can
+            easily view your past records through a heatmap
+          </Balancer>
+        </p>
+        <div className="not-prose my-8 flex items-center gap-2 justify-center">
+          <Button className="w-fit" asChild>
+            <Link href="/my-timers">Get Started</Link>
+          </Button>
+          <Button className="w-fit" variant="link" asChild>
+            <Link href="#">Learn More {"->"}</Link>
+          </Button>
+        </div>
+        <div className="not-prose relative flex h-[600px] overflow-hidden rounded-lg border">
+          <video autoPlay loop playsInline muted>
+            <source src="/featureVideo.mp4" type="video/mp4" />
+          </video>
+        </div>
+      </Container>
+    </Section>
+  );
+};
+
+export default Feature;

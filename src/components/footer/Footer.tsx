@@ -15,6 +15,7 @@ import { Github, Twitter, Facebook, LinkedinIcon } from "lucide-react";
 import { Section, Container } from "../craft";
 import GithubIcon from "../brand-logo/GithubIcon";
 import XIcon from "../brand-logo/XIcon";
+import { Separator } from "../ui/separator";
 
 // Asset imports
 // import Logo from "@/public/logo.svg";
@@ -24,6 +25,7 @@ export default function Footer() {
     <footer>
       <Section>
         <Container className="grid gap-6">
+          {/* <Separator /> */}
           <div className="not-prose flex flex-col gap-6">
             <Link href="/">
               <h3 className="sr-only">PomoLog</h3>

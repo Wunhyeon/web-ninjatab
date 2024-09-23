@@ -56,7 +56,6 @@ export default function MyTimersList({
         <CardDescription>Manage your pomodoro timers.</CardDescription>
       </CardHeader>
       <div className="absolute top-3 right-3 flex gap-2">
-        <Button>Notion Connect</Button>
         {/* <CreateTimerForm /> */}
         <Link
           className={buttonVariants({ variant: "outline" })}
