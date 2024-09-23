@@ -4,13 +4,17 @@ import React, { useState } from "react";
 import Timer from "./Timer";
 
 const Pomodoro = ({
+  timerId,
   savedWorkMinutes,
   savedBreakMinuts,
-  timerId,
+  alarmSoundOn,
+  tickingSoundOn,
 }: {
+  timerId: string;
   savedWorkMinutes: number;
   savedBreakMinuts: number;
-  timerId: string;
+  alarmSoundOn: boolean;
+  tickingSoundOn: boolean;
 }) => {
   const [showSettings, setShowSettings] = useState(false);
   const [workMinutes, setWorkMinutes] = useState(savedWorkMinutes);
@@ -34,6 +38,8 @@ const Pomodoro = ({
         timerId={timerId}
         workMinutes={workMinutes}
         breakMinutes={breakMinutes}
+        alarmSoundOn={alarmSoundOn}
+        tickingSoundOn={tickingSoundOn}
       />
     </main>
   );

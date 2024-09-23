@@ -9,10 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
-import { Label } from "../ui/label";
-import { useForm } from "react-hook-form";
 import {
   Form,
   FormControl,
@@ -22,20 +18,25 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
+import { UpdateTimerSoundSchema } from "@/zodSchema/UpdateTimerSoundSchema";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { UpdateTimerTimeSchema } from "@/zodSchema/UpdateTimerTimeSchema";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { updateTimerTime } from "@/action/timerAction";
+import { Checkbox } from "../ui/checkbox";
+import Link from "next/link";
+import { updateTimerSound } from "@/action/timerAction";
 
-const TimerEditCard = ({
-  workTime,
-  breakTime,
+const SoundEditCard = ({
   timerId,
+  alarmSoundOn,
+  tickingSoundOn,
 }: {
-  workTime: number;
-  breakTime: number;
   timerId: string;
+  alarmSoundOn: boolean;
+  tickingSoundOn: boolean;
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -45,17 +46,22 @@ const TimerEditCard = ({
     const [, setState] = useState({});
     return useCallback(() => setState({}), []);
   }
+
   const reRender = useReRenderer();
 
-  const updateTimerTimeForm = useForm<z.infer<typeof UpdateTimerTimeSchema>>({
-    resolver: zodResolver(UpdateTimerTimeSchema),
+  const updateTimerSoundForm = useForm<z.infer<typeof UpdateTimerSoundSchema>>({
+    resolver: zodResolver(UpdateTimerSoundSchema),
     defaultValues: {
-      workTime,
-      breakTime,
+      alarmSoundId: null,
+      alarmSoundVolume: 50,
+      alarmSoundOn: alarmSoundOn,
+      tickingSoundId: null,
+      tickingSoundVolume: 50,
+      tickingSoundOn: tickingSoundOn,
     },
   });
 
-  async function onSubmit(data: z.infer<typeof UpdateTimerTimeSchema>) {
+  async function onSubmit(data: z.infer<typeof UpdateTimerSoundSchema>) {
     // 따닥 방지하기!
     if (isLoadingRef.current) {
       return;
@@ -63,10 +69,12 @@ const TimerEditCard = ({
     isLoadingRef.current = true;
     setIsLoading(true);
     reRender();
-    const result = await updateTimerTime(
+    console.log("data : ", data);
+
+    const result = await updateTimerSound(
       timerId,
-      data.workTime,
-      data.breakTime
+      data.alarmSoundOn,
+      data.tickingSoundOn
     );
 
     if (result.success === true) {
@@ -78,17 +86,17 @@ const TimerEditCard = ({
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
-              stroke-width="1.5"
+              strokeWidth="1.5"
               stroke="currentColor"
               className="size-6"
             >
               <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
+                strokeLinecap="round"
+                strokeLinejoin="round"
                 d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
               />
             </svg>
-            &nbsp;Time Updated!
+            &nbsp;Sound Updated!
           </strong>
           Please Refresh the notion page. <br />
           Window : Ctrl + R<br />
@@ -109,7 +117,6 @@ const TimerEditCard = ({
     setIsLoading(false);
     reRender();
   }
-
   return (
     <div className="relative">
       <Card
@@ -118,58 +125,54 @@ const TimerEditCard = ({
         }`}
       >
         <CardHeader>
-          <CardTitle>Timer</CardTitle>
+          <CardTitle>Sound</CardTitle>
           <CardDescription>Edit Timer</CardDescription>
         </CardHeader>
         <CardContent>
-          <Form {...updateTimerTimeForm}>
+          <Form {...updateTimerSoundForm}>
             <form
-              onSubmit={updateTimerTimeForm.handleSubmit(onSubmit)}
+              onSubmit={updateTimerSoundForm.handleSubmit(onSubmit)}
               className="space-y-8"
             >
-              <div className="flex gap-6">
+              <div className="flex-col gap-6 space-y-3">
                 <FormField
-                  control={updateTimerTimeForm.control}
-                  name="workTime"
+                  control={updateTimerSoundForm.control}
+                  name="alarmSoundOn"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Work time (Minutes)</FormLabel>
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                       <FormControl>
-                        <Input
-                          placeholder="Please Input Work time"
-                          {...field}
-                          type="number"
-                          min={1}
-                          {...updateTimerTimeForm.register("workTime", {
-                            valueAsNumber: true,
-                          })}
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
                         />
                       </FormControl>
-                      <FormDescription>Worktime 🔥</FormDescription>
-                      <FormMessage />
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>Alarm Sound 🔈</FormLabel>
+                        <FormDescription>
+                          An alarm will sound when the timer ends.
+                        </FormDescription>
+                      </div>
                     </FormItem>
                   )}
                 />
 
                 <FormField
-                  control={updateTimerTimeForm.control}
-                  name="breakTime"
+                  control={updateTimerSoundForm.control}
+                  name="tickingSoundOn"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Break Time (Minutes)</FormLabel>
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                       <FormControl>
-                        <Input
-                          placeholder="Please Input Break Time"
-                          {...field}
-                          {...updateTimerTimeForm.register("breakTime", {
-                            valueAsNumber: true,
-                          })}
-                          type="number"
-                          min={1}
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
                         />
                       </FormControl>
-                      <FormDescription>Break time 😌</FormDescription>
-                      <FormMessage />
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>Ticking Sound ⏰</FormLabel>
+                        <FormDescription>
+                          A ticking sound plays while the timer is running.
+                        </FormDescription>
+                      </div>
                     </FormItem>
                   )}
                 />
@@ -180,7 +183,9 @@ const TimerEditCard = ({
             </form>
           </Form>
         </CardContent>
-        <CardFooter className="flex justify-between"></CardFooter>
+        <CardFooter className="flex justify-between">
+          We are continuously updating!
+        </CardFooter>
       </Card>
       {/* 스피너를 화면 위에 고정 */}
       {isLoading && (
@@ -192,4 +197,4 @@ const TimerEditCard = ({
   );
 };
 
-export default TimerEditCard;
+export default SoundEditCard;

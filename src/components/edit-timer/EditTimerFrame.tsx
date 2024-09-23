@@ -24,6 +24,8 @@ import { AccordionContent } from "@radix-ui/react-accordion";
 import { Separator } from "../ui/separator";
 import CopyLinkCard from "./CopyLinkCard";
 import CopyLinkDialog from "./CopyLinkDialog";
+import SoundEditCard from "./SoundEditCard";
+import ThemeEditCard from "./ThemeEditCard";
 
 const EditTimerFrame = ({
   timerId,
@@ -32,6 +34,8 @@ const EditTimerFrame = ({
   databaseName,
   workTime,
   breakTime,
+  alarmSoundOn,
+  tickingSoundOn,
 }: {
   timerId: string;
   timerName: string;
@@ -42,6 +46,8 @@ const EditTimerFrame = ({
   databaseName: string | null;
   workTime: number;
   breakTime: number;
+  alarmSoundOn: boolean;
+  tickingSoundOn: boolean;
 }) => {
   return (
     <Card className="relative">
@@ -138,7 +144,13 @@ const EditTimerFrame = ({
                 Sound
               </div>
             </AccordionTrigger>
-            <AccordionContent>{/* <TimerEditCard /> */}</AccordionContent>
+            <AccordionContent>
+              <SoundEditCard
+                timerId={timerId}
+                alarmSoundOn={alarmSoundOn}
+                tickingSoundOn={tickingSoundOn}
+              />
+            </AccordionContent>
           </AccordionItem>
 
           <AccordionItem value="theme">
@@ -161,7 +173,9 @@ const EditTimerFrame = ({
                 Theme
               </div>
             </AccordionTrigger>
-            <AccordionContent>{/* <TimerEditCard /> */}</AccordionContent>
+            <AccordionContent>
+              <ThemeEditCard />
+            </AccordionContent>
           </AccordionItem>
 
           <AccordionItem value="database">

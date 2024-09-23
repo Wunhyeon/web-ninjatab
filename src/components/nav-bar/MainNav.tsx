@@ -10,12 +10,7 @@ const MainNav = async ({ user }: { user: User | undefined }) => {
   return (
     <nav className="hidden sm:flex mt-4 font-bold items-center justify-center space-x-8 overflow-auto no-scrollbar w-full">
       <Link href="/">
-        <Image
-          src="/logo-no-background.svg"
-          alt="logo"
-          height={36}
-          width={250}
-        />
+        <Image src="/Frame-7.svg" alt="logo" height={30} width={200} />
       </Link>
       <Link
         href="/my-timers"

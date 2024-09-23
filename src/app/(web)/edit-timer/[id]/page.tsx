@@ -54,6 +54,8 @@ export default async function page({ params }: { params: { id: string } }) {
         }
         workTime={timerInfo.data[0].worktime}
         breakTime={timerInfo.data[0].breaktime}
+        alarmSoundOn={timerInfo.data[0].alarm_sound_on}
+        tickingSoundOn={timerInfo.data[0].ticking_sound_on}
       />
     </div>
   );
