@@ -24,6 +24,8 @@ const page = async ({ params }: { params: { id: string } }) => {
         timerId={timerId}
         savedWorkMinutes={data[0].worktime!}
         savedBreakMinuts={data[0].breaktime!}
+        alarmSoundOn={data[0].alarm_sound_on}
+        tickingSoundOn={data[0].ticking_sound_on}
       />
     </div>
   );

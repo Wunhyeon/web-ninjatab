@@ -972,3 +972,31 @@ export const updateTimerTime = async (
     return { success: false };
   }
 };
+
+export const updateTimerSound = async (
+  timerId: string,
+  alarmSoundOn: boolean,
+  tickingSoundOn: boolean
+) => {
+  // 지금은 사운드 온/오프만 받고 있지만 나중에 사운드 종류, 볼륨도 받아야 한다.
+  const supabase = createClient();
+  const user = await getUser();
+  try {
+    const { data, error } = await supabase
+      .from("timers")
+      .update({
+        alarm_sound_on: alarmSoundOn,
+        ticking_sound_on: tickingSoundOn,
+      })
+      .eq("user_id", user.id)
+      .eq("id", timerId);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+    return { success: true };
+  } catch (err) {
+    console.log("err in timerAction - updateTimerSound : ", err);
+    return { success: false };
+  }
+};

@@ -25,10 +25,14 @@ const Timer = ({
   timerId,
   workMinutes,
   breakMinutes,
+  alarmSoundOn,
+  tickingSoundOn,
 }: {
   timerId: string;
   workMinutes: number;
   breakMinutes: number;
+  alarmSoundOn: boolean;
+  tickingSoundOn: boolean;
 }) => {
   const red = "#f54e4e";
   const green = "#4aec8c";
@@ -109,7 +113,7 @@ const Timer = ({
   const tick = () => {
     secondsLeftRef.current--;
     setSecondsLeft((prev) => prev - 1);
-    if (tickingSoundRef.current) {
+    if (tickingSoundRef.current && tickingSoundOn) {
       tickingSoundRef.current.play();
     }
   };
@@ -173,7 +177,7 @@ const Timer = ({
         if (tickingSoundRef.current) {
           tickingSoundRef.current.pause();
         }
-        if (alarmSoundRef.current) {
+        if (alarmSoundRef.current && alarmSoundOn) {
           alarmSoundRef.current.play();
         }
         return switchMode();
