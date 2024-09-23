@@ -201,7 +201,7 @@ const Timer = ({
   }
 
   return (
-    <div className="bg-white text-black p-1 sm:p-2 h-full flex flex-col transition-all duration-300 ease-in-out w-full ">
+    <div className="bg-white text-black p-1 sm:p-2 h-full flex flex-col transition-all duration-300 ease-in-out w-full overflow-hidden">
       <div className="bg-gray-100 p-2 sm:p-3 rounded-lg mb-2 sm:mb-4 flex-grow flex flex-col justify-between">
         <div className="flex justify-between items-center mb-1 sm:mb-2">
           <h1 className="text-lg sm:text-xl font-bold">

@@ -184,7 +184,6 @@ const HeatmapFrame = ({
 
   return (
     <Card className="ml-7">
-      HeatmapFrame
       <div className="flex justify-between mb-4">
         <Select
           onValueChange={(value) => {
