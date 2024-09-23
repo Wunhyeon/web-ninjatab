@@ -1,3 +1,4 @@
+import Footer from "@/components/footer/Footer";
 import Header from "@/components/nav-bar/Header";
 import { Toaster } from "sonner";
 
@@ -13,6 +14,7 @@ export default async function WebLayout({
         {children}
       </div>
       <Toaster richColors position="top-center" />
+      <Footer />
     </section>
   );
 }
