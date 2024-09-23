@@ -12,7 +12,6 @@ export async function GET(request: NextRequest) {
   // notionInfo Id를 받아 정보를 받아 그 안에 있는 accessToken을 가지고 노션 api에 database 목록을 요청해야한다.
   const searchParams = request.nextUrl.searchParams;
   const notionInfoId = searchParams.get("notionInfoId");
-  console.log("NotionInfoId : ", notionInfoId);
 
   if (!notionInfoId) {
     return NextResponse.json({
