@@ -59,21 +59,6 @@ export const Heatmap = ({
         showWeekdayLabels={true}
       />
       <ReactTooltip id="react-tooltip" />
-
-      <div>
-        <h3 className="text-3xl">2024-09-12</h3>
-        {mp.get("2024-09-12") && mp.get("2024-09-12")!.object.length > 0
-          ? mp
-              .get("2024-09-12")
-              ?.object.map((el, idx) => `<div key={idx}>${el.name}</div>`)
-          : ""}
-        <ul>
-          {mp.get("2024-09-12")?.object.map((el, idx) => (
-            <li key={idx}>{el.name}</li>
-          ))}
-        </ul>
-        12 activities on 2024-09-12
-      </div>
     </div>
   );
 };
