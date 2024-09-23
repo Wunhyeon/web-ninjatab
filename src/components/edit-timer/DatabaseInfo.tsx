@@ -88,8 +88,6 @@ const DatabaseInfo = ({
       .is("deleted_at", null); // access_token, workspace_id, database_id는 극비로 한다. 극도로 조심해서 다뤄야 함.
 
     setUserNofionInfoState(data ? data : []);
-
-    console.log("fetchAndUpdate");
   };
 
   /**
@@ -162,7 +160,6 @@ const DatabaseInfo = ({
     const databaseList = await res.json();
 
     const list = databaseList.databaseList;
-    console.log("list : ", list);
 
     setDatabaseInfoState(list);
     databaseIsLoadingRef.current = false;
@@ -288,7 +285,6 @@ const DatabaseInfo = ({
                               }
                               form.setValue("databaseName", databaseName);
                               setDatabaseIdState(event);
-                              console.log("databaseUrl : ", databaseUrl);
 
                               setDatabaseUrlState(databaseUrl);
                             }}

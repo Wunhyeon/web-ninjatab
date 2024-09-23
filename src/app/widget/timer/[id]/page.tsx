@@ -7,7 +7,6 @@ const page = async ({ params }: { params: { id: string } }) => {
   const supabase = createClient();
   const timerInfo = await supabase.from("timers").select("*").eq("id", timerId);
 
-  // console.log("timerInfo : ", timerInfo);
   /* Todo
    * 결제안된 유저일때 제일 처음 1개만.
    * 결제 기한 지났을 때 어떻게 처리해줄 것인지.

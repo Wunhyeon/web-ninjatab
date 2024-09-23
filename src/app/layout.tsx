@@ -10,8 +10,12 @@ import Script from "next/script";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Focus & Record",
-  description: "뽀모도로 타이머로 깊은 집중을 하고, 이를 기록하고 관리하세요!",
+  title: "PomoLog",
+  description:
+    "With the PomoLog timer, achieve deep focus for efficient task management, while keeping track of and organizing your progress!",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default async function RootLayout({

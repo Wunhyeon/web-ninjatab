@@ -29,8 +29,6 @@ export const POST = async (req: NextRequest) => {
       )
       .eq("id", timerId);
 
-    // console.log("timerInfo : ", timerInfo);
-
     if (timerInfo.error || !timerInfo.data || timerInfo.data.length === 0) {
       // error handling
       return;
@@ -100,7 +98,6 @@ export const POST = async (req: NextRequest) => {
     // return NextResponse.json(newPage);
     return NextResponse.json({ success: true });
   } catch (err) {
-    // console.log("@@@@ err : ", err as notionError);
     const errBody = JSON.parse((err as notionError).body);
     const message: string = errBody.message;
     const messageToArr = message.split(" ");

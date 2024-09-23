@@ -39,7 +39,6 @@ export async function GET(request: Request) {
     });
 
     const responseJson = await response.json();
-    console.log("responseJson : ", responseJson);
 
     // if (!error) {
     //   return NextResponse.redirect(`${origin}${next}`);
