@@ -30,7 +30,7 @@ export type NewPlan = {
 
 export type NewWebhookEvent = {
   id: string;
-  body: Json;
+  body: Json; // test
   event_name: string;
   // created_at?: Date;
   processed?: boolean | null;
