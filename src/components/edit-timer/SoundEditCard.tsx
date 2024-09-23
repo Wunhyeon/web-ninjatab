@@ -69,7 +69,6 @@ const SoundEditCard = ({
     isLoadingRef.current = true;
     setIsLoading(true);
     reRender();
-    console.log("data : ", data);
 
     const result = await updateTimerSound(
       timerId,

@@ -22,8 +22,6 @@ const CopyLinkCard = ({
   timerId: string;
   databaseName: string | null;
 }) => {
-  console.log("card - databaseName : ", databaseName);
-
   return (
     <Card>
       <CardHeader className="flex">
