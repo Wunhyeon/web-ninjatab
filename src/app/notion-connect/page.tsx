@@ -24,8 +24,6 @@ const NotionConnectLink = () => {
     connectToNotion();
   }, [searchParams]);
 
-  console.log("NOTION_AUTHORIZATION_URL : ", NOTION_AUTHORIZATION_URL);
-
   return (
     <div className="w-full min-h-screen flex flex-col justify-center items-center">
       <div>

@@ -16,7 +16,8 @@ const page = async () => {
     .from("timers")
     .select("id,name,notion_database_info(id,database_name,database_id)")
     .eq("user_id", user.data.user?.id)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .is("deleted_at", null);
 
   return (
     <div>

@@ -81,7 +81,8 @@ const HeatmapFrame = ({
       timerId
     );
     if (!success || !map || !minYear) {
-      toast.error("Server Error", {});
+      toast.error("Server Error", { closeButton: true });
+      router.refresh();
       return;
     }
     // 여기 고민좀 해보자. 새로고침 하는 부분.
