@@ -20,6 +20,8 @@ const page = async ({ params }: { params: { id: string } }) => {
   );
 
   let errMessage = "";
+  let link = "";
+  let buttonName = "Edit Page";
   if (err) {
     if (err.split(":")[0] === "Could not find sort property with name or id") {
       const errSplit = err.split(":");
@@ -32,14 +34,19 @@ const page = async ({ params }: { params: { id: string } }) => {
 
         errColumns.push(errSplit[i]);
       }
-      errMessage = `Please Make the ${errColumns} Column in Database.`;
+      errMessage = `Please Make the ${errColumns} Column in (Notion)Database.
+      Or Go to Edit Page And Select Database And Click the Sync Button`;
+      link = `/edit-timer/${timerId}`;
 
       if (errColumns.indexOf("Name") !== -1) {
         errMessage +=
           "If Name Column Exists, Please Name Change Name Columns type to title";
       }
+    } else if (err === "404") {
+      errMessage = "Database Or Timer Not Found. Plaease Check.";
+      link = "/my-timers";
+      buttonName = "My-Timers";
     }
-    console.log("errMessage : ", errMessage);
   }
 
   return (
@@ -57,10 +64,10 @@ const page = async ({ params }: { params: { id: string } }) => {
           {errMessage}
           <Link
             className={buttonVariants({ variant: "default" })}
-            href={`/edit-timer/${timerId}`}
+            href={link}
             target="_blank"
           >
-            Go to Edit timer page
+            {buttonName}
           </Link>
         </div>
       )}

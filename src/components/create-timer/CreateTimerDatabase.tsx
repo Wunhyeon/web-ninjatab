@@ -162,22 +162,29 @@ const CreateTimerDatabase = ({
     setDatabaseIsLoadingState(true);
     setIsLoading(true);
     reRender();
-    const res = await fetch(
-      `${ORIGIN}/notion/api/database?notionInfoId=${notionInfoId}`
-    );
+    try {
+      const res = await fetch(
+        `${ORIGIN}/notion/api/database?notionInfoId=${notionInfoId}`
+      );
 
-    if (!res.ok) {
-      alert("err occur please try again");
+      if (!res.ok) {
+        alert("err occur please try again");
+        router.refresh();
+      }
+      const databaseList = await res.json();
+
+      const list = databaseList.databaseList;
+      setDatabaseInfoState(list);
+    } catch (err) {
+      console.log("err : ", err);
+      toast.error("Sorry Something Wrong. Please Try Again");
       router.refresh();
+    } finally {
+      databaseIsLoadingRef.current = false;
+      setDatabaseIsLoadingState(false);
+      setIsLoading(false);
+      reRender();
     }
-    const databaseList = await res.json();
-
-    const list = databaseList.databaseList;
-    setDatabaseInfoState(list);
-    databaseIsLoadingRef.current = false;
-    setDatabaseIsLoadingState(false);
-    setIsLoading(false);
-    reRender();
   };
 
   /**
