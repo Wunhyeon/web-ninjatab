@@ -34,7 +34,7 @@ const NotionConnectLink = () => {
           href={
             NOTION_AUTHORIZATION_URL
               ? NOTION_AUTHORIZATION_URL
-              : "https://api.notion.com/v1/oauth/authorize?client_id=9107fddb-ff77-47f7-98c9-e9cc68c19640&response_type=code&owner=user&redirect_uri=https%3A%2F%2Fpomolog.site%2Fauth%2Fcallback%2Fnotion"
+              : "https://api.notion.com/v1/oauth/authorize?client_id=10bd872b-594c-8077-8ae1-0037e83bec16&response_type=code&owner=user&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fcallback%2Fnotion"
           }
           className={cn(
             buttonVariants({ variant: "secondary" }),

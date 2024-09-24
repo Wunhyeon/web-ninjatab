@@ -2,7 +2,7 @@ import CopyLinkCard from "@/components/edit-timer/CopyLinkCard";
 import EditTimerFrame from "@/components/edit-timer/EditTimerFrame";
 import { LOGIN_AGAIN } from "@/lib/constant";
 import { createClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import React from "react";
 
 export default async function page({ params }: { params: { id: string } }) {
@@ -23,6 +23,10 @@ export default async function page({ params }: { params: { id: string } }) {
   if (timerInfo.error) {
     // error handling
     redirect("/");
+  }
+
+  if (timerInfo.data.length === 0) {
+    notFound();
   }
 
   // const initialNotionInfo = await getNotionInfo();
