@@ -52,12 +52,14 @@ const page = async ({ params }: { params: { id: string } }) => {
   return (
     <div>
       {success && !err && map && minYear && maxYear ? (
-        <HeatmapFrame
-          mp={map}
-          minYear={minYear}
-          maxYear={maxYear}
-          timerId={timerId}
-        />
+        <div className="p-5">
+          <HeatmapFrame
+            mp={map}
+            minYear={minYear}
+            maxYear={maxYear}
+            timerId={timerId}
+          />
+        </div>
       ) : (
         <div>
           <h3>Something went wrong</h3>

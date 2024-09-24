@@ -15,3 +15,6 @@ export const ORIGIN =
   process.env.NODE_ENV === "development"
     ? "http://localhost:3000"
     : "https://pomolog.site";
+
+export const GUIDE_LINK =
+  "https://worried-blackberry-aa2.notion.site/PomoLog-Guide-8f35cb16436b44b984bc4999249fc44a";
