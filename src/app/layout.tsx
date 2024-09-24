@@ -13,9 +13,6 @@ export const metadata: Metadata = {
   title: "PomoLog",
   description:
     "With the PomoLog timer, achieve deep focus for efficient task management, while keeping track of and organizing your progress!",
-  icons: {
-    icon: "/favicon.ico",
-  },
 };
 
 export default async function RootLayout({

@@ -243,15 +243,15 @@ const getHeatmapInfo = async (timerId: string) => {
       .select(
         "*,notion_database_info(id,database_id,notion_info(id,access_token))"
       )
-      .eq("id", timerId);
+      .eq("id", timerId)
+      .is("deleted_at", null);
 
     if (timerInfo.error) {
-      throw new Error(
-        JSON.stringify({
-          statusCode: 500,
-          title: "can not insert notion_database_info",
-        })
-      );
+      throw new Error("500");
+    }
+
+    if (timerInfo.data.length === 0) {
+      throw new Error("404");
     }
 
     const data = timerInfo.data;
@@ -311,11 +311,16 @@ export const getHeatmapInfoMap = async (timerId: string) => {
       const errSplit = parseData.err.split(":");
       if (errSplit[0] === "Could not find sort property with name or id") {
         return { success: false, err: parseData.err };
+      } else if (parseData.err === "404") {
+        return { success: false, err: parseData.err };
       }
     }
+
+    return { success: false, err: parseData.err };
   }
 
   let nameFlag = false;
+
   let dateFlag = false;
 
   for (let item in parseData.data.results[0].properties) {
@@ -962,8 +967,6 @@ export const updateTimerTime = async (
     if (error) {
       throw new Error();
     }
-
-    console.log("data : ", data);
 
     return { success: true };
   } catch (err) {
