@@ -4,6 +4,7 @@ import Balancer from "react-wrap-balancer";
 
 import { Button } from "@/components/ui/button";
 import { Section, Container } from "@/components/craft";
+import { GUIDE_LINK } from "@/lib/constant";
 // import Placeholder from "@/public/placeholder.jpg";
 
 const Feature = () => {
@@ -25,7 +26,7 @@ const Feature = () => {
             <Link href="/my-timers">Get Started</Link>
           </Button>
           <Button className="w-fit" variant="link" asChild>
-            <Link href="#">Learn More {"->"}</Link>
+            <Link href={GUIDE_LINK}>Learn More {"->"}</Link>
           </Button>
         </div>
         <div className="not-prose relative flex h-[600px] overflow-hidden rounded-lg border">

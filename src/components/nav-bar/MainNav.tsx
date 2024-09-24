@@ -5,6 +5,7 @@ import { Button } from "../ui/button";
 import Image from "next/image";
 import LogoutBtn from "./LogoutBtn";
 import { createClient } from "@/utils/supabase/server";
+import { GUIDE_LINK } from "@/lib/constant";
 
 const MainNav = async ({ user }: { user: User | undefined }) => {
   return (
@@ -35,7 +36,8 @@ const MainNav = async ({ user }: { user: User | undefined }) => {
       </Link>
 
       <Link
-        href="/premium"
+        // href="/premium"
+        href="#"
         className="flex items-center space-x-2 py-2 border border-transparent hover:text-slate-700 dark:hover:text-slate-200 transition text-slate-400 dark:text-slate-500"
       >
         <svg
@@ -53,6 +55,29 @@ const MainNav = async ({ user }: { user: User | undefined }) => {
 
         <span>Premium</span>
       </Link>
+      <Link
+        href={GUIDE_LINK}
+        className="flex items-center space-x-2 py-2 border border-transparent hover:text-slate-700  transition text-slate-400 "
+        target="_blank"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.5}
+          stroke="currentColor"
+          className="size-6"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"
+          />
+        </svg>
+
+        <span>Guide</span>
+      </Link>
+
       <Link
         href="#"
         className="flex items-center space-x-2 py-2 border border-transparent hover:text-slate-700  transition text-slate-400 "
