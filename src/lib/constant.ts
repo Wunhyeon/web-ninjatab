@@ -4,7 +4,8 @@ export const LOGIN_AGAIN_MESSAGE =
 
 // export const NOTION_AUTHORIZATION_URL =
 // "https://api.notion.com/v1/oauth/authorize?client_id=9107fddb-ff77-47f7-98c9-e9cc68c19640&response_type=code&owner=user&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fcallback%2Fnotion";
-export const NOTION_AUTHORIZATION_URL = process.env.NOTION_AUTHORIZATION_URL;
+export const NEXT_PUBLIC_NOTION_AUTHORIZATION_URL =
+  process.env.NEXT_PUBLIC_NOTION_AUTHORIZATION_URL;
 
 export const ERROR_USER_NOT_AUTHORIZED = "user not authorized";
 export const ERROR_SERVER_500 = "server error";
