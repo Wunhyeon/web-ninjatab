@@ -184,7 +184,7 @@ const HeatmapFrame = ({
   }, []);
 
   return (
-    <Card className="ml-7">
+    <Card className="ml-7 relative">
       <div className="flex justify-between mb-4">
         <Select
           onValueChange={(value) => {
@@ -214,6 +214,7 @@ const HeatmapFrame = ({
             console.log("refresh");
           }}
           disabled={isLoadingRef.current}
+          className="absolute top-3 right-3"
         >
           {isLoadingRef.current ? <Spinner /> : <RefreshIcon />}
         </Button>

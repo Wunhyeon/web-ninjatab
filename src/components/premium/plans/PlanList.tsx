@@ -46,7 +46,7 @@ const PlanList = async () => {
         })}
       </div>
 
-      <InfoMessage />
+      {/* <InfoMessage /> */}
     </div>
   );
 };
