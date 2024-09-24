@@ -30,7 +30,8 @@ export async function GET(request: NextRequest) {
       .from("notion_info")
       .select("access_token")
       .eq("user_id", user.data.user.id)
-      .eq("id", notionInfoId);
+      .eq("id", notionInfoId)
+      .is("deleted_at", null);
     if (error) {
       throw new Error(error.message);
     }

@@ -64,7 +64,8 @@ export async function GET(request: Request) {
         .from("notion_info")
         .select("id")
         .eq("user_id", user.data.user.id)
-        .eq("workspace_id", responseJson.workspace_id);
+        .eq("workspace_id", responseJson.workspace_id)
+        .is("deleted_at", null);
 
       // 기존에 workspaceId가 겹치는 게 없다면 notionInfo를 저장하고, 있다면 update해준다!!!
       if (
