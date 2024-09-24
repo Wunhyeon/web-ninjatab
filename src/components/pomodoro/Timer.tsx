@@ -97,7 +97,6 @@ const Timer = ({
     const nextMode = modeRef.current === "work" ? "break" : "work";
     const nextSeconds = (nextMode === "work" ? workMinutes : breakMinutes) * 60;
     setMode(nextMode);
-    alert(`switchMode! - currentMode : ${mode}, nextMode : ${nextMode}`);
 
     if (nextMode == "work") {
       setIsNewSubjectStart(true);

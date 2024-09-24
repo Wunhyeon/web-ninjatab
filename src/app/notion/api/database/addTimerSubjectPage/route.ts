@@ -27,8 +27,8 @@ export const POST = async (req: NextRequest) => {
       .select(
         "id,notion_database_info(id,database_id,notion_info(id,access_token))"
       )
-      .eq("id", timerId);
-
+      .eq("id", timerId)
+      .is("deleted_at", null);
     if (timerInfo.error || !timerInfo.data || timerInfo.data.length === 0) {
       // error handling
       return;

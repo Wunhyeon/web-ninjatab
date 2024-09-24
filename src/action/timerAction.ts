@@ -141,7 +141,8 @@ export const upsertNotionDatabaseInfo = async (
       .from("notion_database_info")
       .select("id, timers(id,user_id)")
       .eq("timer_id", timerId)
-      .eq("timers.user_id", user.id);
+      .eq("timers.user_id", user.id)
+      .is("deleted_at", null);
 
     if (res.error) {
       throw new Error(
@@ -891,7 +892,8 @@ export const syncDatabase = async (
       .from("notion_info")
       .select("id,access_token")
       .eq("user_id", user.id)
-      .eq("id", notionInfoId);
+      .eq("id", notionInfoId)
+      .is("deleted_at", null);
 
     if (notionInfo.error || !notionInfo.data || notionInfo.data.length === 0) {
       throw Error();
