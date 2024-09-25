@@ -6,6 +6,7 @@ import Header from "@/components/nav-bar/Header";
 import { createClient } from "@/utils/supabase/server";
 import { Toaster } from "sonner";
 import Script from "next/script";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -40,6 +41,7 @@ export default async function RootLayout({
           <Toaster richColors position="top-center" />
         </ThemeProvider>
       </body>
+      <GoogleAnalytics gaId="G-YG8HS07L99" />
     </html>
   );
 }
