@@ -6,6 +6,8 @@ import Image from "next/image";
 import LogoutBtn from "./LogoutBtn";
 import { createClient } from "@/utils/supabase/server";
 import { GUIDE_LINK } from "@/lib/constant";
+import { sendGAEvent } from "@next/third-parties/google";
+import { NAV_MY_TIMERS } from "@/lib/GAEvent";
 
 const MainNav = async ({ user }: { user: User | undefined }) => {
   return (
@@ -16,6 +18,12 @@ const MainNav = async ({ user }: { user: User | undefined }) => {
       <Link
         href="/my-timers"
         className="flex items-center space-x-2 py-2 border border-transparent hover:text-slate-700 dark:hover:text-slate-200 transition text-slate-400 dark:text-slate-500"
+        onClick={() =>
+          sendGAEvent({
+            event: NAV_MY_TIMERS.event,
+            value: NAV_MY_TIMERS.value,
+          })
+        }
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
