@@ -1,3 +1,4 @@
+"use client";
 import { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import React from "react";
@@ -9,7 +10,7 @@ import { GUIDE_LINK } from "@/lib/constant";
 import { sendGAEvent } from "@next/third-parties/google";
 import { NAV_MY_TIMERS } from "@/lib/GAEvent";
 
-const MainNav = async ({ user }: { user: User | undefined }) => {
+const MainNav = ({ user }: { user: User | undefined }) => {
   return (
     <nav className="hidden sm:flex mt-4 font-bold items-center justify-center space-x-8 overflow-auto no-scrollbar w-full">
       <Link href="/">
@@ -18,12 +19,12 @@ const MainNav = async ({ user }: { user: User | undefined }) => {
       <Link
         href="/my-timers"
         className="flex items-center space-x-2 py-2 border border-transparent hover:text-slate-700 dark:hover:text-slate-200 transition text-slate-400 dark:text-slate-500"
-        onClick={() =>
+        onClick={() => {
           sendGAEvent({
             event: NAV_MY_TIMERS.event,
             value: NAV_MY_TIMERS.value,
-          })
-        }
+          });
+        }}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
