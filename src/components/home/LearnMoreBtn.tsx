@@ -19,7 +19,9 @@ const LearnMoreBtn = () => {
         });
       }}
     >
-      <Link href={GUIDE_LINK}>Learn More {"->"}</Link>
+      <Link href={GUIDE_LINK} target="_blank">
+        Learn More {"->"}
+      </Link>
     </Button>
   );
 };
