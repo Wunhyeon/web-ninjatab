@@ -178,3 +178,14 @@ export const WIDGET_HEATMAP_YEAR_SELECT = {
   event: "widget_heatmap_year_select",
   value: "click",
 };
+
+// Main page
+export const MAIN_GET_START = {
+  event: "main_get_start",
+  value: "click",
+};
+
+export const MAIN_LEARN_MORE = {
+  event: "main_learn_more",
+  value: "click",
+};
