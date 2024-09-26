@@ -1,6 +1,8 @@
 import React, { useContext } from "react";
 import SettingsContext from "./SettingsContext";
 import { Play } from "lucide-react";
+import { sendGAEvent } from "@next/third-parties/google";
+import { WIDGET_TIMER_START } from "@/lib/GAEvent";
 
 const PlayButton = ({ timerStart }: { timerStart: () => void }) => {
   const settingsInfo = useContext(SettingsContext);
@@ -12,6 +14,9 @@ const PlayButton = ({ timerStart }: { timerStart: () => void }) => {
       aria-label="Start"
       onClick={() => {
         timerStart();
+        sendGAEvent("event", WIDGET_TIMER_START.event, {
+          value: WIDGET_TIMER_START.value,
+        });
       }}
     >
       {/* <svg

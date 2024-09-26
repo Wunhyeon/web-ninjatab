@@ -26,6 +26,13 @@ import CopyLinkCard from "./CopyLinkCard";
 import CopyLinkDialog from "./CopyLinkDialog";
 import SoundEditCard from "./SoundEditCard";
 import ThemeEditCard from "./ThemeEditCard";
+import { sendGAEvent } from "@next/third-parties/google";
+import {
+  EDIT_TIMER_DATABASE_OPEN,
+  EDIT_TIMER_SOUND_OPEN,
+  EDIT_TIMER_THEME_OPEN,
+  EDIT_TIMER_TIMER_OPEN,
+} from "@/lib/GAEvent";
 
 const EditTimerFrame = ({
   timerId,
@@ -96,7 +103,13 @@ const EditTimerFrame = ({
         <Separator />
         <Accordion type="single" collapsible>
           <AccordionItem value="timer">
-            <AccordionTrigger>
+            <AccordionTrigger
+              onClick={() => {
+                sendGAEvent("event", EDIT_TIMER_TIMER_OPEN.event, {
+                  value: EDIT_TIMER_TIMER_OPEN.value,
+                });
+              }}
+            >
               <div className="flex gap-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -125,7 +138,13 @@ const EditTimerFrame = ({
           </AccordionItem>
 
           <AccordionItem value="sound">
-            <AccordionTrigger>
+            <AccordionTrigger
+              onClick={() => {
+                sendGAEvent("event", EDIT_TIMER_SOUND_OPEN.event, {
+                  value: EDIT_TIMER_SOUND_OPEN.value,
+                });
+              }}
+            >
               <div className="flex gap-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -154,7 +173,13 @@ const EditTimerFrame = ({
           </AccordionItem>
 
           <AccordionItem value="theme">
-            <AccordionTrigger>
+            <AccordionTrigger
+              onClick={() => {
+                sendGAEvent("event", EDIT_TIMER_THEME_OPEN.event, {
+                  value: EDIT_TIMER_THEME_OPEN.value,
+                });
+              }}
+            >
               <div className="flex gap-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -179,7 +204,13 @@ const EditTimerFrame = ({
           </AccordionItem>
 
           <AccordionItem value="database">
-            <AccordionTrigger>
+            <AccordionTrigger
+              onClick={() => {
+                sendGAEvent("event", EDIT_TIMER_DATABASE_OPEN.event, {
+                  value: EDIT_TIMER_DATABASE_OPEN.event,
+                });
+              }}
+            >
               <div className="flex gap-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

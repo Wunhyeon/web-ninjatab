@@ -4,6 +4,8 @@ import React from "react";
 import { Button } from "../ui/button";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
+import { sendGAEvent } from "@next/third-parties/google";
+import { NAV_LOGOUT } from "@/lib/GAEvent";
 
 const LogoutBtn = () => {
   const router = useRouter();
@@ -18,7 +20,13 @@ const LogoutBtn = () => {
       <Button
         variant={"ghost"}
         className="items-center space-x-2 py-2 border border-transparent hover:text-slate-700  transition text-slate-400 hidden sm:flex"
-        onClick={handleLogout}
+        onClick={() => {
+          handleLogout();
+
+          sendGAEvent("event", NAV_LOGOUT.event, {
+            value: NAV_LOGOUT.value,
+          });
+        }}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

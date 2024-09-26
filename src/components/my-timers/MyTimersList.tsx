@@ -33,6 +33,8 @@ import { cn } from "@/lib/utils";
 
 import CreateTimerForm from "./CreateTimerForm";
 import { useRouter } from "next/navigation";
+import { sendGAEvent } from "@next/third-parties/google";
+import { MY_TIMER_CREATE_TIMER, MY_TIMER_EDIT_TIMER } from "@/lib/GAEvent";
 
 export default function MyTimersList({
   data,
@@ -60,6 +62,11 @@ export default function MyTimersList({
         <Link
           className={buttonVariants({ variant: "outline" })}
           href={"/create-timer"}
+          onClick={() => {
+            sendGAEvent("event", MY_TIMER_CREATE_TIMER.event, {
+              value: MY_TIMER_CREATE_TIMER.value,
+            });
+          }}
         >
           Create Timer
         </Link>
@@ -73,6 +80,9 @@ export default function MyTimersList({
                 key={el.id}
                 className="cursor-pointer"
                 onClick={() => {
+                  sendGAEvent("event", MY_TIMER_EDIT_TIMER.event, {
+                    value: MY_TIMER_EDIT_TIMER.value,
+                  });
                   router.push(`/edit-timer/${el.id}`);
                 }}
               >

@@ -7,6 +7,8 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import NotionConnectSVG from "@/components/svg/NotionConnectSVG";
+import { sendGAEvent } from "@next/third-parties/google";
+import { CREATE_TIMER_CONNECT_WITH_NOTION } from "@/lib/GAEvent";
 
 const NotionConnectLink = () => {
   const searchParams = useSearchParams();
@@ -40,6 +42,11 @@ const NotionConnectLink = () => {
             buttonVariants({ variant: "secondary" }),
             "text-xl border-2 p-5 rounded-md"
           )}
+          onClick={() => {
+            sendGAEvent("event", CREATE_TIMER_CONNECT_WITH_NOTION.event, {
+              value: CREATE_TIMER_CONNECT_WITH_NOTION.value,
+            });
+          }}
         >
           Connect with Notion
         </Link>
