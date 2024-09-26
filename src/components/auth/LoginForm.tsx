@@ -16,6 +16,8 @@ import Image from "next/image";
 import GoogleLoginBtnSVG from "../svg/GoogleLoginBtnSVG";
 import { createClient } from "@/utils/supabase/client";
 import { ORIGIN } from "@/lib/constant";
+import { sendGAEvent } from "@next/third-parties/google";
+import { GOOGLE_LOGIN } from "@/lib/GAEvent";
 
 export function LoginForm() {
   const googleLogin = async () => {
@@ -43,7 +45,13 @@ export function LoginForm() {
           <Button
             variant={"ghost"}
             className="w-full relative h-full"
-            onClick={googleLogin}
+            onClick={() => {
+              googleLogin();
+
+              sendGAEvent("event", GOOGLE_LOGIN.event, {
+                value: GOOGLE_LOGIN.value,
+              });
+            }}
           >
             {/* <Image src="/web_light_sq_ctn.svg" alt="google_login" fill /> */}
             <GoogleLoginBtnSVG />

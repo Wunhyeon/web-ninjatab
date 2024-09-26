@@ -20,6 +20,8 @@ import { TimeZone } from "@/lib/types";
 import { Input } from "../ui/input";
 import { Coffee, Flame, Pause, Play, SkipForward } from "lucide-react";
 import SkipButton from "./SkipButton";
+import { sendGAEvent } from "@next/third-parties/google";
+import { WIDGET_TIMER_LOGO_LINK, WIDGET_TIMER_SETTING } from "@/lib/GAEvent";
 
 const Timer = ({
   timerId,
@@ -204,13 +206,26 @@ const Timer = ({
       <div className="bg-gray-100 p-2 sm:p-3 rounded-lg mb-2 sm:mb-4 flex-grow flex flex-col justify-between">
         <div className="flex justify-between items-center mb-1 sm:mb-2">
           <h1 className="text-lg sm:text-xl font-bold">
-            <Link href={`${ORIGIN}`} target="_blank">
+            <Link
+              href={`${ORIGIN}`}
+              target="_blank"
+              onClick={() => {
+                sendGAEvent("event", WIDGET_TIMER_LOGO_LINK.event, {
+                  value: WIDGET_TIMER_LOGO_LINK.value,
+                });
+              }}
+            >
               PomoLog
             </Link>
           </h1>
           <div className="flex space-x-2">
             <Link
               href={`${ORIGIN}/edit-timer/${timerId}`}
+              onClick={() => {
+                sendGAEvent("event", WIDGET_TIMER_SETTING.event, {
+                  value: WIDGET_TIMER_SETTING.value,
+                });
+              }}
               target="_blank"
               className={cn(
                 buttonVariants({ variant: "default" }),

@@ -28,6 +28,8 @@ import { toast } from "sonner";
 import { Checkbox } from "../ui/checkbox";
 import Link from "next/link";
 import { updateTimerSound } from "@/action/timerAction";
+import { sendGAEvent } from "@next/third-parties/google";
+import { EDIT_TIMER_SOUND_UPDATE_BTN } from "@/lib/GAEvent";
 
 const SoundEditCard = ({
   timerId,
@@ -176,7 +178,15 @@ const SoundEditCard = ({
                   )}
                 />
               </div>
-              <Button type="submit" disabled={isLoadingRef.current}>
+              <Button
+                type="submit"
+                disabled={isLoadingRef.current}
+                onClick={() => {
+                  sendGAEvent("event", EDIT_TIMER_SOUND_UPDATE_BTN.event, {
+                    value: EDIT_TIMER_SOUND_UPDATE_BTN.value,
+                  });
+                }}
+              >
                 Update
               </Button>
             </form>

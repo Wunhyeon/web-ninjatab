@@ -40,6 +40,17 @@ import { Spinner } from "../Spinner";
 import { ORIGIN } from "@/lib/constant";
 import { toast, useSonner } from "sonner";
 import Link from "next/link";
+import { sendGAEvent } from "@next/third-parties/google";
+import {
+  CREATE_TIMER_BTN_INSERT,
+  CREATE_TIMER_CHECK_DATABASE,
+  CREATE_TIMER_DATABASE_SELECT,
+  CREATE_TIMER_DATABASE_SELECT_REFRESH,
+  CREATE_TIMER_NOTION_CONNECT,
+  CREATE_TIMER_SYNC_DATABASE,
+  CREATE_TIMER_WORKSPACE_SELECT,
+  CREATE_TIMER_WORKSPACE_SELECT_PLUS,
+} from "@/lib/GAEvent";
 
 const CreateTimerDatabase = ({
   userNotionInfo,
@@ -95,6 +106,9 @@ const CreateTimerDatabase = ({
    * 노션 써드파티 연결
    */
   const handleLinkClick = () => {
+    sendGAEvent("event", CREATE_TIMER_NOTION_CONNECT.event, {
+      value: CREATE_TIMER_NOTION_CONNECT.value,
+    });
     const newWindow = window.open("/notion-connect", "_blank");
 
     if (newWindow) {
@@ -246,6 +260,13 @@ const CreateTimerDatabase = ({
                             refreshDatabaseList(event);
                             notionInfoIdRef.current = event;
                             setNotionInfoIdState(event);
+                            sendGAEvent(
+                              "event",
+                              CREATE_TIMER_WORKSPACE_SELECT.event,
+                              {
+                                value: CREATE_TIMER_WORKSPACE_SELECT.value,
+                              }
+                            );
                           }}
                           defaultValue={field.value}
                         >
@@ -262,7 +283,19 @@ const CreateTimerDatabase = ({
                             ))}
                           </SelectContent>
                         </Select>
-                        <Button variant={"ghost"} onClick={handleLinkClick}>
+                        <Button
+                          variant={"ghost"}
+                          onClick={() => {
+                            handleLinkClick();
+                            sendGAEvent(
+                              "event",
+                              CREATE_TIMER_WORKSPACE_SELECT_PLUS.event,
+                              {
+                                value: CREATE_TIMER_WORKSPACE_SELECT_PLUS.value,
+                              }
+                            );
+                          }}
+                        >
                           +
                         </Button>
                       </div>
@@ -304,6 +337,14 @@ const CreateTimerDatabase = ({
                               form.setValue("databaseName", databaseName);
                               form.setValue("name", databaseName);
                               setDatabaseUrlState(databaseUrl);
+
+                              sendGAEvent(
+                                "event",
+                                CREATE_TIMER_DATABASE_SELECT.event,
+                                {
+                                  value: CREATE_TIMER_DATABASE_SELECT.value,
+                                }
+                              );
                             }}
                             defaultValue={field.value}
                           >
@@ -329,6 +370,14 @@ const CreateTimerDatabase = ({
                               if (notionInfoIdRef.current) {
                                 refreshDatabaseList(notionInfoIdRef.current);
                               }
+                              sendGAEvent(
+                                "event",
+                                CREATE_TIMER_DATABASE_SELECT_REFRESH.event,
+                                {
+                                  value:
+                                    CREATE_TIMER_DATABASE_SELECT_REFRESH.value,
+                                }
+                              );
                             }}
                           >
                             {databaseIsLoadingRef.current === true ? (
@@ -339,10 +388,10 @@ const CreateTimerDatabase = ({
                           </Button>
                         </div>
                         <FormDescription>
-                          Connect your databases with Focus&Record: open a
-                          database in Notion, click the &apos;...&apos; button
-                          in the top-right corner → Connections → Add
-                          connections → Focus&Record.
+                          Connect your databases with PomoLog: open a database
+                          in Notion, click the &apos;...&apos; button in the
+                          top-right corner → Connections → Add connections →
+                          PomoLog.
                           {/* <Link href="/examples/forms">email settings</Link>. */}
                         </FormDescription>
                         <FormMessage />
@@ -359,7 +408,12 @@ const CreateTimerDatabase = ({
                       &apos;date&apos;
                     </p>
                     <Button
-                      onClick={handleSyncDatabase}
+                      onClick={() => {
+                        handleSyncDatabase();
+                        sendGAEvent("event", CREATE_TIMER_SYNC_DATABASE.event, {
+                          value: CREATE_TIMER_SYNC_DATABASE.value,
+                        });
+                      }}
                       type="button"
                       disabled={syncButtonIsLoadingRef.current}
                     >
@@ -373,6 +427,15 @@ const CreateTimerDatabase = ({
                       href={databaseUrlState}
                       target="_blank"
                       className="bg-blue-200"
+                      onClick={() => {
+                        sendGAEvent(
+                          "event",
+                          CREATE_TIMER_CHECK_DATABASE.event,
+                          {
+                            value: CREATE_TIMER_CHECK_DATABASE.value,
+                          }
+                        );
+                      }}
                     >
                       Check Database
                     </Link>
@@ -381,7 +444,16 @@ const CreateTimerDatabase = ({
                   <></>
                 )}
 
-                <Button type="submit">Create Timer ⏰</Button>
+                <Button
+                  type="submit"
+                  onClick={() => {
+                    sendGAEvent("event", CREATE_TIMER_BTN_INSERT.event, {
+                      value: CREATE_TIMER_BTN_INSERT.value,
+                    });
+                  }}
+                >
+                  Create Timer ⏰
+                </Button>
               </form>
             </Form>
           )}

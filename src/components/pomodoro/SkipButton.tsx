@@ -1,3 +1,5 @@
+import { WIDGET_TIMER_SKIP } from "@/lib/GAEvent";
+import { sendGAEvent } from "@next/third-parties/google";
 import { SkipForwardIcon } from "lucide-react";
 import React from "react";
 
@@ -9,6 +11,9 @@ const SkipButton = ({ handleSkip }: { handleSkip: () => void }) => {
       aria-label="Skip"
       onClick={() => {
         handleSkip();
+        sendGAEvent("event", WIDGET_TIMER_SKIP.event, {
+          value: WIDGET_TIMER_SKIP.value,
+        });
       }}
     >
       <SkipForwardIcon size={32} color="black" fill="black" />

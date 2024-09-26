@@ -18,6 +18,11 @@ import { getHeatmapInfoMap } from "@/action/timerAction";
 import { Spinner } from "../Spinner";
 import RefreshIcon from "../RefreshIcon";
 import { toast } from "sonner";
+import { sendGAEvent } from "@next/third-parties/google";
+import {
+  WIDGET_HEATMAP_REFRESH,
+  WIDGET_HEATMAP_YEAR_SELECT,
+} from "@/lib/GAEvent";
 
 const HeatmapFrame = ({
   mp,
@@ -189,6 +194,9 @@ const HeatmapFrame = ({
         <Select
           onValueChange={(value) => {
             divideYear(value);
+            sendGAEvent("event", WIDGET_HEATMAP_YEAR_SELECT.event, {
+              value: WIDGET_HEATMAP_YEAR_SELECT.value,
+            });
           }}
         >
           <SelectTrigger className="w-[180px]">
@@ -211,7 +219,9 @@ const HeatmapFrame = ({
           onClick={async () => {
             // router.refresh();
             await handleRefresh();
-            console.log("refresh");
+            sendGAEvent("event", WIDGET_HEATMAP_REFRESH.event, {
+              value: WIDGET_HEATMAP_REFRESH.value,
+            });
           }}
           disabled={isLoadingRef.current}
           className="absolute top-3 right-3"

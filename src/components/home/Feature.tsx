@@ -5,6 +5,10 @@ import Balancer from "react-wrap-balancer";
 import { Button } from "@/components/ui/button";
 import { Section, Container } from "@/components/craft";
 import { GUIDE_LINK } from "@/lib/constant";
+import { sendGAEvent } from "@next/third-parties/google";
+import { MAIN_GET_START } from "@/lib/GAEvent";
+import GetStartBtn from "./GetStartBtn";
+import LearnMoreBtn from "./LearnMoreBtn";
 // import Placeholder from "@/public/placeholder.jpg";
 
 const Feature = () => {
@@ -22,12 +26,8 @@ const Feature = () => {
           </Balancer>
         </p>
         <div className="not-prose my-8 flex items-center gap-2 justify-center">
-          <Button className="w-fit" asChild>
-            <Link href="/my-timers">Get Started</Link>
-          </Button>
-          <Button className="w-fit" variant="link" asChild>
-            <Link href={GUIDE_LINK}>Learn More {"->"}</Link>
-          </Button>
+          <GetStartBtn />
+          <LearnMoreBtn />
         </div>
         <div className="not-prose relative flex h-[600px] overflow-hidden rounded-lg border">
           <video autoPlay loop playsInline muted>
