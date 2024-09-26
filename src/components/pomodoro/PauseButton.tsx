@@ -1,3 +1,5 @@
+import { WIDGET_TIMER_PAUSE } from "@/lib/GAEvent";
+import { sendGAEvent } from "@next/third-parties/google";
 import { Pause } from "lucide-react";
 import React from "react";
 
@@ -19,6 +21,9 @@ const PauseButton = ({
         isPausedRef.current = true;
         setIsPaused(true);
         pauseTicking();
+        sendGAEvent("event", WIDGET_TIMER_PAUSE.event, {
+          value: WIDGET_TIMER_PAUSE.value,
+        });
       }}
     >
       {/* <svg

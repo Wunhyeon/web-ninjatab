@@ -27,6 +27,8 @@ import { z } from "zod";
 import { UpdateTimerTimeSchema } from "@/zodSchema/UpdateTimerTimeSchema";
 import { toast } from "sonner";
 import { updateTimerTime } from "@/action/timerAction";
+import { sendGAEvent } from "@next/third-parties/google";
+import { EDIT_TIMER_TIMER_UPDATE_BTN } from "@/lib/GAEvent";
 
 const TimerEditCard = ({
   workTime,
@@ -174,7 +176,15 @@ const TimerEditCard = ({
                   )}
                 />
               </div>
-              <Button type="submit" disabled={isLoadingRef.current}>
+              <Button
+                type="submit"
+                disabled={isLoadingRef.current}
+                onClick={() => {
+                  sendGAEvent("event", EDIT_TIMER_TIMER_UPDATE_BTN.event, {
+                    value: EDIT_TIMER_TIMER_UPDATE_BTN.value,
+                  });
+                }}
+              >
                 Update
               </Button>
             </form>

@@ -38,6 +38,16 @@ import { ORIGIN } from "@/lib/constant";
 import { toast } from "sonner";
 import { Input } from "../ui/input";
 import Link from "next/link";
+import { sendGAEvent } from "@next/third-parties/google";
+import {
+  EDIT_TIMER_CHECK_DATABASE,
+  EDIT_TIMER_DATABASE_REFRESH,
+  EDIT_TIMER_DATABASE_SELECT,
+  EDIT_TIMER_DATABASE_UPDATE_BTN,
+  EDIT_TIMER_SYNC_DATABASE,
+  EDIT_TIMER_WORKSPACE_SELECT,
+  EDIT_TIMER_WORKSPACE_SELECT_PLUS,
+} from "@/lib/GAEvent";
 
 const DatabaseInfo = ({
   timerId,
@@ -235,6 +245,11 @@ const DatabaseInfo = ({
                             refreshDatabaseList(event);
                             notionInfoIdRef.current = event;
                             setNotionInfoIdState(event);
+                            sendGAEvent(
+                              "event",
+                              EDIT_TIMER_WORKSPACE_SELECT.event,
+                              { value: EDIT_TIMER_WORKSPACE_SELECT.value }
+                            );
                           }}
                           defaultValue={field.value}
                         >
@@ -251,7 +266,17 @@ const DatabaseInfo = ({
                             ))}
                           </SelectContent>
                         </Select>
-                        <Button variant={"ghost"} onClick={handleLinkClick}>
+                        <Button
+                          variant={"ghost"}
+                          onClick={() => {
+                            handleLinkClick();
+                            sendGAEvent(
+                              "event",
+                              EDIT_TIMER_WORKSPACE_SELECT_PLUS.event,
+                              { value: EDIT_TIMER_WORKSPACE_SELECT_PLUS.value }
+                            );
+                          }}
+                        >
                           +
                         </Button>
                       </div>
@@ -294,6 +319,11 @@ const DatabaseInfo = ({
                               setDatabaseIdState(event);
 
                               setDatabaseUrlState(databaseUrl);
+                              sendGAEvent(
+                                "event",
+                                EDIT_TIMER_DATABASE_SELECT.event,
+                                { value: EDIT_TIMER_DATABASE_SELECT.value }
+                              );
                             }}
                             defaultValue={field.value}
                           >
@@ -319,6 +349,11 @@ const DatabaseInfo = ({
                               if (notionInfoIdRef.current) {
                                 refreshDatabaseList(notionInfoIdRef.current);
                               }
+                              sendGAEvent(
+                                "event",
+                                EDIT_TIMER_DATABASE_REFRESH.event,
+                                { value: EDIT_TIMER_DATABASE_REFRESH.value }
+                              );
                             }}
                           >
                             {databaseIsLoadingRef.current === true ? (
@@ -329,10 +364,10 @@ const DatabaseInfo = ({
                           </Button>
                         </div>
                         <FormDescription>
-                          Connect your databases with Focus&Record: open a
-                          database in Notion, click the &apos;...&apos; button
-                          in the top-right corner → Connections → Add
-                          connections → Focus&Record.
+                          Connect your databases with PomoLog: open a database
+                          in Notion, click the &apos;...&apos; button in the
+                          top-right corner → Connections → Add connections →
+                          PomoLog.
                           {/* <Link href="/examples/forms">email settings</Link>. */}
                         </FormDescription>
                         <FormMessage />
@@ -366,7 +401,12 @@ const DatabaseInfo = ({
                       &apos;date&apos;
                     </p>
                     <Button
-                      onClick={handleSyncDatabase}
+                      onClick={() => {
+                        handleSyncDatabase();
+                        sendGAEvent("event", EDIT_TIMER_SYNC_DATABASE.event, {
+                          value: EDIT_TIMER_SYNC_DATABASE.value,
+                        });
+                      }}
                       type="button"
                       disabled={syncButtonIsLoadingRef.current}
                     >
@@ -380,6 +420,11 @@ const DatabaseInfo = ({
                       href={databaseUrlState}
                       target="_blank"
                       className="bg-blue-200"
+                      onClick={() => {
+                        sendGAEvent("event", EDIT_TIMER_CHECK_DATABASE.event, {
+                          value: EDIT_TIMER_CHECK_DATABASE.value,
+                        });
+                      }}
                     >
                       Check Database
                     </Link>
@@ -388,7 +433,16 @@ const DatabaseInfo = ({
                   <></>
                 )}
 
-                <Button type="submit">Submit</Button>
+                <Button
+                  type="submit"
+                  onClick={() => {
+                    sendGAEvent("event", EDIT_TIMER_DATABASE_UPDATE_BTN.event, {
+                      value: EDIT_TIMER_DATABASE_UPDATE_BTN.value,
+                    });
+                  }}
+                >
+                  Update
+                </Button>
               </form>
             </Form>
           )}

@@ -8,7 +8,13 @@ import LogoutBtn from "./LogoutBtn";
 import { createClient } from "@/utils/supabase/server";
 import { GUIDE_LINK } from "@/lib/constant";
 import { sendGAEvent } from "@next/third-parties/google";
-import { NAV_MY_TIMERS } from "@/lib/GAEvent";
+import {
+  NAV_GUIDE,
+  NAV_LOGIN,
+  NAV_MY_TIMERS,
+  NAV_PREMIUM,
+  NAV_SETTING,
+} from "@/lib/GAEvent";
 
 const MainNav = ({ user }: { user: User | undefined }) => {
   return (
@@ -47,6 +53,11 @@ const MainNav = ({ user }: { user: User | undefined }) => {
         // href="/premium"
         href="#"
         className="flex items-center space-x-2 py-2 border border-transparent hover:text-slate-700 dark:hover:text-slate-200 transition text-slate-400 dark:text-slate-500"
+        onClick={() => {
+          sendGAEvent("event", NAV_PREMIUM.event, {
+            value: NAV_PREMIUM.value,
+          });
+        }}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -67,6 +78,11 @@ const MainNav = ({ user }: { user: User | undefined }) => {
         href={GUIDE_LINK}
         className="flex items-center space-x-2 py-2 border border-transparent hover:text-slate-700  transition text-slate-400 "
         target="_blank"
+        onClick={() => {
+          sendGAEvent("event", NAV_GUIDE.event, {
+            value: NAV_GUIDE.value,
+          });
+        }}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -89,6 +105,11 @@ const MainNav = ({ user }: { user: User | undefined }) => {
       <Link
         href="#"
         className="flex items-center space-x-2 py-2 border border-transparent hover:text-slate-700  transition text-slate-400 "
+        onClick={() => {
+          sendGAEvent("event", NAV_SETTING.event, {
+            value: NAV_SETTING.value,
+          });
+        }}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -111,6 +132,11 @@ const MainNav = ({ user }: { user: User | undefined }) => {
         <Link
           href="sign-in"
           className="flex items-center space-x-2 py-2 border border-transparent hover:text-slate-700 dark:hover:text-slate-200 transition text-slate-400 dark:text-slate-500"
+          onClick={() => {
+            sendGAEvent("event", NAV_LOGIN.event, {
+              value: NAV_LOGIN.value,
+            });
+          }}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

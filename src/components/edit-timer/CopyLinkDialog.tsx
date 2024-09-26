@@ -16,6 +16,8 @@ import { ORIGIN } from "@/lib/constant";
 import CopyToClipboard from "react-copy-to-clipboard";
 import { toast } from "sonner";
 import { Badge } from "../ui/badge";
+import { sendGAEvent } from "@next/third-parties/google";
+import { COPY_HEATMAP, COPY_TIMER, EMBED_BTN } from "@/lib/GAEvent";
 
 const CopyLinkDialog = ({
   timerId,
@@ -27,7 +29,13 @@ const CopyLinkDialog = ({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="flex gap-2 font-semibold">
+        <Button
+          variant="outline"
+          className="flex gap-2 font-semibold"
+          onClick={() => {
+            sendGAEvent("event", EMBED_BTN.event, { value: EMBED_BTN.value });
+          }}
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -75,6 +83,9 @@ const CopyLinkDialog = ({
             text={`${ORIGIN}/widget/timer/${timerId}`}
             onCopy={() => {
               toast.info("coppied!");
+              sendGAEvent("event", COPY_TIMER.event, {
+                value: COPY_TIMER.value,
+              });
             }}
           >
             <Button
@@ -102,6 +113,9 @@ const CopyLinkDialog = ({
             text={`${ORIGIN}/widget/heatmap/${timerId}`}
             onCopy={() => {
               toast.info("coppied!");
+              sendGAEvent("event", COPY_HEATMAP.event, {
+                value: COPY_HEATMAP.value,
+              });
             }}
           >
             <Button
