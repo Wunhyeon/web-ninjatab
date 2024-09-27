@@ -28,7 +28,7 @@ export default function Footer() {
           {/* <Separator /> */}
           <div className="not-prose flex flex-col gap-6">
             <Link href="/">
-              <h3 className="sr-only">PomoLog</h3>
+              <h1 className="sr-only">PomoLog</h1>
               <Image
                 src="/Frame-7.svg"
                 alt="Logo"
