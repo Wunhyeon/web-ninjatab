@@ -72,7 +72,7 @@ const MainNav = ({ user }: { user: User | undefined }) => {
           />
         </svg>
 
-        <span>Premium</span>
+        <span>Pricing</span>
       </Link>
       <Link
         href={GUIDE_LINK}
