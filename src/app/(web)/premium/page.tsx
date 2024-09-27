@@ -11,21 +11,21 @@ import React, { Suspense } from "react";
 
 const page = () => {
   return (
-    <DashboardContent
-      title="Billing"
-      subtitle="View and manage your billing information."
-      action={<PageTitleAction />}
-    >
-      <div>
-        <Suspense fallback={<CardSkeleton className="h-[106px]" />}>
+    // <DashboardContent
+    //   title="Billing"
+    //   subtitle="View and manage your billing information."
+    //   action={<PageTitleAction />}
+    // >
+    <div>
+      {/* <Suspense fallback={<CardSkeleton className="h-[106px]" />}>
           <Subscriptions />
-        </Suspense>
+        </Suspense> */}
 
-        <Suspense fallback={<PlansSkeleton />}>
-          <PlanList />
-        </Suspense>
-      </div>
-    </DashboardContent>
+      <Suspense fallback={<PlansSkeleton />}>
+        <PlanList />
+      </Suspense>
+    </div>
+    // </DashboardContent>
   );
 };
 export default page;
