@@ -11,14 +11,13 @@ import GetStartBtn from "./GetStartBtn";
 import LearnMoreBtn from "./LearnMoreBtn";
 // import Placeholder from "@/public/placeholder.jpg";
 
-const Feature = () => {
+const FeatureVideo = () => {
   return (
     <Section>
       <Container className="grid items-stretch">
         <h3 className="!mt-0 text-5xl">
-          {/* Maximize your focus with the Pomodoro technique and automatically
-          track your progress in Notion. */}
-          Achieve peak productivity with <p>Pomodoro + Database + Heatmap</p>
+          Maximize your focus with the Pomodoro technique and automatically
+          track your progress in Notion.
         </h3>
         <p className="text-muted-foreground my-6">
           <Balancer>
@@ -31,21 +30,13 @@ const Feature = () => {
           <LearnMoreBtn />
         </div>
         <div className="not-prose relative flex h-[600px] overflow-hidden rounded-lg border">
-          {/* <video autoPlay loop playsInline muted>
+          <video autoPlay loop playsInline muted>
             <source src="/featureVideo.mp4" type="video/mp4" />
-          </video> */}
-          <Image
-            className="h-full w-full object-cover object-center"
-            src="/Feature.png"
-            width={1920}
-            height={1080}
-            alt="hero image"
-            //   placeholder="blur"
-          />
+          </video>
         </div>
       </Container>
     </Section>
   );
 };
 
-export default Feature;
+export default FeatureVideo;
