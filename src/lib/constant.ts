@@ -20,3 +20,6 @@ export const GUIDE_LINK =
   "https://worried-blackberry-aa2.notion.site/PomoLog-Guide-8f35cb16436b44b984bc4999249fc44a";
 
 export const MY_CRISP_WEBSITE_ID = "25bcb921-80e4-4d3b-bbf1-f326b1eb1bd2";
+
+export const LEMON_SQUEEZY_LINK =
+  "https://jaehyeon.lemonsqueezy.com/buy/c97e65ed-c3a8-49f5-b5f1-48e9ebb813a3";

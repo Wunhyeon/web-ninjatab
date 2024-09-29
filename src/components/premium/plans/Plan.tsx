@@ -6,6 +6,10 @@ import { cn, formatPrice } from "@/lib/utils";
 import { SignupButton } from "./signup-button";
 import { SearchXIcon } from "lucide-react";
 import { Alert } from "@lemonsqueezy/wedges";
+import Link from "next/link";
+import { LEMON_SQUEEZY_LINK } from "@/lib/constant";
+import { sendGAEvent } from "@next/third-parties/google";
+import { PREMIUM_SUBSCRIBE_BTN } from "@/lib/GAEvent";
 
 const Plan = ({
   plan,
@@ -41,7 +45,7 @@ const Plan = ({
       <Section.Item className="flex-col items-start gap-2">
         <header className="flex w-full items-center justify-between">
           {name ? (
-            <h2 className="text-lg text-surface-900">
+            <h2 className="text-lg text-surface-900 font-bold">
               {product_name} ({name})
             </h2>
           ) : null}
@@ -52,6 +56,7 @@ const Plan = ({
               // Ideally sanitize the description first
               __html: description,
             }}
+            className="flex-col space-y-1 text-base"
           />
         ) : null}
       </Section.Item>
@@ -64,13 +69,19 @@ const Plan = ({
           {!plan.is_usage_based && interval ? ` per ${interval}` : null}
           {plan.is_usage_based && interval ? ` /unit per ${interval}` : null}
         </div>
-
-        <SignupButton
-          className="w-full"
-          plan={plan}
-          isChangingPlans={isChangingPlans}
-          currentPlan={currentPlan}
-        />
+        {plan.price === "0" ? (
+          <></>
+        ) : (
+          <div className="w-full">
+            <p className="mb-3 text-lg">Start 15 Days Free Trial</p>
+            <SignupButton
+              className="w-full"
+              plan={plan}
+              isChangingPlans={isChangingPlans}
+              currentPlan={currentPlan}
+            />
+          </div>
+        )}
       </Section.Item>
     </Section>
   );
