@@ -189,3 +189,9 @@ export const MAIN_LEARN_MORE = {
   event: "main_learn_more",
   value: "click",
 };
+
+// Premium
+export const PREMIUM_SUBSCRIBE_BTN = {
+  event: "premium_subscribe_btn",
+  value: "click",
+};
