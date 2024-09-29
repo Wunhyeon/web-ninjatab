@@ -12,6 +12,8 @@ import {
 import { toast } from "sonner";
 import { type NewPlan } from "@/lib/types";
 import { changePlan, getCheckoutURL } from "@/action/lemonSqueezyAction";
+import { sendGAEvent } from "@next/third-parties/google";
+import { PREMIUM_SUBSCRIBE_BTN } from "@/lib/GAEvent";
 
 type ButtonElement = ElementRef<typeof Button>;
 type ButtonProps = ComponentProps<typeof Button> & {
@@ -40,7 +42,7 @@ export const SignupButton = forwardRef<ButtonElement, ButtonProps>(
       ? "Your plan"
       : isChangingPlans
       ? "Switch to this plan"
-      : "Sign up";
+      : "Subscribes";
 
     // eslint-disable-next-line no-nested-ternary -- disabled
     const before = loading ? (
@@ -92,6 +94,10 @@ export const SignupButton = forwardRef<ButtonElement, ButtonProps>(
           embed
             ? checkoutUrl && window.LemonSqueezy.Url.Open(checkoutUrl)
             : router.push(checkoutUrl ?? "/");
+
+          sendGAEvent("event", PREMIUM_SUBSCRIBE_BTN.event, {
+            value: PREMIUM_SUBSCRIBE_BTN.value,
+          });
         }}
         {...otherProps}
       >

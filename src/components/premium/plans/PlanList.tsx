@@ -8,7 +8,7 @@ import { NewPlan } from "@/lib/types";
 const PlanList = async () => {
   const supabase = createClient();
   // let allPlans: NewPlan[] = await db.select().from(plans)
-  let planRes = await supabase.from("plans").select("*").limit(1);
+  let planRes = await supabase.from("plans").select("*");
   if (planRes.error) {
     // error handling
     return;
@@ -36,8 +36,11 @@ const PlanList = async () => {
 
   return (
     <div>
-      <h2 className='flex items-center after:ml-5 after:h-px after:grow after:bg-surface-100 after:content-[""]'>
+      {/* <h2 className='flex items-center after:ml-5 after:h-px after:grow after:bg-surface-100 after:content-[""]'>
         Plans
+      </h2> */}
+      <h2 className="text-center text-4xl font-bold">
+        Maximize Your Productivity!
       </h2>
 
       <div className="mb-5 mt-3 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-5">
