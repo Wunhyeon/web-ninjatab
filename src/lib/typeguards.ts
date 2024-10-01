@@ -17,8 +17,6 @@ export function webhookHasMeta(obj: unknown): obj is {
     };
   };
 } {
-  console.log("webhookHasMeta - obj : ", obj);
-
   if (
     isObject(obj) &&
     isObject(obj.meta) &&
@@ -26,8 +24,11 @@ export function webhookHasMeta(obj: unknown): obj is {
     isObject(obj.meta.custom_data) &&
     typeof obj.meta.custom_data.user_id === "string"
   ) {
+    console.log("webhookHasMeta : ", true);
     return true;
   }
+  console.log("webhookHasMeta : ", false);
+
   return false;
 }
 
