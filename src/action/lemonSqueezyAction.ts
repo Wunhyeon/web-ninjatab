@@ -402,6 +402,8 @@ export async function processWebhookEvent(webhookEvent: NewWebhookEvent) {
               .upsert(updateData, { onConflict: "lemon_squeezy_id" })
               .select("*");
 
+            console.log("processWebhookEvent - upsertRes : ", upsertRes);
+
             if (upsertRes.error) {
               throw new Error(upsertRes.error.message);
             }
