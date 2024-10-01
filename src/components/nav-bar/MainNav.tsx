@@ -103,7 +103,7 @@ const MainNav = ({ user }: { user: User | undefined }) => {
       </Link>
 
       <Link
-        href="#"
+        href="/setting"
         className="flex items-center space-x-2 py-2 border border-transparent hover:text-slate-700  transition text-slate-400 "
         onClick={() => {
           sendGAEvent("event", NAV_SETTING.event, {

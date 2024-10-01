@@ -1,7 +1,10 @@
 // server component
 import React from "react";
 import Plan, { InfoMessage, NoPlans } from "./Plan";
-import { syncPlans } from "@/action/lemonSqueezyAction";
+import {
+  getUserSubscriptionsNotExpired,
+  syncPlans,
+} from "@/action/lemonSqueezyAction";
 import { createClient } from "@/utils/supabase/server";
 import { NewPlan } from "@/lib/types";
 // server component
