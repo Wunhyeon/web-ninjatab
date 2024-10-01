@@ -352,6 +352,9 @@ export async function processWebhookEvent(webhookEvent: NewWebhookEvent) {
 
         if (planRes.error || !planRes.data || planRes.data.length < 1) {
           processingError = `Plan with variantId ${variantId} not found.`;
+          throw new Error(
+            `err in processWebhookEvent - processingError : ${processingError}`
+          );
         } else {
           // Update the subscription in the database.
 
@@ -410,6 +413,9 @@ export async function processWebhookEvent(webhookEvent: NewWebhookEvent) {
           } catch (error) {
             processingError = `Failed to upsert Subscription #${updateData.lemon_squeezy_id} to the database.`;
             console.error(error);
+            throw new Error(
+              `err in processWebhookEvent - processingError : ${processingError}`
+            );
           }
         }
       } else if (webhookEvent.event_name.startsWith("order_")) {
@@ -436,6 +442,7 @@ export async function processWebhookEvent(webhookEvent: NewWebhookEvent) {
     }
   } catch (err) {
     console.log("err in processWebhookEvent : ", err);
+    return new Error("err in  processWebhookEvent" + err);
   }
 }
 
