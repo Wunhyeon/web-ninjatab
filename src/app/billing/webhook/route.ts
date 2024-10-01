@@ -38,8 +38,9 @@ export async function POST(request: Request) {
       return new Response("Error", { status: 500 });
     }
 
-    // Non-blocking call to process the webhook event.
-    void processWebhookEvent(webhookEventId);
+    // Non-blocking call to process the webhook event. // 가이드에는 이렇게 적혀있는데, 이거 때문에 문제 (Error: Webhook event #b4dc7bfc-2d30-4c3b-8cc4-7dc6c235b5f7 not found in the database) 이런 에러가 발생하는 거 같다.
+    // await 붙여서 실험.
+    await void processWebhookEvent(webhookEventId);
 
     return new Response("OK", { status: 200 });
   }
