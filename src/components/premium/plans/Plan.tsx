@@ -10,8 +10,9 @@ import Link from "next/link";
 import { LEMON_SQUEEZY_LINK } from "@/lib/constant";
 import { sendGAEvent } from "@next/third-parties/google";
 import { PREMIUM_SUBSCRIBE_BTN } from "@/lib/GAEvent";
+import { getUserSubscriptionsNotExpiredByPlanId } from "@/action/lemonSqueezyAction";
 
-const Plan = ({
+export const Plan = async ({
   plan,
   currentPlan = null,
   isChangingPlans = false,
@@ -21,7 +22,14 @@ const Plan = ({
   isChangingPlans?: boolean;
 }) => {
   const { description, product_name, name, price, id, interval } = plan;
-  const isCurrent = id && currentPlan?.id === id;
+  let isCurrent = id && currentPlan?.id === id;
+
+  const notExpiredPlan = await getUserSubscriptionsNotExpiredByPlanId(id!);
+
+  if (notExpiredPlan && notExpiredPlan.length) {
+    isCurrent = true;
+    currentPlan = plan;
+  }
 
   return (
     // <div>
