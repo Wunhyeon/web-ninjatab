@@ -17,6 +17,8 @@ export function webhookHasMeta(obj: unknown): obj is {
     };
   };
 } {
+  console.log("webhookHasMeta - obj : ", obj);
+
   if (
     isObject(obj) &&
     isObject(obj.meta) &&

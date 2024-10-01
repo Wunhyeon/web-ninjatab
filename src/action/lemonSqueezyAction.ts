@@ -307,7 +307,7 @@ export async function processWebhookEvent(webhookEvent: NewWebhookEvent) {
       .select("*")
       .eq("id", webhookEvent.id);
 
-    console.log("dbwebhookEventRes : ", dbwebhookEventRes);
+    // console.log("dbwebhookEventRes : ", dbwebhookEventRes);
 
     if (
       dbwebhookEventRes.error ||
@@ -315,15 +315,11 @@ export async function processWebhookEvent(webhookEvent: NewWebhookEvent) {
       dbwebhookEventRes.data.length < 1
     ) {
       throw new Error(
-        `Webhook event #${webhookEvent.id} not found in the database.`
+        `Webhook event #${webhookEvent.id} not found in the database. dbwebhookEventRes.error || !dbwebhookEventRes.data || dbwebhookEventRes.data.length < 1`
       );
     }
 
     if (!process.env.LEMONSQUEEZY_WEBHOOK_URL) {
-      console.log(
-        "!process.env.LEMONSQUEEZY_WEBHOOK_URL - ",
-        process.env.LEMONSQUEEZY_WEBHOOK_URL
-      );
       throw new Error(
         "Missing required WEBHOOK_URL env variable. Please, set it in your .env file."
       );
@@ -401,17 +397,13 @@ export async function processWebhookEvent(webhookEvent: NewWebhookEvent) {
             //     set: updateData,
             //   });
 
-            console.log("updateData : ", updateData);
-
             const upsertRes = await supabase
               .from("subscription")
               .upsert(updateData, { onConflict: "lemon_squeezy_id" })
               .select("*");
 
-            console.log("upsertRes : ", upsertRes);
-
             if (upsertRes.error) {
-              throw new Error();
+              throw new Error(upsertRes.error.message);
             }
           } catch (error) {
             processingError = `Failed to upsert Subscription #${updateData.lemon_squeezy_id} to the database.`;
@@ -478,6 +470,82 @@ export async function getUserSubscriptions() {
     return userSubscriptions;
   } catch (err) {
     console.log("err in getUserSubscriptions - ", err);
+  }
+}
+
+/**
+ * This action will get the subscriptions for the current user.
+ */
+export async function getUserSubscriptionsNotExpired() {
+  const supabase = createServiceRoleClient();
+  const user = await getUser();
+
+  if (!user) {
+    notFound();
+  }
+
+  try {
+    // const userSubscriptions: NewSubscription[] = await db
+    //   .select()
+    //   .from(subscriptions)
+    //   .where(eq(subscriptions.userId, userId));
+
+    const userSubscriptionsRes = await supabase
+      .from("subscription")
+      .select("*")
+      .eq("user_id", user.id)
+      .neq("status", "expired");
+
+    if (userSubscriptionsRes.error) {
+      throw new Error();
+    }
+
+    const userSubscriptions: NewSubscription[] = userSubscriptionsRes.data;
+
+    revalidatePath("/");
+
+    return userSubscriptions;
+  } catch (err) {
+    console.log("err in getUserSubscriptions - ", err);
+  }
+}
+
+/**
+ * This action will get the subscriptions for the current user.
+ */
+export async function getUserSubscriptionsNotExpiredByPlanId(planId: string) {
+  const supabase = createServiceRoleClient();
+  const serverSupabase = createClient();
+  const user = await serverSupabase.auth.getUser();
+
+  if (!user.data.user) {
+    return undefined;
+  }
+
+  try {
+    // const userSubscriptions: NewSubscription[] = await db
+    //   .select()
+    //   .from(subscriptions)
+    //   .where(eq(subscriptions.userId, userId));
+
+    const userSubscriptionsRes = await supabase
+      .from("subscription")
+      .select("*")
+      .eq("user_id", user.data.user.id)
+      .eq("plan_id", planId)
+      .neq("status", "expired");
+
+    if (userSubscriptionsRes.error) {
+      throw new Error();
+    }
+
+    const userSubscriptions: NewSubscription[] = userSubscriptionsRes.data;
+
+    revalidatePath("/");
+
+    return userSubscriptions;
+  } catch (err) {
+    console.log("err in getUserSubscriptionsNotExpiredByPlanId - ", err);
   }
 }
 
