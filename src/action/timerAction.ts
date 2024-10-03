@@ -10,6 +10,7 @@ import { Client } from "@notionhq/client";
 import { redirect } from "next/navigation";
 import { GetPageResponseWithInTrashAndArchived, TimeZone } from "@/lib/types";
 import { revalidatePath } from "next/cache";
+import { User } from "@supabase/supabase-js";
 
 interface notionError extends Error {
   body: string;
@@ -20,7 +21,7 @@ interface notionError extends Error {
  * serverAction안에서만 쓸 것
  * @returns user.data.user
  */
-const getUser = async () => {
+const getUser = async (): Promise<User> => {
   const supabase = createClient();
 
   try {
@@ -1003,5 +1004,76 @@ export const updateTimerSound = async (
   } catch (err) {
     console.log("err in timerAction - updateTimerSound : ", err);
     return { success: false };
+  }
+};
+
+/**
+ * user의 (삭제되지 않은) 첫번째 만들어진 타이머를 가져오는 메서드.
+ */
+export const getUserFirstTimer = async () => {
+  const supabase = createClient();
+  const user = await getUser();
+  try {
+    const { data, error } = await supabase
+      .from("timers")
+      .select("id")
+      .eq("user_id", user.id)
+      .is("deleted_at", null)
+      .order("created_at", { ascending: true })
+      .limit(1);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data;
+  } catch (err) {
+    throw new Error("err");
+  }
+};
+
+/**
+ * userId를 파라미터로 받아 user의 (삭제되지 않은) 첫번째 만들어진 타이머를 가져오는 메서드.
+ */
+export const getUserFirstTimerByUserId = async (userId: string) => {
+  const supabase = createClient();
+  try {
+    const { data, error } = await supabase
+      .from("timers")
+      .select("id")
+      .eq("user_id", userId)
+      .is("deleted_at", null)
+      .order("created_at", { ascending: true })
+      .limit(1);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data;
+  } catch (err) {
+    throw new Error("err");
+  }
+};
+
+/**
+ * timerId를 가지고 그 timer와 연결된 userId 반환
+ */
+export const getUserIdByTimerId = async (timerId: string) => {
+  const supabase = createClient();
+  try {
+    const { data, error } = await supabase
+      .from("timers")
+      .select("users(id)")
+      .eq("id", timerId)
+      .is("deleted_at", null);
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  } catch (err) {
+    throw err;
   }
 };

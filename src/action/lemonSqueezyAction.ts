@@ -483,7 +483,7 @@ export async function getUserSubscriptions() {
 }
 
 /**
- * This action will get the subscriptions for the current user.
+ * This action will get the subscriptions that not expired for the current user.
  */
 export async function getUserSubscriptionsNotExpired() {
   const supabase = createServiceRoleClient();
@@ -503,6 +503,38 @@ export async function getUserSubscriptionsNotExpired() {
       .from("subscription")
       .select("*")
       .eq("user_id", user.id)
+      .neq("status", "expired");
+
+    if (userSubscriptionsRes.error) {
+      throw new Error();
+    }
+
+    const userSubscriptions: NewSubscription[] = userSubscriptionsRes.data;
+
+    revalidatePath("/");
+
+    return userSubscriptions;
+  } catch (err) {
+    console.log("err in getUserSubscriptions - ", err);
+  }
+}
+
+/**
+ * This action will get the subscriptions that not expired for the user by user_id parameter.
+ */
+export async function getUserSubscriptionsNotExpiredByUserId(userId: string) {
+  const supabase = createServiceRoleClient();
+
+  try {
+    // const userSubscriptions: NewSubscription[] = await db
+    //   .select()
+    //   .from(subscriptions)
+    //   .where(eq(subscriptions.userId, userId));
+
+    const userSubscriptionsRes = await supabase
+      .from("subscription")
+      .select("*")
+      .eq("user_id", userId)
       .neq("status", "expired");
 
     if (userSubscriptionsRes.error) {

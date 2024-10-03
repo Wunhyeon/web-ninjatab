@@ -11,8 +11,12 @@ import CreateTimerDatabase from "./CreateTimerDatabase";
 
 const CreateTimerFrame = ({
   userNotionInfo,
+  isSubscribe,
+  isFirstTimerExist,
 }: {
   userNotionInfo: { id: string; workspace_name: string }[];
+  isSubscribe: boolean;
+  isFirstTimerExist: boolean;
 }) => {
   return (
     <Card className="relative">
@@ -24,7 +28,11 @@ const CreateTimerFrame = ({
       <CardContent>
         {/* notion */}
         {/* <DatabaseInfo timerId={timerId} userNotionInfo={userNotionInfo} /> */}
-        <CreateTimerDatabase userNotionInfo={userNotionInfo} />
+        <CreateTimerDatabase
+          userNotionInfo={userNotionInfo}
+          isSubscribe
+          isFirstTimerExist
+        />
       </CardContent>
       <CardFooter>
         {/* <div className="text-xs text-muted-foreground">

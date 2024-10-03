@@ -32,12 +32,14 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 import CreateTimerForm from "./CreateTimerForm";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { sendGAEvent } from "@next/third-parties/google";
 import { MY_TIMER_CREATE_TIMER, MY_TIMER_EDIT_TIMER } from "@/lib/GAEvent";
+import { toast } from "sonner";
 
 export default function MyTimersList({
   data,
+  isSubscribe,
 }: {
   data: {
     id: string;
@@ -48,8 +50,21 @@ export default function MyTimersList({
       database_name: string;
     }[];
   }[];
+  isSubscribe: boolean;
 }) {
   const router = useRouter();
+
+  const handleCreateTimer = (
+    event: React.MouseEvent<HTMLAnchorElement, MouseEvent>
+  ) => {
+    if (!isSubscribe && data.length > 0) {
+      // 구독 안했을 때
+      event.preventDefault();
+      toast.info("Please Subscribe to create more timers!");
+      return;
+    }
+    // redirect("/create-timer");
+  };
 
   return (
     <Card className="relative">
@@ -61,11 +76,12 @@ export default function MyTimersList({
         {/* <CreateTimerForm /> */}
         <Link
           className={buttonVariants({ variant: "outline" })}
-          href={"/create-timer"}
-          onClick={() => {
+          href="/create-timer"
+          onClick={(e) => {
             sendGAEvent("event", MY_TIMER_CREATE_TIMER.event, {
               value: MY_TIMER_CREATE_TIMER.value,
             });
+            handleCreateTimer(e);
           }}
         >
           Create Timer

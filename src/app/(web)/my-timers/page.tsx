@@ -1,3 +1,4 @@
+import { getUserSubscriptionsNotExpired } from "@/action/lemonSqueezyAction";
 import MyTimersList from "@/components/my-timers/MyTimersList";
 import { LOGIN_AGAIN } from "@/lib/constant";
 import { createClient } from "@/utils/supabase/server";
@@ -19,9 +20,18 @@ const page = async () => {
     .order("created_at", { ascending: false })
     .is("deleted_at", null);
 
+  if (error) {
+  }
+
+  // 구독 했나 안했나
+  const subscriptionInfo = await getUserSubscriptionsNotExpired();
+
+  let isSubscribe =
+    subscriptionInfo && subscriptionInfo.length > 0 ? true : false;
+
   return (
     <div>
-      <MyTimersList data={data ? data : []} />
+      <MyTimersList data={data ? data : []} isSubscribe={isSubscribe} />
     </div>
   );
 };

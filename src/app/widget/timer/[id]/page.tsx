@@ -1,5 +1,14 @@
+import {
+  getUserSubscriptionsNotExpired,
+  getUserSubscriptionsNotExpiredByUserId,
+} from "@/action/lemonSqueezyAction";
+import {
+  getUserFirstTimer,
+  getUserFirstTimerByUserId,
+} from "@/action/timerAction";
 import Pomodoro from "@/components/pomodoro/Pomodoro";
 import { buttonVariants } from "@/components/ui/button";
+import PleaseSubscribe from "@/components/widget/PleaseSubscribe";
 import { createClient } from "@/utils/supabase/server";
 import Link from "next/link";
 import React from "react";
@@ -9,14 +18,18 @@ const page = async ({ params }: { params: { id: string } }) => {
   const supabase = createClient();
   const timerInfo = await supabase
     .from("timers")
-    .select("*")
+    .select("*, users(id)") // 지금 여기가 server component에서 이렇게 하는거. user 정보는 될 수 있으면 id나 name정보만 선택하도록 제한하자. 보안철저.
     .eq("id", timerId)
     .is("deleted_at", null);
 
-  if (!timerInfo.data || timerInfo.data.length === 0) {
+  if (
+    !timerInfo.data ||
+    timerInfo.data.length === 0 ||
+    !timerInfo.data[0].users
+  ) {
     return (
       <div>
-        Something wrong. Your Timer Or Database Not Founded. Please Check
+        <p>Something wrong. Your Timer Or Database Not Founded. Please Check</p>
         <Link
           href="/my-timers"
           className={buttonVariants({ variant: "default" })}
@@ -25,6 +38,33 @@ const page = async ({ params }: { params: { id: string } }) => {
         </Link>
       </div>
     );
+  }
+
+  const userId = timerInfo.data[0].users.id;
+
+  // 구독 했나 안했나
+  const [subscriptionInfo, firstTimerInfo] = await Promise.all([
+    getUserSubscriptionsNotExpiredByUserId(userId),
+    getUserFirstTimerByUserId(userId),
+  ]);
+
+  let flag = true;
+  if (
+    firstTimerInfo &&
+    firstTimerInfo.length &&
+    firstTimerInfo[0].id === timerId
+  ) {
+    // 첫번째 타이머면 구독 여부와 상관없이 사용가능.
+    flag = true;
+  } else if (
+    (!subscriptionInfo || subscriptionInfo.length === 0) &&
+    firstTimerInfo &&
+    firstTimerInfo.length &&
+    firstTimerInfo[0].id !== timerId
+  ) {
+    // 첫번째 타이머가 아니고, 구독을 안했으면 작동안하게
+    flag = false;
+    return <PleaseSubscribe />;
   }
 
   /* Todo
@@ -39,13 +79,17 @@ const page = async ({ params }: { params: { id: string } }) => {
 
   return (
     <div>
-      <Pomodoro
-        timerId={timerId}
-        savedWorkMinutes={data[0].worktime!}
-        savedBreakMinuts={data[0].breaktime!}
-        alarmSoundOn={data[0].alarm_sound_on}
-        tickingSoundOn={data[0].ticking_sound_on}
-      />
+      {flag ? (
+        <Pomodoro
+          timerId={timerId}
+          savedWorkMinutes={data[0].worktime!}
+          savedBreakMinuts={data[0].breaktime!}
+          alarmSoundOn={data[0].alarm_sound_on}
+          tickingSoundOn={data[0].ticking_sound_on}
+        />
+      ) : (
+        <PleaseSubscribe />
+      )}
     </div>
   );
 };
