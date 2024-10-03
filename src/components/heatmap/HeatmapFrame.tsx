@@ -22,7 +22,10 @@ import { sendGAEvent } from "@next/third-parties/google";
 import {
   WIDGET_HEATMAP_REFRESH,
   WIDGET_HEATMAP_YEAR_SELECT,
+  WIDGET_TIMER_LOGO_LINK,
 } from "@/lib/GAEvent";
+import Link from "next/link";
+import { ORIGIN } from "@/lib/constant";
 
 const HeatmapFrame = ({
   mp,
@@ -189,48 +192,62 @@ const HeatmapFrame = ({
   }, []);
 
   return (
-    <Card className="ml-7 relative">
-      <div className="flex justify-between mb-4">
-        <Select
-          onValueChange={(value) => {
-            divideYear(value);
-            sendGAEvent("event", WIDGET_HEATMAP_YEAR_SELECT.event, {
-              value: WIDGET_HEATMAP_YEAR_SELECT.value,
-            });
-          }}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Recent" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Year</SelectLabel>
-              {yearList.map((el, idx) => {
-                return (
-                  <SelectItem key={idx} value={el}>
-                    {el}
-                  </SelectItem>
-                );
-              })}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-        <Button
-          onClick={async () => {
-            // router.refresh();
-            await handleRefresh();
-            sendGAEvent("event", WIDGET_HEATMAP_REFRESH.event, {
-              value: WIDGET_HEATMAP_REFRESH.value,
-            });
-          }}
-          disabled={isLoadingRef.current}
-          className="absolute top-3 right-3"
-        >
-          {isLoadingRef.current ? <Spinner /> : <RefreshIcon />}
-        </Button>
-      </div>
-      <Heatmap data={calendarData} mp={calendarDataMp} />
-    </Card>
+    <div>
+      <Link
+        href={`${ORIGIN}`}
+        target="_blank"
+        onClick={() => {
+          sendGAEvent("event", WIDGET_TIMER_LOGO_LINK.event, {
+            value: WIDGET_TIMER_LOGO_LINK.value,
+          });
+        }}
+      >
+        <h1 className="inline-block text-lg sm:text-xl font-bold">PomoLog</h1>
+      </Link>
+
+      <Card className="ml-7 relative">
+        <div className="flex justify-between mb-4">
+          <Select
+            onValueChange={(value) => {
+              divideYear(value);
+              sendGAEvent("event", WIDGET_HEATMAP_YEAR_SELECT.event, {
+                value: WIDGET_HEATMAP_YEAR_SELECT.value,
+              });
+            }}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Recent" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Year</SelectLabel>
+                {yearList.map((el, idx) => {
+                  return (
+                    <SelectItem key={idx} value={el}>
+                      {el}
+                    </SelectItem>
+                  );
+                })}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          <Button
+            onClick={async () => {
+              // router.refresh();
+              await handleRefresh();
+              sendGAEvent("event", WIDGET_HEATMAP_REFRESH.event, {
+                value: WIDGET_HEATMAP_REFRESH.value,
+              });
+            }}
+            disabled={isLoadingRef.current}
+            className="absolute top-3 right-3"
+          >
+            {isLoadingRef.current ? <Spinner /> : <RefreshIcon />}
+          </Button>
+        </div>
+        <Heatmap data={calendarData} mp={calendarDataMp} />
+      </Card>
+    </div>
   );
 };
 

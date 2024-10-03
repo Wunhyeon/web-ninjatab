@@ -4,15 +4,10 @@ import {
   getUserFirstTimerByUserId,
   getUserIdByTimerId,
 } from "@/action/timerAction";
-import { Heatmap } from "@/components/heatmap/Heatmap";
 import HeatmapFrame from "@/components/heatmap/HeatmapFrame";
-import Pomodoro from "@/components/pomodoro/Pomodoro";
 import { buttonVariants } from "@/components/ui/button";
 import PleaseSubscribe from "@/components/widget/PleaseSubscribe";
-import { createClient } from "@/utils/supabase/server";
-import { Client } from "@notionhq/client";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import React from "react";
 
 const page = async ({ params }: { params: { id: string } }) => {
