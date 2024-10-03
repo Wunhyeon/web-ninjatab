@@ -54,8 +54,12 @@ import {
 
 const CreateTimerDatabase = ({
   userNotionInfo,
+  isSubscribe,
+  isFirstTimerExist,
 }: {
   userNotionInfo: { id: string; workspace_name: string }[];
+  isSubscribe: boolean;
+  isFirstTimerExist: boolean;
 }) => {
   const [userNotionInfoState, setUserNofionInfoState] =
     useState<{ id: string; workspace_name: string }[]>(userNotionInfo);
@@ -137,6 +141,12 @@ const CreateTimerDatabase = ({
   });
 
   async function onSubmit(data: z.infer<typeof CreateTimerSchema>) {
+    // 구독 안했고, 이미 첫번째 타이머가 있다면 안만든다.
+    if (!isSubscribe && isFirstTimerExist) {
+      toast.info("Please Subscribe to create more timers!");
+      return;
+    }
+
     // 따닥 방지하기!
     if (isLoadingRef.current) {
       return;
