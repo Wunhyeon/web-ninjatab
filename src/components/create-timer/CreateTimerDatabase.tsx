@@ -37,7 +37,7 @@ import { CreateTimerSchema } from "@/zodSchema/CreateTimerSchema";
 import { z } from "zod";
 import RefreshIcon from "../RefreshIcon";
 import { Spinner } from "../Spinner";
-import { ORIGIN } from "@/lib/constant";
+import { GUIDE_LINK, ORIGIN } from "@/lib/constant";
 import { toast, useSonner } from "sonner";
 import Link from "next/link";
 import { sendGAEvent } from "@next/third-parties/google";
@@ -242,7 +242,18 @@ const CreateTimerDatabase = ({
       >
         <CardHeader>
           <CardTitle>Connect Notion Database</CardTitle>
-          <CardDescription>Notion Database Connect</CardDescription>
+          <CardDescription>
+            Notion Database Connect. <br />
+            If this is your first time, please check the{" "}
+            <Link
+              href={GUIDE_LINK}
+              target="_blank"
+              className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10"
+            >
+              guide
+            </Link>{" "}
+            .
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {userNotionInfoState.length === 0 ? (
