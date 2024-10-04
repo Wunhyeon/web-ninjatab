@@ -127,7 +127,7 @@ const SoundEditCard = ({
       >
         <CardHeader>
           <CardTitle>Sound</CardTitle>
-          <CardDescription>Edit Timer</CardDescription>
+          <CardDescription>Edit Timer Sound</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...updateTimerSoundForm}>

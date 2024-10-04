@@ -36,6 +36,8 @@ import { redirect, useRouter } from "next/navigation";
 import { sendGAEvent } from "@next/third-parties/google";
 import { MY_TIMER_CREATE_TIMER, MY_TIMER_EDIT_TIMER } from "@/lib/GAEvent";
 import { toast } from "sonner";
+import DeleteAlertDialog from "./DeleteAlertDialog";
+import { useState } from "react";
 
 export default function MyTimersList({
   data,
@@ -102,37 +104,13 @@ export default function MyTimersList({
                   router.push(`/edit-timer/${el.id}`);
                 }}
               >
-                {/* <Link href={`/edit-timer/${el.id}`} legacyBehavior> */}
-                {/* <TableCell className="font-medium">{idx + 1}</TableCell> */}
                 <TableCell className="font-medium">{el.name}</TableCell>
-                <TableCell>
-                  {/* <Badge variant="outline"> */}{" "}
+                {/* <TableCell>
                   {el.notion_database_info.length &&
                   el.notion_database_info[0].database_name
                     ? el.notion_database_info[0].database_name
                     : "Not Connected Notion Database Yet"}
-                  {/* </Badge> */}
-                </TableCell>
-
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button aria-haspopup="true" size="icon" variant="ghost">
-                        <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">
-                          {/* {el.notion_info[0].database_name} */}
-                          Active
-                        </span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuItem>Delete</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-                {/* </Link> */}
+                </TableCell> */}
               </TableRow>
             ))}
           </TableBody>
