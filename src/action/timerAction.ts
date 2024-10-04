@@ -1077,3 +1077,57 @@ export const getUserIdByTimerId = async (timerId: string) => {
     throw err;
   }
 };
+
+/**
+ * Timer Name Update (Rename)
+ * @param timerId
+ * @param timerName
+ * @returns
+ */
+export const updateTimerName = async (timerId: string, timerName: string) => {
+  const supabase = createClient();
+  const user = await getUser();
+  try {
+    const { data, error } = await supabase
+      .from("timers")
+      .update({
+        name: timerName,
+      })
+      .eq("user_id", user.id)
+      .eq("id", timerId);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+    return { success: true };
+  } catch (err) {
+    console.log("err in timerAction - updateTimerName : ", err);
+    return { success: false };
+  }
+};
+
+/**
+ * softDeleteTimer (진짜 삭제는 아니고 deleted_at에 날짜 넣는거. soft delete)
+ * @param timerId
+ * @returns
+ */
+export const softDeleteTimer = async (timerId: string) => {
+  const supabase = createClient();
+  const user = await getUser();
+  try {
+    const { data, error } = await supabase
+      .from("timers")
+      .update({ deleted_at: new Date().toISOString() })
+      .eq("user_id", user.id)
+      .eq("id", timerId);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+    revalidatePath("/my-timers");
+    return { success: true };
+  } catch (err) {
+    console.log("err in timerAction - deleteTimer : ", err);
+    return { success: false };
+  }
+};
