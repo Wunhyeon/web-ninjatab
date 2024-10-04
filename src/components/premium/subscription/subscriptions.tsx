@@ -12,6 +12,8 @@ import { cn, isValidSubscription } from "@/lib/utils";
 import { type NewSubscription } from "@/lib/types";
 import { getAllPlan, getUserSubscriptions } from "@/action/lemonSqueezyAction";
 import { notFound } from "next/navigation";
+import Link from "next/link";
+import { buttonVariants } from "@/components/ui/button";
 
 export async function Subscriptions() {
   const userSubscriptions = await getUserSubscriptions();
@@ -28,10 +30,17 @@ export async function Subscriptions() {
 
   if (userSubscriptions.length === 0) {
     return (
-      <p className="not-prose mb-2">
-        It appears that you do not have any subscriptions. Please sign up for a
-        plan below.
-      </p>
+      <div>
+        <p className="not-prose mb-2">
+          It appears that you do not have any subscriptions.
+        </p>
+        <Link
+          href="/premium"
+          className={cn(buttonVariants({ variant: "default" }))}
+        >
+          Go to Subscribe
+        </Link>
+      </div>
     );
   }
 

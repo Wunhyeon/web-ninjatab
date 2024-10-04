@@ -48,6 +48,12 @@ export default function Footer() {
             <Link href="/legal/privacyPolicy">Privacy Policy</Link>
             <Link href="/legal/termsOfService">Terms of Service</Link>
             {/* <Link href="/cookie-policy">Cookie Policy</Link> */}
+            <Link
+              href="https://joey.team/block/?id=9cU5pLkasKPZCLb5piwAqg3C9OF2&block_id=ThRk4exx8AW1gfTAznUx"
+              target="_blank"
+            >
+              Anonymous board
+            </Link>
           </div>
         </Container>
         <Container className="not-prose flex flex-col justify-between gap-6 border-t md:flex-row md:items-center md:gap-2">
