@@ -74,7 +74,12 @@ export const Plan = async ({
           <span className="mr-0.5 text-xl text-surface-900">
             {formatPrice(price)}
           </span>
-          {!plan.is_usage_based && interval ? ` per ${interval}` : null}
+
+          {plan.price === "0"
+            ? ` forever`
+            : !plan.is_usage_based && interval
+            ? ` per ${interval}`
+            : null}
           {plan.is_usage_based && interval ? ` /unit per ${interval}` : null}
         </div>
         {plan.price === "0" ? (
