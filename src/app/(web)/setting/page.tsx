@@ -1,11 +1,20 @@
 import { CardSkeleton } from "@/components/premium/skeletons/card";
 import { Subscriptions } from "@/components/premium/subscription/subscriptions";
 import { buttonVariants } from "@/components/ui/button";
+import { LOGIN_AGAIN } from "@/lib/constant";
 import { cn } from "@/lib/utils";
+import { createClient } from "@/utils/supabase/server";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import React, { Suspense } from "react";
 
-const page = () => {
+const page = async () => {
+  const supabase = createClient();
+  const user = await supabase.auth.getUser();
+
+  if (!user.data.user) {
+    redirect(`/please-login?message=${LOGIN_AGAIN}`);
+  }
   return (
     <div className="flex items-center justify-center">
       <div className="">
