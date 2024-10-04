@@ -26,7 +26,7 @@ const Feature1 = () => {
           </h3>
           <div className="not-prose my-8 h-96 w-full overflow-hidden rounded-lg border md:h-[480px] md:rounded-xl">
             <Image
-              className="h-full w-full object-cover object-center"
+              className="h-full w-full object-scale-down"
               src="/Feature1.png"
               width={1920}
               height={1080}

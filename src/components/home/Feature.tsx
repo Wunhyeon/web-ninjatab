@@ -35,7 +35,7 @@ const Feature = () => {
             <source src="/featureVideo.mp4" type="video/mp4" />
           </video> */}
           <Image
-            className="h-full w-full object-cover object-center"
+            className="h-full w-full object-scale-down"
             src="/Feature.png"
             width={1920}
             height={1080}
