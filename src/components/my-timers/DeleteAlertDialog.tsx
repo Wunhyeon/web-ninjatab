@@ -17,20 +17,30 @@ import { softDeleteTimer } from "@/action/timerAction";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
-const DeleteAlertDialog = ({ timerId }: { timerId: string }) => {
+const DeleteAlertDialog = ({
+  timerId,
+  setIsLoading,
+}: {
+  timerId: string;
+  setIsLoading: (isLoading: boolean) => void;
+}) => {
   const router = useRouter();
 
   const handleDeleteTimer = async () => {
+    setIsLoading(true);
     const result = await softDeleteTimer(timerId);
 
     if (result.success === true) {
       // toast.success("Time Updated ", { duration: Infinity });
 
       toast.warning("Timer Deleted");
+
       router.push("/my-timers");
     } else {
       toast.error("Sorry. Something wrong. please try again 🙏");
     }
+
+    setIsLoading(false);
   };
 
   return (

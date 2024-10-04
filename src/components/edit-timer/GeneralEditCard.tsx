@@ -165,7 +165,7 @@ const GeneralEditCard = ({
           <Separator className="my-3" />
           <div className="space-y-3">
             <h4 className="text-lg font-semibold">⚠️ Caution</h4>
-            <DeleteAlertDialog timerId={timerId} />
+            <DeleteAlertDialog timerId={timerId} setIsLoading={setIsLoading} />
           </div>
         </CardContent>
         <CardFooter className="flex justify-between"></CardFooter>
