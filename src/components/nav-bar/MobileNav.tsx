@@ -15,17 +15,13 @@ import { cn } from "@/lib/utils";
 import { User } from "@supabase/supabase-js";
 import LogoutBtn from "./LogoutBtn";
 import { createClient } from "@/utils/supabase/server";
+import { GUIDE_LINK } from "@/lib/constant";
 
 const MobileNav = async ({ user }: { user: User | undefined }) => {
   return (
     <nav className="relative flex sm:hidden items-center space-x-2 py-4 px-2 lg:px-0 mx-auto w-full max-w-[1000px]">
       <Link href="/">
-        <Image
-          src="/logo-no-background.svg"
-          alt="logo"
-          height={36}
-          width={250}
-        />
+        <Image src="/Frame-7.svg" alt="logo" height={30} width={200} />
       </Link>
       <div className="flex-grow"></div>
       {user ? (
@@ -58,19 +54,50 @@ const MobileNav = async ({ user }: { user: User | undefined }) => {
               />
             </svg>
           </MenubarTrigger>
-          <MenubarContent>
+          <MenubarContent className="space-y-2">
+            {/* My Timers */}
             <Link
               href="/my-timers"
-              className="flex items-center space-x-2 py-2 border border-transparent hover:text-slate-700  transition "
+              className="flex items-center space-x-2  border border-transparent hover:text-slate-700  transition "
             >
               <MenubarItem>
-                My Timers
-                <MenubarShortcut>⏰</MenubarShortcut>
+                ⏰ My Timers
+                {/* <MenubarShortcut>⏰</MenubarShortcut> */}
               </MenubarItem>
             </Link>
-            <MenubarItem>New Window</MenubarItem>
-            <MenubarSeparator />
-            <MenubarItem>Share</MenubarItem>
+            {/* Pricing */}
+            <Link
+              href="/premium"
+              className="flex items-center space-x-2  border border-transparent hover:text-slate-700  transition "
+            >
+              <MenubarItem>
+                ⭐️ Pricing
+                {/* <MenubarShortcut>⭐️</MenubarShortcut> */}
+              </MenubarItem>
+            </Link>
+            {/* Guide */}
+            <Link
+              href={GUIDE_LINK}
+              className="flex items-center space-x-2  border border-transparent hover:text-slate-700  transition "
+              target="_blank"
+            >
+              <MenubarItem>
+                📖 Guide
+                {/* <MenubarShortcut>📖</MenubarShortcut> */}
+              </MenubarItem>
+            </Link>
+            {/* Setting */}
+            <Link
+              href="/setting"
+              className="flex items-center space-x-2  border border-transparent hover:text-slate-700  transition "
+            >
+              <MenubarItem>
+                ⚙️ Setting
+                {/* <MenubarShortcut>⚙️</MenubarShortcut> */}
+              </MenubarItem>
+            </Link>
+            {/* <MenubarSeparator /> */}
+            {/* <MenubarItem>Share</MenubarItem> */}
             {user ? (
               <div>
                 <MenubarSeparator />

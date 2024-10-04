@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { Button } from "../ui/button";
+import { Button, buttonVariants } from "../ui/button";
 import {
   createTimerWithNotionDatabaseInfo,
   syncDatabase,
@@ -51,6 +51,7 @@ import {
   CREATE_TIMER_WORKSPACE_SELECT,
   CREATE_TIMER_WORKSPACE_SELECT_PLUS,
 } from "@/lib/GAEvent";
+import { cn } from "@/lib/utils";
 
 const CreateTimerDatabase = ({
   userNotionInfo,
@@ -428,38 +429,44 @@ const CreateTimerDatabase = ({
                       &apos;title&apos; and a Date property of type
                       &apos;date&apos;
                     </p>
-                    <Button
-                      onClick={() => {
-                        handleSyncDatabase();
-                        sendGAEvent("event", CREATE_TIMER_SYNC_DATABASE.event, {
-                          value: CREATE_TIMER_SYNC_DATABASE.value,
-                        });
-                      }}
-                      type="button"
-                      disabled={syncButtonIsLoadingRef.current}
-                    >
-                      {syncButtonIsLoadingRef.current === true ? (
-                        <Spinner />
-                      ) : (
-                        "Sync Database"
-                      )}
-                    </Button>
-                    <Link
-                      href={databaseUrlState}
-                      target="_blank"
-                      className="bg-blue-200"
-                      onClick={() => {
-                        sendGAEvent(
-                          "event",
-                          CREATE_TIMER_CHECK_DATABASE.event,
-                          {
-                            value: CREATE_TIMER_CHECK_DATABASE.value,
-                          }
-                        );
-                      }}
-                    >
-                      Check Database
-                    </Link>
+                    <div className="flex gap-3">
+                      <Button
+                        onClick={() => {
+                          handleSyncDatabase();
+                          sendGAEvent(
+                            "event",
+                            CREATE_TIMER_SYNC_DATABASE.event,
+                            {
+                              value: CREATE_TIMER_SYNC_DATABASE.value,
+                            }
+                          );
+                        }}
+                        type="button"
+                        disabled={syncButtonIsLoadingRef.current}
+                      >
+                        {syncButtonIsLoadingRef.current === true ? (
+                          <Spinner />
+                        ) : (
+                          "Sync Database"
+                        )}
+                      </Button>
+                      <Link
+                        href={databaseUrlState}
+                        target="_blank"
+                        className={cn(buttonVariants({ variant: "outline" }))}
+                        onClick={() => {
+                          sendGAEvent(
+                            "event",
+                            CREATE_TIMER_CHECK_DATABASE.event,
+                            {
+                              value: CREATE_TIMER_CHECK_DATABASE.value,
+                            }
+                          );
+                        }}
+                      >
+                        Check Database
+                      </Link>
+                    </div>
                   </div>
                 ) : (
                   <></>
