@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { Button } from "../ui/button";
+import { Button, buttonVariants } from "../ui/button";
 import { syncDatabase, upsertNotionDatabaseInfo } from "@/action/timerAction";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
@@ -48,6 +48,7 @@ import {
   EDIT_TIMER_WORKSPACE_SELECT,
   EDIT_TIMER_WORKSPACE_SELECT_PLUS,
 } from "@/lib/GAEvent";
+import { cn } from "@/lib/utils";
 
 const DatabaseInfo = ({
   timerId,
@@ -400,34 +401,40 @@ const DatabaseInfo = ({
                       &apos;title&apos; and a Date property of type
                       &apos;date&apos;
                     </p>
-                    <Button
-                      onClick={() => {
-                        handleSyncDatabase();
-                        sendGAEvent("event", EDIT_TIMER_SYNC_DATABASE.event, {
-                          value: EDIT_TIMER_SYNC_DATABASE.value,
-                        });
-                      }}
-                      type="button"
-                      disabled={syncButtonIsLoadingRef.current}
-                    >
-                      {syncButtonIsLoadingRef.current === true ? (
-                        <Spinner />
-                      ) : (
-                        "Sync Database"
-                      )}
-                    </Button>
-                    <Link
-                      href={databaseUrlState}
-                      target="_blank"
-                      className="bg-blue-200"
-                      onClick={() => {
-                        sendGAEvent("event", EDIT_TIMER_CHECK_DATABASE.event, {
-                          value: EDIT_TIMER_CHECK_DATABASE.value,
-                        });
-                      }}
-                    >
-                      Check Database
-                    </Link>
+                    <div className="flex gap-3">
+                      <Button
+                        onClick={() => {
+                          handleSyncDatabase();
+                          sendGAEvent("event", EDIT_TIMER_SYNC_DATABASE.event, {
+                            value: EDIT_TIMER_SYNC_DATABASE.value,
+                          });
+                        }}
+                        type="button"
+                        disabled={syncButtonIsLoadingRef.current}
+                      >
+                        {syncButtonIsLoadingRef.current === true ? (
+                          <Spinner />
+                        ) : (
+                          "Sync Database"
+                        )}
+                      </Button>
+                      <Link
+                        href={databaseUrlState}
+                        target="_blank"
+                        className={cn(buttonVariants({ variant: "outline" }))}
+                        onClick={() => {
+                          sendGAEvent(
+                            "event",
+                            EDIT_TIMER_CHECK_DATABASE.event,
+                            {
+                              value: EDIT_TIMER_CHECK_DATABASE.value,
+                            }
+                          );
+                        }}
+                      >
+                        Check Database
+                      </Link>
+                    </div>
                   </div>
                 ) : (
                   <></>
