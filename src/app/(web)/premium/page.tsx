@@ -1,3 +1,4 @@
+import Maintenance from "@/components/Maintenance";
 import { DashboardContent } from "@/components/premium/content";
 import { PageTitleAction } from "@/components/premium/page-title-action";
 import PlanList from "@/components/premium/plans/PlanList";
@@ -11,21 +12,12 @@ import React, { Suspense } from "react";
 
 const page = () => {
   return (
-    // <DashboardContent
-    //   title="Billing"
-    //   subtitle="View and manage your billing information."
-    //   action={<PageTitleAction />}
-    // >
-    <div>
-      {/* <Suspense fallback={<CardSkeleton className="h-[106px]" />}>
-          <Subscriptions />
-        </Suspense> */}
-
-      <Suspense fallback={<PlansSkeleton />}>
-        <PlanList />
-      </Suspense>
-    </div>
-    // </DashboardContent>
+    // <div>
+    //   <Suspense fallback={<PlansSkeleton />}>
+    //     <PlanList />
+    //   </Suspense>
+    // </div>
+    <Maintenance />
   );
 };
 export default page;
