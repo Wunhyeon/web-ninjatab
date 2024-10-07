@@ -39,14 +39,14 @@ export default function Footer() {
             </Link>
             <p>
               <Balancer>
-                PomoLog is a Notion Pomodoro widget integrate Database and
-                Heatmap.
+                PomoLog is a Notion Timer widget integrate Database and Heatmap.
               </Balancer>
             </p>
           </div>
           <div className="mb-4 flex flex-col gap-4 md:mb-0 md:flex-row">
             <Link href="/legal/privacyPolicy">Privacy Policy</Link>
             <Link href="/legal/termsOfService">Terms of Service</Link>
+            <Link href="/legal/licenseNotice">License</Link>
             {/* <Link href="/cookie-policy">Cookie Policy</Link> */}
             <Link
               href="https://joey.team/block/?id=9cU5pLkasKPZCLb5piwAqg3C9OF2&block_id=ThRk4exx8AW1gfTAznUx"
