@@ -28,6 +28,15 @@ import {
   TooltipTrigger,
 } from "../ui/tooltip";
 
+function isNotionApp() {
+  const userAgent = window.navigator.userAgent;
+  if (userAgent.includes("Notion") || userAgent.includes("notion")) {
+    return true;
+  }
+
+  return false;
+}
+
 const HeatmapDialogListItem = ({
   heatmapId,
   pageName,
@@ -35,6 +44,7 @@ const HeatmapDialogListItem = ({
   date,
   mp,
   timerId,
+  setIsOpen,
   pageId,
 }: {
   heatmapId: string;
@@ -43,6 +53,7 @@ const HeatmapDialogListItem = ({
   url: string;
   mp: HeatmapMap;
   timerId: string;
+  setIsOpen: (open: boolean) => void;
   pageId?: string;
 }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -62,16 +73,25 @@ const HeatmapDialogListItem = ({
     const supabase = createClient();
     const user = await supabase.auth.getUser();
 
-    if (!user.data.user) {
-      // router.push("/please-login");
+    const userAgent = window.navigator.userAgent;
 
-      router.push(
-        `/sign-in?redirect=${encodeURIComponent(window.location.pathname)}`
-      );
+    if (isNotionApp()) {
+      // notion 앱일때
+      window.open(window.location.href, "_blank", "noopener,noreferrer");
+      setIsOpen(false);
       return;
-    }
+    } else {
+      // notion 앱 아닐때
+      if (!user.data.user) {
+        router.push(
+          `/sign-in?redirect=${encodeURIComponent(window.location.pathname)}`
+        );
 
-    setIsEditing(true);
+        return;
+      }
+
+      setIsEditing(true);
+    }
   };
 
   const handleUpdate = async () => {
@@ -96,7 +116,6 @@ const HeatmapDialogListItem = ({
       mp.get(date)?.object.forEach((el) => {
         if (el.id === heatmapId) {
           el.name = name;
-          console.log("dd");
         }
       });
 
@@ -126,31 +145,73 @@ const HeatmapDialogListItem = ({
         </div>
       ) : (
         <div className="flex gap-3 items-center">
-          <span
-            onClick={async () => {
-              await handleEditClick();
-            }}
-            className="cursor-pointer"
-          >
-            {name}
+          {isNotionApp() ? (
+            <TooltipProvider delayDuration={100}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span
+                    onClick={async () => {
+                      await handleEditClick();
+                    }}
+                    className="cursor-pointer"
+                  >
+                    {name}
 
-            <Button variant="link" className="text-zinc-600">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="size-4"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
-                />
-              </svg>
-            </Button>
-          </span>
+                    <Button variant="link" className="text-zinc-600">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="size-4"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
+                        />
+                      </svg>
+                    </Button>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>
+                    Edits cannot be made within the Notion app.
+                    <br />
+                    Please click to open in your web browser.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : (
+            <span
+              onClick={async () => {
+                await handleEditClick();
+              }}
+              className="cursor-pointer"
+            >
+              {name}
+
+              <Button variant="link" className="text-zinc-600">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="size-4"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
+                  />
+                </svg>
+              </Button>
+            </span>
+          )}
+
           <TooltipProvider delayDuration={100}>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -229,6 +290,7 @@ const HeatmapDialog = ({
                 mp={mp}
                 url={el.url}
                 key={el.pageId}
+                setIsOpen={setIsOpen}
                 timerId={timerId}
               />
             );
