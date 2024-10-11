@@ -283,7 +283,10 @@ const getHeatmapInfo = async (timerId: string) => {
       .from("heatmaps")
       .select("id, name, start, end, url, pageId")
       .eq("timer_id", timerId)
-      .is("deleted_at", null);
+      .is("deleted_at", null)
+      .order("start")
+      .limit(5000);
+
     return JSON.stringify({ success: true, data: response2.data });
   } catch (err) {
     return JSON.stringify({ success: false, err: (err as Error).message });
@@ -1175,9 +1178,6 @@ export const heatmapNameUpdate = async (
 ) => {
   const supabase = createClient();
   try {
-    console.log("name : ", name);
-    console.log("heatmapId : ", heatmapId);
-
     const { data, error } = await supabase
       .from("heatmaps")
       .update({ name })
