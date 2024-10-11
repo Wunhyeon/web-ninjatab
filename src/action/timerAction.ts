@@ -8,7 +8,11 @@ import {
 import { createClient } from "@/utils/supabase/server";
 import { Client } from "@notionhq/client";
 import { redirect } from "next/navigation";
-import { GetPageResponseWithInTrashAndArchived, TimeZone } from "@/lib/types";
+import {
+  GetPageResponseWithInTrashAndArchived,
+  HeatmapMap,
+  TimeZone,
+} from "@/lib/types";
 import { revalidatePath } from "next/cache";
 import { User } from "@supabase/supabase-js";
 
@@ -256,26 +260,31 @@ const getHeatmapInfo = async (timerId: string) => {
       throw new Error("404");
     }
 
-    const data = timerInfo.data;
+    // const data = timerInfo.data;
 
-    const notionDatabaseInfo = data[0].notion_database_info;
+    // const notionDatabaseInfo = data[0].notion_database_info;
 
-    const databaseId = notionDatabaseInfo[0].database_id;
-    const accessToken = notionDatabaseInfo[0].notion_info?.access_token;
+    // const databaseId = notionDatabaseInfo[0].database_id;
+    // const accessToken = notionDatabaseInfo[0].notion_info?.access_token;
 
-    const notion = new Client({ auth: accessToken });
+    // const notion = new Client({ auth: accessToken });
 
-    const response = await notion.databases.query({
-      database_id: databaseId,
-      sorts: [
-        {
-          property: "Date",
-          direction: "ascending",
-        },
-      ],
-    });
+    // const response = await notion.databases.query({
+    //   database_id: databaseId,
+    //   sorts: [
+    //     {
+    //       property: "Date",
+    //       direction: "ascending",
+    //     },
+    //   ],
+    // });
 
-    return JSON.stringify({ success: true, data: response });
+    const response2 = await supabase
+      .from("heatmaps")
+      .select("id, name, start, end, url, pageId")
+      .eq("timer_id", timerId)
+      .is("deleted_at", null);
+    return JSON.stringify({ success: true, data: response2.data });
   } catch (err) {
     return JSON.stringify({ success: false, err: (err as Error).message });
   }
@@ -288,24 +297,13 @@ export const getHeatmapInfoMap = async (timerId: string) => {
     success: boolean;
     err: string | undefined;
     data: {
-      results: {
-        object: string;
-        id: string;
-        parent: { type: string; database_id: string };
-        properties: {
-          Date: {
-            id: string;
-            type: string;
-            date: { start: string; end: string | null };
-          };
-          Name: {
-            id: string;
-            type: string;
-            title: { plain_text: string; type: string }[];
-          };
-        };
-      }[];
-    };
+      id: string;
+      pageId: string;
+      name: string;
+      url: string;
+      start: string;
+      end?: string;
+    }[];
   } = JSON.parse(res);
 
   if (parseData.success === false) {
@@ -321,31 +319,6 @@ export const getHeatmapInfoMap = async (timerId: string) => {
     return { success: false, err: parseData.err };
   }
 
-  let nameFlag = false;
-
-  let dateFlag = false;
-
-  for (let item in parseData.data.results[0].properties) {
-    if (
-      item === "Name" &&
-      parseData.data.results[0].properties.Name.type === "title"
-    ) {
-      nameFlag = true;
-    }
-    if (item === "Date") {
-      dateFlag = true;
-    }
-  }
-
-  if (!nameFlag || !dateFlag) {
-    return {
-      success: false,
-      err: `Could not find sort property with name or id:${
-        !nameFlag ? "Name" : ""
-      } ${!dateFlag ? "Date" : ""}`,
-    };
-  }
-
   const data = parseData.data;
 
   const todayDate = new Date();
@@ -353,35 +326,22 @@ export const getHeatmapInfoMap = async (timerId: string) => {
   let maxYear = todayDate.getFullYear();
   let maxCount = 0;
 
-  const results = data.results;
-
-  const mp = new Map<
-    string,
-    { count: number; object: { name: string; id: string }[] }
-  >();
-  results.forEach((el) => {
-    if (
-      !el.properties ||
-      !el.properties.Name ||
-      !el.properties.Date ||
-      !el.properties.Date.date ||
-      !el.properties.Date.date.start
-    ) {
+  const mp: HeatmapMap = new Map();
+  data.forEach((el) => {
+    if (!el.id || !el.name || !el.start) {
       return;
     }
-    const date = el.properties.Date.date.start.split("T")[0];
+    const date = el.start.split("T")[0];
     const mpGet = mp.get(date);
     if (mpGet) {
       mpGet.count++;
       mpGet.object.push({
-        name:
-          el.properties.Name &&
-          el.properties.Name.title &&
-          el.properties.Name.title.length &&
-          el.properties.Name.title[0].plain_text
-            ? el.properties.Name.title[0].plain_text
-            : "",
         id: el.id,
+        name: el.name ? el.name : "",
+        pageId: el.pageId,
+        url: el.url,
+        start: el.start,
+        end: el.end,
       });
 
       if (mpGet.count > maxCount) {
@@ -392,14 +352,12 @@ export const getHeatmapInfoMap = async (timerId: string) => {
         count: 1,
         object: [
           {
-            name:
-              el.properties.Name &&
-              el.properties.Name.title &&
-              el.properties.Name.title.length &&
-              el.properties.Name.title[0].plain_text
-                ? el.properties.Name.title[0].plain_text
-                : "",
             id: el.id,
+            name: el.name ? el.name : "",
+            pageId: el.pageId,
+            url: el.url,
+            start: el.start,
+            end: el.end,
           },
         ],
       });
@@ -665,14 +623,27 @@ export const insertNewPageToDBWithDate = async (
 
     if (!timerInfo) {
       // error handling
-      return;
+      // return;
+
+      return {
+        success: false,
+        err: null,
+        pageId: null,
+        url: null,
+      };
     }
 
     const notionDatabaseInfo = timerInfo.data[0].notion_database_info;
 
     if (!notionDatabaseInfo[0].notion_info) {
       // error handling
-      return;
+      // return;
+      return {
+        success: false,
+        err: null,
+        pageId: null,
+        url: null,
+      };
     }
 
     const dbId = notionDatabaseInfo[0].database_id;
@@ -716,9 +687,16 @@ export const insertNewPageToDBWithDate = async (
       ],
     });
 
-    return { success: true, err: null, pageId: newPage.id };
+    const pageWithUrl = newPage as typeof newPage & { url: string };
+
+    return {
+      success: true,
+      err: null,
+      pageId: pageWithUrl.id,
+      url: pageWithUrl.url,
+    };
   } catch (err) {
-    return { success: false, err, pageId: null };
+    return { success: false, err, pageId: null, url: null };
   }
 };
 
@@ -809,13 +787,26 @@ export const updatePageDate = async (
 
     if (!page || (page.archived && page.in_trash)) {
       // insert
-      await insertNewPageToDBWithDate(
+      const { pageId, url, success } = await insertNewPageToDBWithDate(
         notion,
         timerId,
         pageName,
         startDate,
         endDate,
         timeZone
+      );
+
+      if (!success) {
+        throw new Error();
+      }
+
+      await insertHeatmap(
+        timerId,
+        startDate,
+        endDate,
+        pageId ? pageId : undefined,
+        pageName,
+        url ? url : undefined
       );
     } else {
       // update
@@ -841,6 +832,19 @@ export const updatePageDate = async (
           },
         },
       });
+
+      // console.log("response : ", response);
+
+      const responseWithUrl = response as typeof response & { url: string };
+
+      await insertHeatmap(
+        timerId,
+        startDate,
+        endDate,
+        pageId,
+        pageName,
+        responseWithUrl.url
+      );
     }
 
     return { success: true, err: null, property: null };
@@ -1128,6 +1132,116 @@ export const softDeleteTimer = async (timerId: string) => {
     return { success: true };
   } catch (err) {
     console.log("err in timerAction - deleteTimer : ", err);
+    return { success: false };
+  }
+};
+
+export const insertHeatmap = async (
+  timerId: string,
+  start: Date,
+  end: Date,
+  pageId?: string,
+  name?: string,
+  url?: string
+) => {
+  const supabase = createClient();
+  try {
+    const { data, error } = await supabase.from("heatmaps").insert({
+      timer_id: timerId,
+      start: start.toISOString(),
+      end: end.toISOString(),
+      name,
+      url,
+      pageId: pageId,
+    });
+
+    if (error) {
+      // error handling
+      throw new Error();
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.log("err in timerAction - insertHeatmap : ", err);
+    return { success: false };
+  }
+};
+
+export const heatmapNameUpdate = async (
+  heatmapId: string,
+  name: string,
+  timerId: string,
+  notionPageId?: string
+) => {
+  const supabase = createClient();
+  try {
+    console.log("name : ", name);
+    console.log("heatmapId : ", heatmapId);
+
+    const { data, error } = await supabase
+      .from("heatmaps")
+      .update({ name })
+      .eq("id", heatmapId)
+      .select();
+
+    if (notionPageId) {
+      const timerInfo = await getTimerInfo(timerId);
+
+      if (!timerInfo) {
+        // error handling
+        // return;
+        return { success: false };
+      }
+
+      const notionDatabaseInfo = timerInfo.data[0].notion_database_info;
+
+      if (!notionDatabaseInfo[0].notion_info) {
+        // error handling
+        // return;
+        return { success: false };
+      }
+
+      await notionPageNameUpdate(
+        notionDatabaseInfo[0].notion_info.access_token,
+        notionPageId,
+        name
+      );
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.log("err in timerAction - handleHeatmapNameUpdate : ", err);
+    return { success: false };
+  }
+};
+
+export const notionPageNameUpdate = async (
+  notionAccessToken: string,
+  notionPageId: string,
+  name: string
+) => {
+  try {
+    const notion = new Client({
+      auth: notionAccessToken,
+    });
+    const response = await notion.pages.update({
+      page_id: notionPageId,
+      properties: {
+        Name: {
+          title: [
+            {
+              text: {
+                content: name,
+              },
+            },
+          ],
+        },
+      },
+    });
+    return { success: true };
+  } catch (err) {
+    console.log("err in timerAction - notionPageNameUpdate : ", err);
+
     return { success: false };
   }
 };

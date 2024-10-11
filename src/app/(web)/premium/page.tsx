@@ -12,12 +12,12 @@ import React, { Suspense } from "react";
 
 const page = () => {
   return (
-    // <div>
-    //   <Suspense fallback={<PlansSkeleton />}>
-    //     <PlanList />
-    //   </Suspense>
-    // </div>
-    <Maintenance />
+    <div>
+      <Suspense fallback={<PlansSkeleton />}>
+        <PlanList />
+      </Suspense>
+    </div>
+    // <Maintenance />
   );
 };
 export default page;

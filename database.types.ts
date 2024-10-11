@@ -30,6 +30,85 @@ export type Database = {
         }
         Relationships: []
       }
+      error_log: {
+        Row: {
+          body: Json | null
+          created_at: string
+          id: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          body?: Json | null
+          created_at?: string
+          id?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          body?: Json | null
+          created_at?: string
+          id?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "error_log_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      heatmaps: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          end: string | null
+          id: string
+          name: string | null
+          pageId: string | null
+          start: string
+          timer_id: string
+          updated_at: string | null
+          url: string | null
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          end?: string | null
+          id?: string
+          name?: string | null
+          pageId?: string | null
+          start: string
+          timer_id: string
+          updated_at?: string | null
+          url?: string | null
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          end?: string | null
+          id?: string
+          name?: string | null
+          pageId?: string | null
+          start?: string
+          timer_id?: string
+          updated_at?: string | null
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "heatmaps_timers_id_fkey"
+            columns: ["timer_id"]
+            isOneToOne: false
+            referencedRelation: "timers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notion_database_info: {
         Row: {
           created_at: string
@@ -214,6 +293,7 @@ export type Database = {
       }
       subscription: {
         Row: {
+          created_at: string | null
           email: string
           ends_at: string | null
           id: string
@@ -229,9 +309,11 @@ export type Database = {
           status_formatted: string
           subscription_item_id: number
           trial_ends_at: string | null
+          updated_at: string | null
           user_id: string
         }
         Insert: {
+          created_at?: string | null
           email: string
           ends_at?: string | null
           id?: string
@@ -247,9 +329,11 @@ export type Database = {
           status_formatted: string
           subscription_item_id?: number
           trial_ends_at?: string | null
+          updated_at?: string | null
           user_id: string
         }
         Update: {
+          created_at?: string | null
           email?: string
           ends_at?: string | null
           id?: string
@@ -265,6 +349,7 @@ export type Database = {
           status_formatted?: string
           subscription_item_id?: number
           trial_ends_at?: string | null
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: [
