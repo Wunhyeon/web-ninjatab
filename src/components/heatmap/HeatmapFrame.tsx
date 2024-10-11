@@ -26,6 +26,7 @@ import {
 } from "@/lib/GAEvent";
 import Link from "next/link";
 import { ORIGIN } from "@/lib/constant";
+import { HeatmapMap } from "@/lib/types";
 
 const HeatmapFrame = ({
   mp,
@@ -35,16 +36,7 @@ const HeatmapFrame = ({
 }: //   maxCount,
 
 {
-  mp: Map<
-    string,
-    {
-      count: number;
-      object: {
-        name: string;
-        id: string;
-      }[];
-    }
-  >;
+  mp: HeatmapMap;
   minYear: number;
   maxYear: number;
   timerId: string;
@@ -58,18 +50,7 @@ const HeatmapFrame = ({
   const [calendarData, setCalendarData] = useState<
     { date: string; count: number; level: number }[]
   >([]);
-  const [calendarDataMp, setCalendarDataMp] = useState<
-    Map<
-      string,
-      {
-        count: number;
-        object: {
-          name: string;
-          id: string;
-        }[];
-      }
-    >
-  >(mp);
+  const [calendarDataMp, setCalendarDataMp] = useState<HeatmapMap>(mp);
 
   const [yearList, setYearList] = useState<string[]>([]);
   const router = useRouter();
@@ -245,7 +226,7 @@ const HeatmapFrame = ({
             {isLoadingRef.current ? <Spinner /> : <RefreshIcon />}
           </Button>
         </div>
-        <Heatmap data={calendarData} mp={calendarDataMp} />
+        <Heatmap data={calendarData} mp={calendarDataMp} timerId={timerId} />
       </Card>
     </div>
   );

@@ -2,6 +2,23 @@ import { GetPageResponse } from "@notionhq/client/build/src/api-endpoints";
 import { Json } from "../../database.types";
 import { type Subscription } from "@lemonsqueezy/lemonsqueezy.js";
 
+export type HeatmapMap = Map<
+  string,
+  {
+    count: number;
+    object: HeatmapObject[];
+  }
+>;
+
+export type HeatmapObject = {
+  id: string;
+  name: string;
+  pageId: string;
+  start: string;
+  end?: string;
+  url: string;
+};
+
 export type SubscriptionStatusType =
   Subscription["data"]["attributes"]["status"];
 

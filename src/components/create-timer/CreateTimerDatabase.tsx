@@ -96,7 +96,7 @@ const CreateTimerDatabase = ({
     const user = await supabase.auth.getUser();
 
     if (!user.data.user) {
-      router.push("/pleanse-login");
+      router.push("/please-login");
     }
     const { data, error } = await supabase
       .from("notion_info")

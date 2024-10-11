@@ -11,6 +11,7 @@ import {
   type getSubscriptionURLs,
 } from "@/action/lemonSqueezyAction";
 import { LemonSqueezyModalLink } from "./modal-link";
+import { toast } from "sonner";
 
 export function SubscriptionActionsDropdown({
   subscription,
@@ -57,6 +58,9 @@ export function SubscriptionActionsDropdown({
                     subscription.lemon_squeezy_id
                   ).then(() => {
                     setLoading(false);
+                    toast.info(
+                      "The pause status will be lifted after 7 days, and the subscription will automatically resume."
+                    );
                   });
                 }}
               >
