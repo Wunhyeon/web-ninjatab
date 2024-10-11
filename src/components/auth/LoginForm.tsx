@@ -22,10 +22,16 @@ import { GOOGLE_LOGIN } from "@/lib/GAEvent";
 export function LoginForm() {
   const googleLogin = async () => {
     const supabase = createClient();
+    const redirectPath = new URLSearchParams(window.location.search).get(
+      "redirect"
+    );
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${ORIGIN}/auth/callback/google`,
+        // redirectTo: `${ORIGIN}/auth/callback/google`,
+        redirectTo: `${ORIGIN}/auth/callback/google${
+          redirectPath ? `?next=${encodeURIComponent(redirectPath)}` : ""
+        }`,
         queryParams: {
           access_type: "offline",
           prompt: "consent",

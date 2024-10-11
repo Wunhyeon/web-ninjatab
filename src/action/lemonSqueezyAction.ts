@@ -692,9 +692,14 @@ export async function pauseUserSubscription(id: string) {
     throw new Error(`Subscription #${id} not found.`);
   }
 
+  const date = new Date();
+  date.setDate(date.getDate() + 7); // 7일 후 날짜 설정
+  const resumeDate = date.toISOString(); // ISO 8601 형식으로 변환
+
   const returnedSub = await updateSubscription(id, {
     pause: {
       mode: "void",
+      resumesAt: resumeDate,
     },
   });
 
