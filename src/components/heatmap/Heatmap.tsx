@@ -28,9 +28,16 @@ import {
   TooltipTrigger,
 } from "../ui/tooltip";
 
-function isNotionApp() {
+// notion 어플리케이션이거나 브라우저에서 notion을 켰을 때
+function isNotion() {
   const userAgent = window.navigator.userAgent;
-  if (userAgent.includes("Notion") || userAgent.includes("notion")) {
+  const ancestor = window.location.ancestorOrigins;
+
+  if (
+    userAgent.includes("Notion") ||
+    userAgent.includes("notion") ||
+    (ancestor && ancestor.length > 0 && ancestor[0].includes("notion.so"))
+  ) {
     return true;
   }
 
@@ -75,13 +82,14 @@ const HeatmapDialogListItem = ({
 
     const userAgent = window.navigator.userAgent;
 
-    if (isNotionApp()) {
+    if (isNotion()) {
       // notion 앱일때
       window.open(window.location.href, "_blank", "noopener,noreferrer");
       setIsOpen(false);
       return;
     } else {
       // notion 앱 아닐때
+
       if (!user.data.user) {
         router.push(
           `/sign-in?redirect=${encodeURIComponent(window.location.pathname)}`
@@ -89,7 +97,6 @@ const HeatmapDialogListItem = ({
 
         return;
       }
-
       setIsEditing(true);
     }
   };
@@ -145,7 +152,7 @@ const HeatmapDialogListItem = ({
         </div>
       ) : (
         <div className="flex gap-3 items-center">
-          {isNotionApp() ? (
+          {isNotion() ? (
             <TooltipProvider delayDuration={100}>
               <Tooltip>
                 <TooltipTrigger asChild>
