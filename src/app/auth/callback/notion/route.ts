@@ -44,12 +44,12 @@ export async function GET(request: Request) {
       //   return NextResponse.redirect(`${origin}${next}`);
       // }
 
-      if (responseJson.owner.type != "user") {
-        // 개인유저가 아니라면 법인이나 이런 걸 껀데, 이거 처리해줘야함.
-        return NextResponse.redirect(
-          `${origin}/notion-connect?success=false&message=onlyPersonalUser`
-        );
-      }
+      // if (responseJson.owner.type != "user") {
+      //   // 개인유저가 아니라면 법인이나 이런 걸 껀데, 이거 처리해줘야함. <- 법인 유저도 어차피 개인 로그인 아이디를 가지고 있으므로, 제한해줄 필요X 2024.10.15
+      //   return NextResponse.redirect(
+      //     `${origin}/notion-connect?success=false&message=onlyPersonalUser`
+      //   );
+      // }
 
       const supabase = createClient();
       const user = await supabase.auth.getUser();
