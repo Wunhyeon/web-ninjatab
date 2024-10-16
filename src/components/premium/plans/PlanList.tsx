@@ -47,9 +47,17 @@ const PlanList = async () => {
       </h2>
 
       <div className="mb-5 mt-3 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-5">
-        {allPlans.map((plan, index) => {
-          return <Plan key={`plan-${index}`} plan={plan} />;
-        })}
+        {allPlans
+          .filter((plan) => {
+            if (process.env.NEXT_PUBLIC_NODE_ENV === "development") {
+              return true; // development 환경에서는 모든 plan을 렌더링
+            }
+            // production 환경에서는 plan.env가 production인 것만 렌더링
+            return plan.env === "production";
+          })
+          .map((plan, index) => {
+            return <Plan key={`plan-${index}`} plan={plan} />;
+          })}
       </div>
 
       {/* <InfoMessage /> */}
