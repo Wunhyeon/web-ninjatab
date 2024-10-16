@@ -18,7 +18,7 @@ const Feature = () => {
         <h3 className="!mt-0 text-5xl">
           {/* Maximize your focus with the Pomodoro technique and automatically
           track your progress in Notion. */}
-          Achieve peak productivity with <p>Timer + Database + Heatmap</p>
+          Achieve peak productivity with <p>Notion + Timer + Heatmap</p>
         </h3>
         <p className="text-muted-foreground my-6">
           <Balancer>

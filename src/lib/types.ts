@@ -42,6 +42,7 @@ export type NewPlan = {
   trial_interval?: string | null;
   trial_interval_count?: number | null;
   sort?: number | null;
+  env: "production" | "development" | "test";
   // created_at: string;
 };
 
