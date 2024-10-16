@@ -187,6 +187,7 @@ export async function syncPlans() {
           trial_interval: trialInterval,
           trial_interval_count: trialIntervalCount,
           sort: variant.sort,
+          env: variant.name.includes("Test") ? "development" : "test",
         });
         productVariants.push(res);
       }
