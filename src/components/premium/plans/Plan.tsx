@@ -7,7 +7,7 @@ import { SignupButton } from "./signup-button";
 import { SearchXIcon } from "lucide-react";
 import { Alert } from "@lemonsqueezy/wedges";
 import Link from "next/link";
-import { LEMON_SQUEEZY_LINK } from "@/lib/constant";
+import { LEMON_SQUEEZY_LINK, LIFE_TIME_DEAL } from "@/lib/constant";
 import { sendGAEvent } from "@next/third-parties/google";
 import { PREMIUM_SUBSCRIBE_BTN } from "@/lib/GAEvent";
 import { getUserSubscriptionsNotExpiredByPlanId } from "@/action/lemonSqueezyAction";
@@ -78,8 +78,12 @@ export const Plan = async ({
             {formatPrice(price)}
           </span>
 
-          {plan.price === "0"
-            ? ` forever`
+          {plan.name
+            .trim()
+            .replaceAll(" ", "")
+            .toLowerCase()
+            .includes(LIFE_TIME_DEAL)
+            ? ` Buy Once, Use Forever!`
             : !plan.is_usage_based && interval
             ? ` per ${interval}`
             : null}
