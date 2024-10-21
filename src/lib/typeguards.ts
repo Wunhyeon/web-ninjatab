@@ -46,6 +46,13 @@ export function webhookHasData(obj: unknown): obj is {
         price_id: number;
         is_usage_based: boolean;
       };
+      first_order_item: {
+        id: number;
+        price_id: number;
+        variant_id: number;
+        order_id: number;
+        variant_name: string;
+      };
     };
     id: string;
   };
