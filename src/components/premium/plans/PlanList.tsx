@@ -12,7 +12,7 @@ import { NewPlan } from "@/lib/types";
 const PlanList = async () => {
   const supabase = createClient();
   // let allPlans: NewPlan[] = await db.select().from(plans)
-  let planRes = await supabase.from("plans").select("*");
+  let planRes = await supabase.from("plans").select("*").order("sort");
   if (planRes.error) {
     // error handling
     return;
