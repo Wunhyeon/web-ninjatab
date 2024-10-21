@@ -2,6 +2,7 @@
 import React from "react";
 import Plan, { InfoMessage, NoPlans } from "./Plan";
 import {
+  getUserPurchase,
   getUserSubscriptionsNotExpired,
   syncPlans,
 } from "@/action/lemonSqueezyAction";
@@ -37,6 +38,13 @@ const PlanList = async () => {
     return <NoPlans />;
   }
 
+  const userPurchase = await getUserPurchase();
+
+  let isPaid = false;
+  if (userPurchase && userPurchase.length > 0) {
+    isPaid = true;
+  }
+
   return (
     <div>
       {/* <h2 className='flex items-center after:ml-5 after:h-px after:grow after:bg-surface-100 after:content-[""]'>
@@ -56,7 +64,7 @@ const PlanList = async () => {
             return plan.env === "production";
           })
           .map((plan, index) => {
-            return <Plan key={`plan-${index}`} plan={plan} />;
+            return <Plan key={`plan-${index}`} plan={plan} isPaid={isPaid} />;
           })}
       </div>
 

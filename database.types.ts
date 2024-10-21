@@ -294,6 +294,66 @@ export type Database = {
         }
         Relationships: []
       }
+      purchase: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          lemon_squeezy_id: string
+          name: string
+          order_id: number
+          plan_id: string
+          price: string
+          status: string
+          status_formatted: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          lemon_squeezy_id: string
+          name: string
+          order_id: number
+          plan_id: string
+          price: string
+          status: string
+          status_formatted: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          lemon_squeezy_id?: string
+          name?: string
+          order_id?: number
+          plan_id?: string
+          price?: string
+          status?: string
+          status_formatted?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscription: {
         Row: {
           created_at: string | null

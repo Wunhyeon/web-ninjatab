@@ -16,17 +16,20 @@ export const Plan = async ({
   plan,
   currentPlan = null,
   isChangingPlans = false,
+  isPaid,
 }: {
   plan: NewPlan;
   currentPlan?: NewPlan | null;
   isChangingPlans?: boolean;
+  isPaid?: boolean;
 }) => {
   const { description, product_name, name, price, id, interval } = plan;
   let isCurrent = id && currentPlan?.id === id;
 
   const notExpiredPlan = await getUserSubscriptionsNotExpiredByPlanId(id!);
+  // const userOrders = await getUserOrdersPaid(id!);
 
-  if (notExpiredPlan && notExpiredPlan.length) {
+  if ((notExpiredPlan && notExpiredPlan.length) || isPaid) {
     isCurrent = true;
     currentPlan = plan;
   }
@@ -86,12 +89,12 @@ export const Plan = async ({
           <></>
         ) : (
           <div className="w-full">
-            <p className="mb-3 text-lg">Start 15 Days Free Trial</p>
             <SignupButton
               className="w-full"
               plan={plan}
               isChangingPlans={isChangingPlans}
               currentPlan={currentPlan}
+              isPaid={isPaid}
             />
           </div>
         )}

@@ -6,12 +6,14 @@ import { useState } from "react";
 import { type NewSubscription } from "@/lib/types";
 import {
   cancelSub,
+  getOrderURLs,
   pauseUserSubscription,
   unpauseUserSubscription,
   type getSubscriptionURLs,
 } from "@/action/lemonSqueezyAction";
 import { LemonSqueezyModalLink } from "./modal-link";
 import { toast } from "sonner";
+import { Database } from "../../../../database.types";
 
 export function SubscriptionActionsDropdown({
   subscription,
@@ -84,12 +86,20 @@ export function SubscriptionActionsDropdown({
             )}
 
             <DropdownMenu.Item asChild>
-              <a href={urls.customer_portal}>Customer portal ↗</a>
+              {urls ? (
+                <a href={urls.customer_portal}>Customer portal ↗</a>
+              ) : (
+                <p>Please Try Again🙇‍♂️</p>
+              )}
             </DropdownMenu.Item>
 
-            <LemonSqueezyModalLink href={urls.update_payment_method}>
-              Update payment method
-            </LemonSqueezyModalLink>
+            {urls ? (
+              <LemonSqueezyModalLink href={urls.update_payment_method}>
+                Update payment method
+              </LemonSqueezyModalLink>
+            ) : (
+              <p>Please Try Again🙇‍♂️</p>
+            )}
           </DropdownMenu.Group>
 
           <DropdownMenu.Separator />
@@ -114,6 +124,51 @@ export function SubscriptionActionsDropdown({
               Cancel subscription
             </DropdownMenu.Item>
           </DropdownMenu.Group>
+        </DropdownMenu.Content>
+      </DropdownMenu>
+    </>
+  );
+}
+
+export function OrderActionsDropdown({
+  order,
+  urls,
+}: {
+  order: Database["public"]["Tables"]["purchase"]["Row"];
+  urls: Awaited<ReturnType<typeof getOrderURLs>>;
+}) {
+  const [loading, setLoading] = useState(false);
+
+  if (order.status !== "paid") {
+    return null;
+  }
+
+  return (
+    <>
+      {loading && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-md bg-surface-50/50">
+          <Loading size="sm" />
+        </div>
+      )}
+
+      <DropdownMenu>
+        <DropdownMenu.Trigger asChild>
+          <Button
+            size="sm"
+            variant="transparent"
+            className="size-8 data-[state=open]:bg-surface-50"
+            before={<MoreVerticalIcon className="size-4" />}
+          />
+        </DropdownMenu.Trigger>
+
+        <DropdownMenu.Content side="bottom" className="z-10" align="end">
+          <DropdownMenu.Group>
+            <DropdownMenu.Item asChild>
+              <a href={urls?.receipt}>Customer portal ↗</a>
+            </DropdownMenu.Item>
+          </DropdownMenu.Group>
+
+          <DropdownMenu.Separator />
         </DropdownMenu.Content>
       </DropdownMenu>
     </>

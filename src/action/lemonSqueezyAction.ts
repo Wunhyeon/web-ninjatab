@@ -1,7 +1,11 @@
 "use server";
 
 import { configureLemonSqueezy } from "@/config/lemonsqueezy";
-import { ERROR_USER_NOT_AUTHORIZED, LOGIN_AGAIN } from "@/lib/constant";
+import {
+  ERROR_USER_NOT_AUTHORIZED,
+  LIFE_TIME_DEAL,
+  LOGIN_AGAIN,
+} from "@/lib/constant";
 import { webhookHasData, webhookHasMeta } from "@/lib/typeguards";
 import { NewPlan, NewSubscription, NewWebhookEvent } from "@/lib/types";
 import { createClient } from "@/utils/supabase/server";
@@ -9,6 +13,9 @@ import { createServiceRoleClient } from "@/utils/supabase/serviceRoleServer";
 import {
   cancelSubscription,
   createCheckout,
+  getCustomer,
+  getOrder,
+  getOrderItem,
   getPrice,
   getProduct,
   getSubscription,
@@ -21,6 +28,7 @@ import {
 import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 import crypto, { randomUUID } from "node:crypto";
+import { Database } from "../../database.types";
 
 /**
  * getUser. 유저 객체를 돌려준다. 유저 객체가 없으면 please-login page로 리다이렉트 시킨다.
@@ -170,9 +178,9 @@ export async function syncPlans() {
           currentPriceObj?.attributes.category === "subscription";
 
         // If not a subscription, skip it.
-        if (!isSubscription) {
-          continue;
-        }
+        // if (!isSubscription) {
+        //   continue;
+        // }
 
         const res = await _addVariant({
           name: variant.name,
@@ -421,7 +429,91 @@ export async function processWebhookEvent(webhookEvent: NewWebhookEvent) {
         }
       } else if (webhookEvent.event_name.startsWith("order_")) {
         // Save orders; eventBody is a "Order"
-        /* Not implemented */
+        // 이건 oneTimepayment인데, 우선 구독할때랑 비슷하게 만듬. order table따로 만듬.
+        // subscription을 할때도 order_created 웹훅을 보낸다. 1time payment라면 필터를 하나 더 걸어줘야 한다.
+        // 필터를 lemonsqueezy product의 variant name으로 걸어주기로 했다.
+        // Save subscription events; obj is a Subscription
+        const attributes = eventBody.data.attributes;
+
+        const variantId = attributes.first_order_item
+          ? String(attributes.first_order_item.variant_id)
+          : undefined;
+
+        if (!variantId) {
+          throw new Error();
+        }
+
+        const variantName = attributes.first_order_item
+          ? String(attributes.first_order_item.variant_name)
+          : undefined;
+
+        if (!variantName) {
+          throw new Error();
+        }
+
+        const isLifeTimeDeal = variantName
+          .trim()
+          .replaceAll(" ", "")
+          .toLowerCase()
+          .includes(LIFE_TIME_DEAL);
+        if (!isLifeTimeDeal) {
+          return;
+        }
+
+        const planRes = await supabase
+          .from("plans")
+          .select("*")
+          .eq("variant_id", parseInt(variantId, 10));
+
+        if (planRes.error || !planRes.data || planRes.data.length < 1) {
+          processingError = `Plan with variantId ${variantId} not found.`;
+          throw new Error(
+            `err in processWebhookEvent - processingError : ${processingError}`
+          );
+        } else {
+          // Update the subscription in the database.
+
+          const priceId = attributes.first_order_item.price_id;
+
+          // Get the price data from Lemon Squeezy.
+          const priceData = await getPrice(priceId);
+          if (priceData.error) {
+            processingError = `Failed to get the price data for the subscription ${eventBody.data.id}.`;
+          }
+
+          const price = priceData.data?.data.attributes.unit_price;
+
+          const orderData: Database["public"]["Tables"]["purchase"]["Insert"] =
+            {
+              lemon_squeezy_id: eventBody.data.id,
+              order_id: attributes.first_order_item.order_id as number,
+              name: attributes.user_name as string,
+              email: attributes.user_email as string,
+              status: attributes.status as string,
+              status_formatted: attributes.status_formatted as string,
+              price: price?.toString() ?? "",
+              user_id: eventBody.meta.custom_data.user_id,
+              plan_id: planRes.data[0].id,
+            };
+
+          // Create/update subscription in the database.
+          try {
+            const upsertRes = await supabase
+              .from("purchase")
+              .upsert(orderData, { onConflict: "lemon_squeezy_id" })
+              .select("*");
+
+            if (upsertRes.error) {
+              throw new Error(upsertRes.error.message);
+            }
+          } catch (error) {
+            processingError = `Failed to upsert Subscription #${orderData.lemon_squeezy_id} to the database.`;
+            console.error(error);
+            throw new Error(
+              `err in processWebhookEvent - processingError : ${processingError}`
+            );
+          }
+        }
       } else if (webhookEvent.event_name.startsWith("license_")) {
         // Save license keys; eventBody is a "License key"
         /* Not implemented */
@@ -478,6 +570,38 @@ export async function getUserSubscriptions() {
     revalidatePath("/");
 
     return userSubscriptions;
+  } catch (err) {
+    console.log("err in getUserSubscriptions - ", err);
+  }
+}
+
+/**
+ * This action will get the orders for the current user.
+ */
+export async function getUserOrders() {
+  const supabase = createServiceRoleClient();
+  const user = await getUser();
+
+  if (!user) {
+    notFound();
+  }
+
+  try {
+    const userOrderRes = await supabase
+      .from("purchase")
+      .select("*")
+      .eq("user_id", user.id);
+
+    if (userOrderRes.error) {
+      throw new Error();
+    }
+
+    const userOrders: Database["public"]["Tables"]["purchase"]["Row"][] =
+      userOrderRes.data;
+
+    revalidatePath("/");
+
+    return userOrders;
   } catch (err) {
     console.log("err in getUserSubscriptions - ", err);
   }
@@ -578,7 +702,7 @@ export async function getUserSubscriptionsNotExpiredByPlanId(planId: string) {
       .neq("status", "expired");
 
     if (userSubscriptionsRes.error) {
-      throw new Error();
+      throw new Error(userSubscriptionsRes.error.message);
     }
 
     const userSubscriptions: NewSubscription[] = userSubscriptionsRes.data;
@@ -592,21 +716,89 @@ export async function getUserSubscriptionsNotExpiredByPlanId(planId: string) {
 }
 
 /**
+ * This action will get the orders for the current user.
+ */
+export async function getUserPurchase() {
+  const supabase = createServiceRoleClient();
+  const serverSupabase = createClient();
+  const user = await serverSupabase.auth.getUser();
+
+  if (!user.data.user) {
+    return undefined;
+  }
+
+  try {
+    const userPurchaseRes = await supabase
+      .from("purchase")
+      .select("*")
+      .eq("user_id", user.data.user.id)
+      .eq("status", "paid");
+
+    if (userPurchaseRes.error) {
+      throw new Error(userPurchaseRes.error.message);
+    }
+
+    const userPurchases: Database["public"]["Tables"]["purchase"]["Row"][] =
+      userPurchaseRes.data;
+
+    revalidatePath("/");
+
+    return userPurchases;
+  } catch (err) {
+    console.log("err in getUserSubscriptionsNotExpiredByPlanId - ", err);
+  }
+}
+
+/**
  * This action will get the subscription URLs (update_payment_method and
  * customer_portal) for the given subscription ID.
  *
  */
 export async function getSubscriptionURLs(id: string) {
+  try {
+    configureLemonSqueezy();
+
+    const apiKey = process.env.LEMONSQUEEZY_API_KEY; // 환경 변수에서 API 키를 가져옵니다.
+
+    if (!apiKey) {
+      throw new Error("API key is not set");
+    }
+
+    const subscription = await getSubscription(id);
+
+    if (subscription.error) {
+      throw new Error(subscription.error.message);
+    }
+
+    revalidatePath("/");
+
+    return subscription.data.data.attributes.urls;
+  } catch (err) {}
+}
+
+/**
+ * This action will get the orders URLs (update_payment_method and
+ * customer_portal) for the given order ID.
+ *
+ */
+export async function getOrderURLs(id: string) {
   configureLemonSqueezy();
-  const subscription = await getSubscription(id);
 
-  if (subscription.error) {
-    throw new Error(subscription.error.message);
+  const apiKey = process.env.LEMONSQUEEZY_API_KEY; // 환경 변수에서 API 키를 가져옵니다.
+
+  if (!apiKey) {
+    throw new Error("API key is not set");
   }
+  try {
+    const order = await getOrder(id);
 
-  revalidatePath("/");
+    if (order.error) {
+      throw new Error(order.error.message);
+    }
+    revalidatePath("/");
 
-  return subscription.data.data.attributes.urls;
+    return order.data.data.attributes.urls;
+  } catch (err) {}
 }
 
 /**
