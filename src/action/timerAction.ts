@@ -331,7 +331,7 @@ export const getHeatmapInfoMap = async (timerId: string) => {
 
   const mp: HeatmapMap = new Map();
   data.forEach((el) => {
-    if (!el.id || !el.name || !el.start) {
+    if (!el.id || el.name === undefined || el.name === null || !el.start) {
       return;
     }
     const date = el.start.split("T")[0];

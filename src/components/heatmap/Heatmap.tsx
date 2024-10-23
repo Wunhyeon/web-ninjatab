@@ -27,6 +27,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
+import { ORIGIN } from "@/lib/constant";
 
 // notion 어플리케이션이거나 브라우저에서 notion을 켰을 때
 function isNotion() {
