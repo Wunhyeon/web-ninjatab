@@ -816,15 +816,15 @@ export const updatePageDate = async (
       const response = await notion.pages.update({
         page_id: pageId,
         properties: {
-          // Name: {
-          //   title: [
-          //     {
-          //       text: {
-          //         content: pageName,
-          //       },
-          //     },
-          //   ],
-          // },
+          Name: {
+            title: [
+              {
+                text: {
+                  content: pageName,
+                },
+              },
+            ],
+          },
           Date: {
             type: "date",
             date: {
