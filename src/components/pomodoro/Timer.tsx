@@ -134,6 +134,8 @@ const Timer = ({
       Intl.DateTimeFormat().resolvedOptions().timeZone as TimeZone
     );
 
+    subjRef.current = "";
+
     if (!updateResult?.success && updateResult?.err === "missingProperty") {
       // toast.error(`Please make ${updateResult.property} column`, {
       //   duration: Infinity,
