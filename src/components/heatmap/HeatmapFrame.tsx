@@ -26,19 +26,21 @@ import {
 } from "@/lib/GAEvent";
 import Link from "next/link";
 import { ORIGIN } from "@/lib/constant";
-import { HeatmapMap } from "@/lib/types";
+import { HeatmapMap, TimeZone } from "@/lib/types";
+import HeamapWidgetError from "./HeatmapWidgetError";
+import HeatmapWidgetError from "./HeatmapWidgetError";
 
 const HeatmapFrame = ({
-  mp,
-  minYear,
-  maxYear,
+  // mp,
+  // minYear,
+  // maxYear,
   timerId,
 }: //   maxCount,
 
 {
-  mp: HeatmapMap;
-  minYear: number;
-  maxYear: number;
+  // mp: HeatmapMap;
+  // minYear: number;
+  // maxYear: number;
   timerId: string;
   //   maxCount: number;
 }) => {
@@ -50,7 +52,15 @@ const HeatmapFrame = ({
   const [calendarData, setCalendarData] = useState<
     { date: string; count: number; level: number }[]
   >([]);
-  const [calendarDataMp, setCalendarDataMp] = useState<HeatmapMap>(mp);
+  // const [mp, setMp] = useState<HeatmapMap>();
+  const [minYear, setMinYear] = useState<number>();
+  // const [calendarDataMp, setCalendarDataMp] = useState<HeatmapMap>();
+  const [initLoading, setInitLoading] = useState(true);
+
+  const mpRef = useRef<HeatmapMap>();
+  const calendarDataMpRef = useRef<HeatmapMap>();
+  const calendarDataRef =
+    useRef<{ date: string; count: number; level: number }[]>();
 
   const [yearList, setYearList] = useState<string[]>([]);
   const router = useRouter();
@@ -67,16 +77,25 @@ const HeatmapFrame = ({
     isLoadingRef.current = true;
     reRender();
     const { map, minYear, maxYear, success, err } = await getHeatmapInfoMap(
-      timerId
+      timerId,
+      Intl.DateTimeFormat().resolvedOptions().timeZone
     );
     if (!success || !map || !minYear) {
       toast.error("Server Error", { closeButton: true });
-      router.refresh();
-      return;
+      // router.refresh();
+
+      return <HeamapWidgetError />;
     }
     // 여기 고민좀 해보자. 새로고침 하는 부분.
-    mp = map;
-    setCalendarDataMp(mp);
+    // mp = map;
+
+    // setMp(map);
+    mpRef.current = map;
+    setMinYear(minYear);
+    // setCalendarDataMp(mp!); // 바로 위에서 설정해주고 있음.
+    calendarDataMpRef.current = map;
+    // console.log("222 calendarDataMp : ", calendarDataMp);
+
     // select에 들어갈 년도들
     const date = new Date();
     const thisYear = date.getFullYear();
@@ -95,6 +114,10 @@ const HeatmapFrame = ({
   };
 
   const divideYear = (year: string) => {
+    if (!mpRef.current) {
+      return <HeatmapWidgetError />;
+    }
+
     const date = new Date();
     const data: { date: string; count: number; level: number }[] = [];
     let maxCount = 0;
@@ -103,7 +126,7 @@ const HeatmapFrame = ({
       measureYear = date.getFullYear().toString();
     }
     // 단위(년도)별 maxCount 구하기
-    for (const [key, value] of mp) {
+    for (const [key, value] of mpRef.current) {
       const dateSplit = key.split("-");
       const dataYear = dateSplit[0];
       if (dataYear != String(measureYear)) {
@@ -114,11 +137,11 @@ const HeatmapFrame = ({
       }
     }
     // data 넣어주기
-    if (!mp.get(`${measureYear}-01-01`)) {
+    if (!mpRef.current.get(`${measureYear}-01-01`)) {
       data.push({ date: `${measureYear}-01-01`, count: 0, level: 0 });
     }
 
-    for (const [key, value] of mp) {
+    for (const [key, value] of mpRef.current) {
       const dateSplit = key.split("-");
       const dataYear = dateSplit[0];
 
@@ -142,7 +165,7 @@ const HeatmapFrame = ({
 
       const today = `${year}-${month}-${day}`;
 
-      if (!mp.get(today)) {
+      if (!mpRef.current.get(today)) {
         data.push({
           date: today,
           count: 0,
@@ -150,7 +173,7 @@ const HeatmapFrame = ({
         });
       }
     } else {
-      if (!mp.get(`${measureYear}-12-31`)) {
+      if (!mpRef.current.get(`${measureYear}-12-31`)) {
         data.push({
           date: `${measureYear}-12-31`,
           count: 0,
@@ -160,81 +183,105 @@ const HeatmapFrame = ({
     }
 
     setCalendarData(data);
+    calendarDataRef.current = data;
   };
 
   // 시작시. 기본 올해년도.
   useEffect(() => {
-    const date = new Date();
-    const thisYear = date.getFullYear();
+    const init = async () => {
+      await handleRefresh();
 
-    // select에 들어갈 년도들
-    const tmpYearList = [];
-    tmpYearList.push("Recent");
-    for (let i = thisYear; i >= minYear; i--) {
-      tmpYearList.push(String(i));
-    }
-    setYearList(tmpYearList);
+      const date = new Date();
+      const thisYear = date.getFullYear();
 
-    // 처음 데이터들은 Recent
-    divideYear("Recent");
+      // select에 들어갈 년도들
+      const tmpYearList = [];
+      tmpYearList.push("Recent");
+      let selectMinYear = minYear || new Date().getFullYear();
+      for (let i = thisYear; i >= selectMinYear; i--) {
+        tmpYearList.push(String(i));
+      }
+      setYearList(tmpYearList);
+
+      // 처음 데이터들은 Recent
+      divideYear("Recent");
+      setInitLoading(false);
+    };
+    init();
   }, []);
 
   return (
     <div>
-      <Link
-        href={`${ORIGIN}`}
-        target="_blank"
-        onClick={() => {
-          sendGAEvent("event", WIDGET_TIMER_LOGO_LINK.event, {
-            value: WIDGET_TIMER_LOGO_LINK.value,
-          });
-        }}
-      >
-        <h1 className="inline-block text-lg sm:text-xl font-bold">PomoLog</h1>
-      </Link>
+      {initLoading || !calendarDataRef.current || !calendarDataMpRef.current ? (
+        <div>Loading...</div>
+      ) : (
+        <div>
+          <Link
+            href={`${ORIGIN}`}
+            target="_blank"
+            onClick={() => {
+              sendGAEvent("event", WIDGET_TIMER_LOGO_LINK.event, {
+                value: WIDGET_TIMER_LOGO_LINK.value,
+              });
+            }}
+          >
+            <h1 className="inline-block text-lg sm:text-xl font-bold">
+              PomoLog
+            </h1>
+          </Link>
 
-      <Card className="ml-7 relative">
-        <div className="flex justify-between mb-4">
-          <Select
-            onValueChange={(value) => {
-              divideYear(value);
-              sendGAEvent("event", WIDGET_HEATMAP_YEAR_SELECT.event, {
-                value: WIDGET_HEATMAP_YEAR_SELECT.value,
-              });
-            }}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Recent" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Year</SelectLabel>
-                {yearList.map((el, idx) => {
-                  return (
-                    <SelectItem key={idx} value={el}>
-                      {el}
-                    </SelectItem>
-                  );
-                })}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-          <Button
-            onClick={async () => {
-              // router.refresh();
-              await handleRefresh();
-              sendGAEvent("event", WIDGET_HEATMAP_REFRESH.event, {
-                value: WIDGET_HEATMAP_REFRESH.value,
-              });
-            }}
-            disabled={isLoadingRef.current}
-            className="absolute top-3 right-3"
-          >
-            {isLoadingRef.current ? <Spinner /> : <RefreshIcon />}
-          </Button>
+          <Card className="ml-7 relative">
+            <div className="flex justify-between mb-4">
+              <Select
+                onValueChange={(value) => {
+                  divideYear(value);
+                  sendGAEvent("event", WIDGET_HEATMAP_YEAR_SELECT.event, {
+                    value: WIDGET_HEATMAP_YEAR_SELECT.value,
+                  });
+                }}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Recent" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Year</SelectLabel>
+                    {yearList.map((el, idx) => {
+                      return (
+                        <SelectItem key={idx} value={el}>
+                          {el}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+              <Button
+                onClick={async () => {
+                  // router.refresh();
+                  await handleRefresh();
+                  sendGAEvent("event", WIDGET_HEATMAP_REFRESH.event, {
+                    value: WIDGET_HEATMAP_REFRESH.value,
+                  });
+                }}
+                disabled={isLoadingRef.current}
+                className="absolute top-3 right-3"
+              >
+                {isLoadingRef.current ? <Spinner /> : <RefreshIcon />}
+              </Button>
+            </div>
+            <Heatmap
+              data={calendarData}
+              mp={
+                calendarDataMpRef.current
+                  ? calendarDataMpRef.current
+                  : new Map()
+              }
+              timerId={timerId}
+            />
+          </Card>
         </div>
-        <Heatmap data={calendarData} mp={calendarDataMp} timerId={timerId} />
-      </Card>
+      )}
     </div>
   );
 };
