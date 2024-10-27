@@ -98,12 +98,7 @@ const page = async ({ params }: { params: { id: string } }) => {
       {success && !err && map && minYear && maxYear ? (
         flag ? (
           <div className="p-5">
-            <HeatmapFrame
-              mp={map}
-              minYear={minYear}
-              maxYear={maxYear}
-              timerId={timerId}
-            />
+            <HeatmapFrame timerId={timerId} />
           </div>
         ) : (
           <PleaseSubscribe />
