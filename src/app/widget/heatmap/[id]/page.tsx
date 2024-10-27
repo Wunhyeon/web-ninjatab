@@ -59,62 +59,22 @@ const page = async ({ params }: { params: { id: string } }) => {
     return <PleaseSubscribe />;
   }
 
-  const { map, minYear, maxYear, success, err } = await getHeatmapInfoMap(
-    timerId
-  );
+  // const { map, minYear, maxYear, success, err } = await getHeatmapInfoMap(
+  //   timerId
+  // );
 
   let errMessage = "";
   let link = "";
   let buttonName = "Edit Page";
-  if (err) {
-    if (err.split(":")[0] === "Could not find sort property with name or id") {
-      const errSplit = err.split(":");
-
-      const errColumns = [];
-      for (let i = 0; i < errSplit.length; i++) {
-        if (i === 0) {
-          continue;
-        }
-
-        errColumns.push(errSplit[i]);
-      }
-      errMessage = `Please Make the ${errColumns} Column in (Notion)Database.
-      Or Go to Edit Page And Select Database And Click the Sync Button`;
-      link = `/edit-timer/${timerId}`;
-
-      if (errColumns.indexOf("Name") !== -1) {
-        errMessage +=
-          "If Name Column Exists, Please Name Change Name Columns type to title";
-      }
-    } else if (err === "404") {
-      errMessage = "Your Database Or Timer Not Found. Plaease Check.";
-      link = "/my-timers";
-      buttonName = "My-Timers";
-    }
-  }
 
   return (
     <div>
-      {success && !err && map && minYear && maxYear ? (
-        flag ? (
-          <div className="p-5">
-            <HeatmapFrame timerId={timerId} />
-          </div>
-        ) : (
-          <PleaseSubscribe />
-        )
-      ) : (
-        <div>
-          <h3>Something went wrong</h3>
-          {errMessage}
-          <Link
-            className={buttonVariants({ variant: "default" })}
-            href={link}
-            target="_blank"
-          >
-            {buttonName}
-          </Link>
+      {flag ? (
+        <div className="p-5">
+          <HeatmapFrame timerId={timerId} />
         </div>
+      ) : (
+        <PleaseSubscribe />
       )}
     </div>
   );
