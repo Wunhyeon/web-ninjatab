@@ -50,7 +50,8 @@ const Timer = ({
   const isPausedRef = useRef(isPaused);
   const modeRef = useRef(mode);
   const subjRef = useRef(subject);
-  const startDateRef: React.MutableRefObject<Date | undefined> = useRef();
+  // const startDateRef: React.MutableRefObject<Date | undefined> = useRef();
+  const startDateRef = useRef("");
   const alarmSoundRef = useRef<HTMLAudioElement | null>(null);
   const tickingSoundRef = useRef<HTMLAudioElement | null>(null);
   const pageIdRef = useRef("");
@@ -61,7 +62,7 @@ const Timer = ({
 
     if (isNewSubjectStart) {
       // 새로운 task 가 시작될 때.
-      startDateRef.current = new Date();
+      startDateRef.current = new Date().toISOString();
       setIsNewSubjectStart(false);
       // 데이터베이스에 page 넣고 page id 받아오기. 타이머가 다 되서 멈출 때, 이 페이지의 date에 시작시간과 끝시간을 업데이트 한다.
       const result = await insertNewPageToDBWithoutDate(
@@ -122,16 +123,17 @@ const Timer = ({
   const someF = async () => {
     // alert(`some Function. subject : ${subject}, subjRef : ${subjRef.current}`);
     const endTime = new Date();
-    const offset = endTime.getTimezoneOffset() * 60000;
-    const start = new Date(startDateRef.current!.getTime() - offset);
-    const end = new Date(endTime.getTime() - offset);
+    // const offset = endTime.getTimezoneOffset() * 60000;
+    // const start = new Date(startDateRef.current!.getTime() - offset);
+    const start = startDateRef.current;
+    const end = endTime.toISOString();
     const updateResult = await updatePageDate(
       timerId,
       pageIdRef.current,
       subjRef.current,
       start,
-      end,
-      Intl.DateTimeFormat().resolvedOptions().timeZone as TimeZone
+      end
+      // Intl.DateTimeFormat().resolvedOptions().timeZone as TimeZone
     );
 
     subjRef.current = "";

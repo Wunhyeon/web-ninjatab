@@ -293,7 +293,7 @@ const getHeatmapInfo = async (timerId: string) => {
   }
 };
 
-export const getHeatmapInfoMap = async (timerId: string) => {
+export const getHeatmapInfoMap = async (timerId: string, timeZone: string) => {
   const res = await getHeatmapInfo(timerId);
 
   const parseData: {
@@ -334,7 +334,22 @@ export const getHeatmapInfoMap = async (timerId: string) => {
     if (!el.id || el.name === undefined || el.name === null || !el.start) {
       return;
     }
-    const date = el.start.split("T")[0];
+    const utcDate = new Date(el.start);
+    let convertDate = new Intl.DateTimeFormat("default", {
+      timeZone: timeZone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      // hour: "2-digit",
+      // minute: "2-digit",
+      // second: "2-digit",
+      hour12: false,
+    }).format(utcDate);
+    if (convertDate.endsWith(".")) {
+      convertDate = convertDate.slice(0, -1); // 마지막 "." 제거
+    }
+
+    const date = convertDate.split(". ").join("-");
     const mpGet = mp.get(date);
     if (mpGet) {
       mpGet.count++;
@@ -617,9 +632,9 @@ export const insertNewPageToDBWithDate = async (
   notion: Client,
   timerId: string,
   pageName: string,
-  startTime: Date,
-  endTime: Date,
-  timeZone: TimeZone
+  startTime: string,
+  endTime: string
+  // timeZone: TimeZone
 ) => {
   try {
     const timerInfo = await getTimerInfo(timerId);
@@ -668,9 +683,9 @@ export const insertNewPageToDBWithDate = async (
         },
         Date: {
           date: {
-            start: startTime.toISOString(),
-            end: endTime.toISOString(),
-            time_zone: timeZone,
+            start: startTime,
+            end: endTime,
+            // time_zone: timeZone,
           },
         },
       },
@@ -707,9 +722,9 @@ export const updatePageDate = async (
   timerId: string,
   pageId: string,
   pageName: string,
-  startDate: Date,
-  endDate: Date,
-  timeZone: TimeZone
+  startDate: string,
+  endDate: string
+  // timeZone: TimeZone
 ) => {
   // 만약 pageId가 있으면 pageID를 업데이트 하지만, 없다면 새로운 page를 만들어 넣는다.
   try {
@@ -795,8 +810,8 @@ export const updatePageDate = async (
         timerId,
         pageName,
         startDate,
-        endDate,
-        timeZone
+        endDate
+        // timeZone
       );
 
       if (!success) {
@@ -828,9 +843,9 @@ export const updatePageDate = async (
           Date: {
             type: "date",
             date: {
-              start: startDate.toISOString(),
-              end: endDate.toISOString(),
-              time_zone: timeZone,
+              start: startDate,
+              end: endDate,
+              // time_zone: timeZone,
             },
           },
         },
@@ -1141,8 +1156,8 @@ export const softDeleteTimer = async (timerId: string) => {
 
 export const insertHeatmap = async (
   timerId: string,
-  start: Date,
-  end: Date,
+  start: string,
+  end: string,
   pageId?: string,
   name?: string,
   url?: string
@@ -1151,8 +1166,8 @@ export const insertHeatmap = async (
   try {
     const { data, error } = await supabase.from("heatmaps").insert({
       timer_id: timerId,
-      start: start.toISOString(),
-      end: end.toISOString(),
+      start: start,
+      end: end,
       name,
       url,
       pageId: pageId,
