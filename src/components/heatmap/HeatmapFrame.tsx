@@ -94,7 +94,6 @@ const HeatmapFrame = ({
     setMinYear(minYear);
     // setCalendarDataMp(mp!); // 바로 위에서 설정해주고 있음.
     calendarDataMpRef.current = map;
-    // console.log("222 calendarDataMp : ", calendarDataMp);
 
     // select에 들어갈 년도들
     const date = new Date();
@@ -157,7 +156,6 @@ const HeatmapFrame = ({
 
     if (year === "Recent") {
       // const today = date.toISOString().split("T")[0];
-      // console.log("today : ", today);
 
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, "0"); // 월은 0부터 시작하므로 1을 더합니다.

@@ -335,7 +335,8 @@ export const getHeatmapInfoMap = async (timerId: string, timeZone: string) => {
       return;
     }
     const utcDate = new Date(el.start);
-    let convertDate = new Intl.DateTimeFormat("default", {
+    let convertDate = new Intl.DateTimeFormat("ko-KR", {
+      // ko-KR 로 해줘야 '연.월.일' 로 나옴. en-EN으로 하면 '월/일/년'으로 나옴.
       timeZone: timeZone,
       year: "numeric",
       month: "2-digit",
@@ -350,6 +351,7 @@ export const getHeatmapInfoMap = async (timerId: string, timeZone: string) => {
     }
 
     const date = convertDate.split(". ").join("-");
+
     const mpGet = mp.get(date);
     if (mpGet) {
       mpGet.count++;
