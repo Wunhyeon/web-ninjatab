@@ -323,7 +323,6 @@ export const getHeatmapInfoMap = async (timerId: string, timeZone: string) => {
   }
 
   const data = parseData.data;
-  console.log("data.length : ", data.length);
 
   const todayDate = new Date();
   let minYear = todayDate.getFullYear();
@@ -352,7 +351,6 @@ export const getHeatmapInfoMap = async (timerId: string, timeZone: string) => {
     }
 
     const date = convertDate.split(". ").join("-");
-    console.log();
 
     const mpGet = mp.get(date);
     if (mpGet) {
