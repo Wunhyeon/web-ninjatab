@@ -94,7 +94,7 @@ const HeatmapFrame = ({
     setMinYear(minYear);
     // setCalendarDataMp(mp!); // 바로 위에서 설정해주고 있음.
     calendarDataMpRef.current = map;
-    // console.log("222 calendarDataMp : ", calendarDataMp);
+    console.log("heamapFrame - mpRef.current : ", mpRef.current);
 
     // select에 들어갈 년도들
     const date = new Date();
