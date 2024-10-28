@@ -184,6 +184,7 @@ const HeatmapFrame = ({
 
     setCalendarData(data);
     calendarDataRef.current = data;
+    console.log("frame - calendarDataRef : ", calendarDataRef.current);
   };
 
   // 시작시. 기본 올해년도.

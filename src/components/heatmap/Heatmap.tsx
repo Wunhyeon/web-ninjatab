@@ -331,6 +331,8 @@ export const Heatmap = ({
   const dateRef = useRef("");
   const objectRef = useRef<HeatmapObject[]>([]);
 
+  console.log("Heatmap - data : ", data);
+
   return (
     <div className="text-3x">
       <ActivityCalendar
