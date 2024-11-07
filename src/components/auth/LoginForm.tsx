@@ -39,6 +39,10 @@ export function LoginForm() {
       },
     });
   };
+  console.log(
+    "process.env.NEXT_PUBLIC_ORIGIN : ",
+    process.env.NEXT_PUBLIC_ORIGIN
+  );
 
   return (
     <Card className="mx-auto max-w-sm">
