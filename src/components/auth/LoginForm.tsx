@@ -29,7 +29,7 @@ export function LoginForm() {
       provider: "google",
       options: {
         // redirectTo: `${ORIGIN}/auth/callback/google`,
-        redirectTo: `${ORIGIN}/auth/callback/google${
+        redirectTo: `${process.env.NEXT_PUBLIC_ORIGIN}/auth/callback/google${
           redirectPath ? `?next=${encodeURIComponent(redirectPath)}` : ""
         }`,
         queryParams: {
