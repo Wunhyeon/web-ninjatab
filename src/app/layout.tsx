@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import Header from "@/components/header/Header";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -36,6 +37,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          {/* https://velog.io/@yangth/Async-Server-Component-TypeScript-%EC%97%90%EB%9F%AC */}
+          {/* @ts-expect-error Async Server Component */}
+          <Header />
           {children}
         </ThemeProvider>
       </body>

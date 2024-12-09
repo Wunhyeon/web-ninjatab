@@ -2,10 +2,6 @@
 import { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import React from "react";
-import { Button } from "../ui/button";
-import Image from "next/image";
-// import LogoutBtn from "./LogoutBtn";
-import { createClient } from "@/utils/supabase/server";
 import { GUIDE_LINK } from "@/lib/constant";
 import { sendGAEvent } from "@next/third-parties/google";
 import {
@@ -15,12 +11,13 @@ import {
   NAV_PREMIUM,
   NAV_SETTING,
 } from "@/lib/GAEvent";
+import LogoutBtn from "../auth/LogoutBtn";
 
 const MainNav = ({ user }: { user: User | undefined }) => {
   return (
-    <nav className="hidden sm:flex mt-4 font-bold items-center justify-center space-x-8 overflow-auto no-scrollbar w-full">
+    <nav className=" sm:flex mt-4 font-bold items-center justify-center space-x-8 overflow-auto no-scrollbar w-full">
       <Link href="/">
-        <Image src="/Frame-7.svg" alt="logo" height={30} width={200} />
+        {/* <Image src="/Frame-7.svg" alt="logo" height={30} width={200} /> */}
       </Link>
       <Link
         href="/my-timers"
@@ -127,8 +124,7 @@ const MainNav = ({ user }: { user: User | undefined }) => {
         <span>Setting</span>
       </Link>
       {user ? (
-        // <LogoutBtn />
-        <></>
+        <LogoutBtn />
       ) : (
         <Link
           href="/sign-in"
