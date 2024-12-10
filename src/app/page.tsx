@@ -1,7 +1,9 @@
+import Feature from "@/components/home/Feature";
+
 export default function Home() {
   return (
-    <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-      🥷 Ninja Tab
+    <main className="relative flex flex-col text-slate-700  bg-white dark:bg-slate-900">
+      <Feature />
     </main>
   );
 }

@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import Header from "@/components/header/Header";
+import Footer from "@/components/footer/Footer";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -41,6 +42,7 @@ export default function RootLayout({
           {/* @ts-expect-error Async Server Component */}
           <Header />
           {children}
+          <Footer />
         </ThemeProvider>
       </body>
       <GoogleAnalytics gaId="G-FPS7LSPMJX" />
