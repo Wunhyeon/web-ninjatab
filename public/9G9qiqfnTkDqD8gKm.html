@@ -1,0 +1,102 @@
+<html><head><base href="https://example.com"><script src="https://cdn.tailwindcss.com"></script><script src="https://unpkg.com/react@17/umd/react.development.js"></script><script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script><script src="https://unpkg.com/@babel/standalone/babel.min.js"></script></head><body class="bg-white">
+<div id="root" class="h-screen"></div>
+<script type="text/babel">
+
+const PomodoroTimer = () => {
+  const [time, setTime] = React.useState(25 * 60);
+  const [isActive, setIsActive] = React.useState(false);
+  const [mode, setMode] = React.useState('Pomodoro');
+  const [goal, setGoal] = React.useState('');
+
+  React.useEffect(() => {
+    let interval = null;
+    if (isActive) {
+      interval = setInterval(() => {
+        setTime((time) => time - 1);
+      }, 1000);
+    } else if (!isActive && time !== 0) {
+      clearInterval(interval);
+    }
+    return () => clearInterval(interval);
+  }, [isActive, time]);
+
+  const toggleTimer = () => {
+    setIsActive(!isActive);
+  };
+
+  const resetTimer = (newMode) => {
+    setIsActive(false);
+    setMode(newMode);
+    switch (newMode) {
+      case 'Pomodoro':
+        setTime(25 * 60);
+        break;
+      case 'Short Break':
+        setTime(5 * 60);
+        break;
+      case 'Long Break':
+        setTime(15 * 60);
+        break;
+      default:
+        setTime(25 * 60);
+    }
+  };
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  return (
+    <div className="bg-white text-black p-4 h-full flex flex-col transition-all duration-300 ease-in-out">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-xl font-bold md:hidden">LMS</h1>
+        <h1 className="text-xl font-bold hidden md:block">Pomofocus</h1>
+        <div className="flex space-x-2 hidden md:flex">
+          <button className="bg-gray-200 px-2 py-1 rounded text-sm">Report</button>
+          <button className="bg-gray-200 px-2 py-1 rounded text-sm">Setting</button>
+          <button className="bg-gray-200 px-2 py-1 rounded text-sm">Sign In</button>
+        </div>
+      </div>
+      
+      <div className="bg-gray-100 p-4 rounded-lg mb-4 flex-grow flex flex-col justify-center">
+        <div className="flex justify-center space-x-2 mb-4 hidden md:flex">
+          <button onClick={() => resetTimer('Pomodoro')} className={`px-3 py-1 rounded text-sm ${mode === 'Pomodoro' ? 'bg-gray-300' : 'bg-gray-200'}`}>Pomodoro</button>
+          <button onClick={() => resetTimer('Short Break')} className={`px-3 py-1 rounded text-sm ${mode === 'Short Break' ? 'bg-gray-300' : 'bg-gray-200'}`}>Short Break</button>
+          <button onClick={() => resetTimer('Long Break')} className={`px-3 py-1 rounded text-sm ${mode === 'Long Break' ? 'bg-gray-300' : 'bg-gray-200'}`}>Long Break</button>
+        </div>
+        <div className="text-8xl md:text-9xl font-bold text-center mb-8">{formatTime(time)}</div>
+        <div className="mb-6">
+          <input
+            type="text"
+            value={goal}
+            onChange={(e) => setGoal(e.target.value)}
+            placeholder="What are you working on?"
+            className="w-full p-2 rounded bg-white border border-gray-300 text-black placeholder-gray-500 text-sm"
+          />
+        </div>
+        <div className="flex justify-center space-x-2">
+          <button onClick={toggleTimer} className="bg-black text-white font-bold py-3 px-6 rounded text-base md:text-lg">{isActive ? 'PAUSE' : 'START'}</button>
+          <button onClick={() => resetTimer(mode)} className="bg-gray-200 text-black font-bold py-3 px-6 rounded text-lg hidden md:block">RESET</button>
+        </div>
+      </div>
+      
+      <div className="text-center hidden md:block text-gray-600">#1 LMS</div>
+    </div>
+  );
+};
+
+ReactDOM.render(<PomodoroTimer />, document.getElementById('root'));
+</script>
+
+<style>
+@media (max-width: 767px) {
+  .h-screen {
+    height: auto;
+    min-height: 100vh;
+  }
+}
+</style>
+
+</body></html>
