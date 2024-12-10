@@ -3,25 +3,19 @@
 
 import { Section } from "../section";
 // import { ChangePlan } from "../plans/change-plan-button";
-import { OrderActions, SubscriptionActions } from "./actions";
+import { SubscriptionActions } from "./actions";
 import { SubscriptionDate } from "./date";
 import { SubscriptionPrice } from "./price";
 import { SubscriptionStatus } from "./status";
 import { type SubscriptionStatusType } from "@/lib/types";
-import { cn, formatPrice, isValidSubscription } from "@/lib/utils";
-import { type NewSubscription } from "@/lib/types";
-import {
-  getAllPlan,
-  getUserOrders,
-  getUserSubscriptions,
-} from "@/action/lemonSqueezyAction";
+import { cn, isValidSubscription } from "@/lib/utils";
+import { getAllPlan, getUserSubscriptions } from "@/action/lemonSqueezyAction";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
-import { Badge } from "@lemonsqueezy/wedges";
+import { Database } from "@/lib/database.types";
 
 export async function Subscriptions() {
-  const userOrders = await getUserOrders();
   const userSubscriptions = await getUserSubscriptions();
   const allPlans = await getAllPlan();
 
@@ -35,7 +29,7 @@ export async function Subscriptions() {
     return;
   }
 
-  if (userOrders?.length === 0 && userSubscriptions.length === 0) {
+  if (userSubscriptions.length === 0) {
     return (
       <div>
         <p className="not-prose mb-2">
@@ -64,47 +58,13 @@ export async function Subscriptions() {
     return 0;
   });
 
-  const userOrder = () => {
-    if (userOrders && userOrders[0]) {
-      const plan = allPlans.find((p) => p.id === userOrders[0].plan_id);
-      return (
-        <Section.Item className="flex-col items-stretch justify-center gap-2">
-          <header className="flex items-center justify-between gap-3">
-            <div className="min-h-8 flex flex-wrap items-center gap-x-3 gap-y-1">
-              <h2 className={cn("text-surface-900 text-lg")}>
-                {}
-                {plan?.product_name} ({plan?.name})
-              </h2>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <OrderActions order={userOrders[0]} />
-            </div>
-          </header>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <p>{formatPrice(userOrders[0].price)}</p>
-
-            <Badge
-              className="rounded-sm px-1 py-0 text-sm"
-              size="sm"
-              color={"blue"}
-            >
-              {userOrders[0].status_formatted}
-            </Badge>
-          </div>
-        </Section.Item>
-      );
-    } else {
-      return <></>;
-    }
-  };
-
   return (
     <Section className="not-prose relative">
-      {userOrder()}
       {sortedSubscriptions.map(
-        (subscription: NewSubscription, index: number) => {
+        (
+          subscription: Database["public"]["Tables"]["subscriptions"]["Row"],
+          index: number
+        ) => {
           const plan = allPlans.find((p) => p.id === subscription.plan_id);
           const status = subscription.status as SubscriptionStatusType;
 

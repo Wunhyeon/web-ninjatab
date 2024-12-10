@@ -1,20 +1,21 @@
 import { getOrderURLs, getSubscriptionURLs } from "@/action/lemonSqueezyAction";
 import { type NewSubscription } from "@/lib/types";
-import {
-  OrderActionsDropdown,
-  SubscriptionActionsDropdown,
-} from "./actions-dropdown";
+import { SubscriptionActionsDropdown } from "./actions-dropdown";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
-import { Database } from "../../../../database.types";
+import { Database } from "../../../lib/database.types";
 
 export async function SubscriptionActions({
   subscription,
 }: {
-  subscription: NewSubscription;
+  subscription: Database["public"]["Tables"]["subscriptions"]["Row"];
 }) {
+  console.log("lemonSqueezyId : ", subscription.lemon_squeezy_id);
+
   const urls = await getSubscriptionURLs(subscription.lemon_squeezy_id);
+  console.log("urls : ", urls);
+
   if (!urls) {
     return <></>;
   }
@@ -37,14 +38,4 @@ export async function SubscriptionActions({
   return (
     <SubscriptionActionsDropdown subscription={subscription} urls={urls} />
   );
-}
-
-export async function OrderActions({
-  order,
-}: {
-  order: Database["public"]["Tables"]["purchase"]["Row"];
-}) {
-  const urls = await getOrderURLs(order.lemon_squeezy_id);
-
-  return <OrderActionsDropdown order={order} urls={urls} />;
 }

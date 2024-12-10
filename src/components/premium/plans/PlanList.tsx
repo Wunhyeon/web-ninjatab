@@ -1,11 +1,7 @@
 // server component
 import React from "react";
 import Plan, { InfoMessage, NoPlans } from "./Plan";
-import {
-  getUserPurchase,
-  getUserSubscriptionsNotExpired,
-  syncPlans,
-} from "@/action/lemonSqueezyAction";
+import { syncPlans } from "@/action/lemonSqueezyAction";
 import { createClient } from "@/utils/supabase/server";
 import { NewPlan } from "@/lib/types";
 // server component
@@ -38,13 +34,6 @@ const PlanList = async () => {
     return <NoPlans />;
   }
 
-  const userPurchase = await getUserPurchase();
-
-  let isPaid = false;
-  if (userPurchase && userPurchase.length > 0) {
-    isPaid = true;
-  }
-
   return (
     <div>
       {/* <h2 className='flex items-center after:ml-5 after:h-px after:grow after:bg-surface-100 after:content-[""]'>
@@ -55,17 +44,9 @@ const PlanList = async () => {
       </h2>
 
       <div className="mb-5 mt-3 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-5">
-        {allPlans
-          .filter((plan) => {
-            if (process.env.NEXT_PUBLIC_NODE_ENV === "development") {
-              return true; // development 환경에서는 모든 plan을 렌더링
-            }
-            // production 환경에서는 plan.env가 production인 것만 렌더링
-            return plan.env === "production";
-          })
-          .map((plan, index) => {
-            return <Plan key={`plan-${index}`} plan={plan} isPaid={isPaid} />;
-          })}
+        {allPlans.map((plan, index) => {
+          return <Plan key={`plan-${index}`} plan={plan} />;
+        })}
       </div>
 
       {/* <InfoMessage /> */}

@@ -1,5 +1,5 @@
 import { GetPageResponse } from "@notionhq/client/build/src/api-endpoints";
-import { Json } from "../../database.types";
+import { Json } from "../lib/database.types";
 import { type Subscription } from "@lemonsqueezy/lemonsqueezy.js";
 
 export type HeatmapMap = Map<
@@ -42,7 +42,7 @@ export type NewPlan = {
   trial_interval?: string | null;
   trial_interval_count?: number | null;
   sort?: number | null;
-  env: "production" | "development" | "test";
+  // env: "production" | "development" | "test";
   // created_at: string;
 };
 

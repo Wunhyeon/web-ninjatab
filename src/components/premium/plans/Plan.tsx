@@ -16,12 +16,10 @@ export const Plan = async ({
   plan,
   currentPlan = null,
   isChangingPlans = false,
-  isPaid,
 }: {
   plan: NewPlan;
   currentPlan?: NewPlan | null;
   isChangingPlans?: boolean;
-  isPaid?: boolean;
 }) => {
   const { description, product_name, name, price, id, interval } = plan;
   let isCurrent = id && currentPlan?.id === id;
@@ -29,29 +27,12 @@ export const Plan = async ({
   const notExpiredPlan = await getUserSubscriptionsNotExpiredByPlanId(id!);
   // const userOrders = await getUserOrdersPaid(id!);
 
-  if ((notExpiredPlan && notExpiredPlan.length) || isPaid) {
+  if (notExpiredPlan && notExpiredPlan.length) {
     isCurrent = true;
     currentPlan = plan;
   }
 
   return (
-    // <div>
-    //   <h2>
-    //     {product_name} ({name})
-    //   </h2>
-
-    //   {description ? (
-    //     <div
-    //       dangerouslySetInnerHTML={{
-    //         // Ideally sanitize the description first.
-    //         __html: description,
-    //       }}
-    //     ></div>
-    //   ) : null}
-
-    //   <p>${price}</p>
-    //   <SignupButton plan={plan} />
-    // </div>
     <Section className={cn("not-prose", isCurrent && "bg-surface-50/40")}>
       <Section.Item className="flex-col items-start gap-2">
         <header className="flex w-full items-center justify-between">
@@ -98,7 +79,6 @@ export const Plan = async ({
               plan={plan}
               isChangingPlans={isChangingPlans}
               currentPlan={currentPlan}
-              isPaid={isPaid}
             />
           </div>
         )}

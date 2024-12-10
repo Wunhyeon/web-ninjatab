@@ -21,7 +21,6 @@ type ButtonProps = ComponentProps<typeof Button> & {
   isChangingPlans?: boolean;
   currentPlan?: NewPlan | null;
   plan: NewPlan;
-  isPaid?: boolean; // 유저가 LifeTimeDeal을 샀는지 안샀는지
 };
 
 export const SignupButton = forwardRef<ButtonElement, ButtonProps>(
@@ -33,14 +32,10 @@ export const SignupButton = forwardRef<ButtonElement, ButtonProps>(
       plan,
       currentPlan,
       isChangingPlans = false,
-      isPaid,
       ...otherProps
     } = props;
 
     let isCurrent = currentPlan && plan.id === currentPlan.id;
-    if (isPaid) {
-      isCurrent = true;
-    }
 
     // eslint-disable-next-line no-nested-ternary -- allow
     const label = isCurrent

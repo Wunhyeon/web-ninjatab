@@ -13,13 +13,13 @@ import {
 } from "@/action/lemonSqueezyAction";
 import { LemonSqueezyModalLink } from "./modal-link";
 import { toast } from "sonner";
-import { Database } from "../../../../database.types";
+import { Database } from "../../../lib/database.types";
 
 export function SubscriptionActionsDropdown({
   subscription,
   urls,
 }: {
-  subscription: NewSubscription;
+  subscription: Database["public"]["Tables"]["subscriptions"]["Row"];
   urls: Awaited<ReturnType<typeof getSubscriptionURLs>>;
 }) {
   const [loading, setLoading] = useState(false);
@@ -124,51 +124,6 @@ export function SubscriptionActionsDropdown({
               Cancel subscription
             </DropdownMenu.Item>
           </DropdownMenu.Group>
-        </DropdownMenu.Content>
-      </DropdownMenu>
-    </>
-  );
-}
-
-export function OrderActionsDropdown({
-  order,
-  urls,
-}: {
-  order: Database["public"]["Tables"]["purchase"]["Row"];
-  urls: Awaited<ReturnType<typeof getOrderURLs>>;
-}) {
-  const [loading, setLoading] = useState(false);
-
-  if (order.status !== "paid") {
-    return null;
-  }
-
-  return (
-    <>
-      {loading && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-md bg-surface-50/50">
-          <Loading size="sm" />
-        </div>
-      )}
-
-      <DropdownMenu>
-        <DropdownMenu.Trigger asChild>
-          <Button
-            size="sm"
-            variant="transparent"
-            className="size-8 data-[state=open]:bg-surface-50"
-            before={<MoreVerticalIcon className="size-4" />}
-          />
-        </DropdownMenu.Trigger>
-
-        <DropdownMenu.Content side="bottom" className="z-10" align="end">
-          <DropdownMenu.Group>
-            <DropdownMenu.Item asChild>
-              <a href={urls?.receipt}>Customer portal ↗</a>
-            </DropdownMenu.Item>
-          </DropdownMenu.Group>
-
-          <DropdownMenu.Separator />
         </DropdownMenu.Content>
       </DropdownMenu>
     </>

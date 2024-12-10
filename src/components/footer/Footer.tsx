@@ -28,18 +28,12 @@ export default function Footer() {
           {/* <Separator /> */}
           <div className="not-prose flex flex-col gap-6">
             <Link href="/">
-              <h1 className="sr-only">PomoLog</h1>
-              <Image
-                src="/Frame-7.svg"
-                alt="Logo"
-                width={120}
-                height={27.27}
-                className="transition-all hover:opacity-75 dark:invert"
-              ></Image>
+              <h1 className="text-xl">🥷 Ninja Tab</h1>
             </Link>
             <p>
               <Balancer>
-                PomoLog is a Notion Timer widget integrate Database and Heatmap.
+                Ninja Tab is a Chrome Extension that Quickly open, close, and
+                mute tabs with shortcuts Like Ninja.
               </Balancer>
             </p>
           </div>

@@ -35,6 +35,8 @@ export async function POST(request: Request) {
     const webhookEventId = await storeWebhookEvent(data.meta.event_name, data);
     // 사실은 ID가 아니고 객체인데, 공식문서에서 페이크 쓴듯.
     if (!webhookEventId) {
+      console.log("!webhookEventId");
+
       return new Response("Error", { status: 500 });
     }
 

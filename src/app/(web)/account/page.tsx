@@ -21,7 +21,7 @@ const page = async () => {
         <h3 className="text-3xl font-bold">Subscription Info</h3>
         <p className="text-zinc-500">Manage Your Subscription</p>
         <Link
-          href="/setting/subscription"
+          href="/account/subscription"
           className={cn(
             buttonVariants({ variant: "default" }),
             "justify-center mt-3"

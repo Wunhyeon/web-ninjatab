@@ -28,7 +28,7 @@ import {
 import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 import crypto, { randomUUID } from "node:crypto";
-import { Database } from "../../database.types";
+import { Database } from "../lib/database.types";
 
 /**
  * getUser. 유저 객체를 돌려준다. 유저 객체가 없으면 please-login page로 리다이렉트 시킨다.
@@ -68,7 +68,9 @@ export const getAllPlan = async () => {
  * This action will sync the product variants from Lemon Squeezy with the
  * Plans database model. It will only sync the 'subscription' variants.
  */
-async function _addVariant(variant: NewPlan) {
+async function _addVariant(
+  variant: Database["public"]["Tables"]["plans"]["Insert"]
+) {
   const supabase = createServiceRoleClient();
   try {
     // eslint-disable-next-line no-console -- allow
@@ -85,6 +87,8 @@ async function _addVariant(variant: NewPlan) {
 
     if (error) {
       // error handling
+      console.log("err in _addVarint : ", error);
+
       throw new Error();
     }
 
@@ -99,7 +103,7 @@ async function _addVariant(variant: NewPlan) {
 }
 
 export async function syncPlans() {
-  const supabase = createClient();
+  const supabase = createServiceRoleClient();
   configureLemonSqueezy();
 
   try {
@@ -114,7 +118,8 @@ export async function syncPlans() {
       // return;
     }
 
-    const productVariants: NewPlan[] = productVariantsResult.data;
+    const productVariants: Database["public"]["Tables"]["plans"]["Insert"][] =
+      productVariantsResult.data;
 
     // Helper function to add a variant to the productVariants array and sync it with the database.
 
@@ -186,16 +191,17 @@ export async function syncPlans() {
           name: variant.name,
           description: variant.description,
           price: priceString,
-          interval,
-          interval_count: intervalCount,
+          interval: interval ? interval : null,
+          interval_count:
+            typeof intervalCount === "number" ? intervalCount : null,
           is_usage_based: isUsageBased,
           product_id: variant.product_id,
           product_name: productName,
           variant_id: parseInt(v.id) as unknown as number,
-          trial_interval: trialInterval,
-          trial_interval_count: trialIntervalCount,
+          trial_interval: trialInterval ? trialInterval : null,
+          trial_interval_count:
+            typeof trialIntervalCount === "number" ? trialIntervalCount : null,
           sort: variant.sort,
-          env: variant.name.includes("Test") ? "development" : "test",
         });
         productVariants.push(res);
       }
@@ -239,7 +245,7 @@ export async function getCheckoutURL(variantId: number, embed = false) {
       },
       productOptions: {
         enabledVariants: [variantId],
-        redirectUrl: `${process.env.ORIGIN}/premium/billing/success`,
+        redirectUrl: `${process.env.NEXT_PUBLIC_ORIGIN}/premium/billing/success`,
         receiptButtonText: "Go to Dashboard",
         receiptThankYouNote: "Thank you for signing up to Lemon Stand!",
       },
@@ -291,6 +297,8 @@ export async function storeWebhookEvent(
       .select();
 
     if (returnedValueRes.error) {
+      console.log("storeWebhookEvent Error : ", returnedValueRes.error);
+
       throw new Error();
     }
 
@@ -381,23 +389,24 @@ export async function processWebhookEvent(webhookEvent: NewWebhookEvent) {
             ? priceData.data?.data.attributes.unit_price_decimal
             : priceData.data?.data.attributes.unit_price;
 
-          const updateData: NewSubscription = {
-            lemon_squeezy_id: eventBody.data.id,
-            order_id: attributes.order_id as number,
-            name: attributes.user_name as string,
-            email: attributes.user_email as string,
-            status: attributes.status as string,
-            status_formatted: attributes.status_formatted as string,
-            renews_at: attributes.renews_at as string,
-            ends_at: attributes.ends_at as string,
-            trial_ends_at: attributes.trial_ends_at as string,
-            price: price?.toString() ?? "",
-            is_paused: false,
-            subscription_item_id: attributes.first_subscription_item.id,
-            is_usage_based: attributes.first_subscription_item.is_usage_based,
-            user_id: eventBody.meta.custom_data.user_id,
-            plan_id: planRes.data[0].id,
-          };
+          const updateData: Database["public"]["Tables"]["subscriptions"]["Insert"] =
+            {
+              lemon_squeezy_id: eventBody.data.id,
+              order_id: attributes.order_id as number,
+              name: attributes.user_name as string,
+              email: attributes.user_email as string,
+              status: attributes.status as string,
+              status_formatted: attributes.status_formatted as string,
+              renews_at: attributes.renews_at as string,
+              ends_at: attributes.ends_at as string,
+              trial_ends_at: attributes.trial_ends_at as string,
+              price: price?.toString() ?? "",
+              is_paused: false,
+              subscription_item_id: attributes.first_subscription_item.id,
+              is_usage_based: attributes.first_subscription_item.is_usage_based,
+              user_id: eventBody.meta.custom_data.user_id,
+              plan_id: planRes.data[0].id,
+            };
 
           // Create/update subscription in the database.
           try {
@@ -410,7 +419,7 @@ export async function processWebhookEvent(webhookEvent: NewWebhookEvent) {
             //   });
 
             const upsertRes = await supabase
-              .from("subscription")
+              .from("subscriptions")
               .upsert(updateData, { onConflict: "lemon_squeezy_id" })
               .select("*");
 
@@ -428,92 +437,6 @@ export async function processWebhookEvent(webhookEvent: NewWebhookEvent) {
           }
         }
       } else if (webhookEvent.event_name.startsWith("order_")) {
-        // Save orders; eventBody is a "Order"
-        // 이건 oneTimepayment인데, 우선 구독할때랑 비슷하게 만듬. order table따로 만듬.
-        // subscription을 할때도 order_created 웹훅을 보낸다. 1time payment라면 필터를 하나 더 걸어줘야 한다.
-        // 필터를 lemonsqueezy product의 variant name으로 걸어주기로 했다.
-        // Save subscription events; obj is a Subscription
-        const attributes = eventBody.data.attributes;
-
-        const variantId = attributes.first_order_item
-          ? String(attributes.first_order_item.variant_id)
-          : undefined;
-
-        if (!variantId) {
-          throw new Error();
-        }
-
-        const variantName = attributes.first_order_item
-          ? String(attributes.first_order_item.variant_name)
-          : undefined;
-
-        if (!variantName) {
-          throw new Error();
-        }
-
-        const isLifeTimeDeal = variantName
-          .trim()
-          .replaceAll(" ", "")
-          .toLowerCase()
-          .includes(LIFE_TIME_DEAL);
-        if (!isLifeTimeDeal) {
-          return;
-        }
-
-        const planRes = await supabase
-          .from("plans")
-          .select("*")
-          .eq("variant_id", parseInt(variantId, 10));
-
-        if (planRes.error || !planRes.data || planRes.data.length < 1) {
-          processingError = `Plan with variantId ${variantId} not found.`;
-          throw new Error(
-            `err in processWebhookEvent - processingError : ${processingError}`
-          );
-        } else {
-          // Update the subscription in the database.
-
-          const priceId = attributes.first_order_item.price_id;
-
-          // Get the price data from Lemon Squeezy.
-          const priceData = await getPrice(priceId);
-          if (priceData.error) {
-            processingError = `Failed to get the price data for the subscription ${eventBody.data.id}.`;
-          }
-
-          const price = priceData.data?.data.attributes.unit_price;
-
-          const orderData: Database["public"]["Tables"]["purchase"]["Insert"] =
-            {
-              lemon_squeezy_id: eventBody.data.id,
-              order_id: attributes.first_order_item.order_id as number,
-              name: attributes.user_name as string,
-              email: attributes.user_email as string,
-              status: attributes.status as string,
-              status_formatted: attributes.status_formatted as string,
-              price: price?.toString() ?? "",
-              user_id: eventBody.meta.custom_data.user_id,
-              plan_id: planRes.data[0].id,
-            };
-
-          // Create/update subscription in the database.
-          try {
-            const upsertRes = await supabase
-              .from("purchase")
-              .upsert(orderData, { onConflict: "lemon_squeezy_id" })
-              .select("*");
-
-            if (upsertRes.error) {
-              throw new Error(upsertRes.error.message);
-            }
-          } catch (error) {
-            processingError = `Failed to upsert Subscription #${orderData.lemon_squeezy_id} to the database.`;
-            console.error(error);
-            throw new Error(
-              `err in processWebhookEvent - processingError : ${processingError}`
-            );
-          }
-        }
       } else if (webhookEvent.event_name.startsWith("license_")) {
         // Save license keys; eventBody is a "License key"
         /* Not implemented */
@@ -557,7 +480,7 @@ export async function getUserSubscriptions() {
     //   .where(eq(subscriptions.userId, userId));
 
     const userSubscriptionsRes = await supabase
-      .from("subscription")
+      .from("subscriptions")
       .select("*")
       .eq("user_id", user.id);
 
@@ -565,43 +488,12 @@ export async function getUserSubscriptions() {
       throw new Error();
     }
 
-    const userSubscriptions: NewSubscription[] = userSubscriptionsRes.data;
+    const userSubscriptions: Database["public"]["Tables"]["subscriptions"]["Row"][] =
+      userSubscriptionsRes.data;
 
     revalidatePath("/");
 
     return userSubscriptions;
-  } catch (err) {
-    console.log("err in getUserSubscriptions - ", err);
-  }
-}
-
-/**
- * This action will get the orders for the current user.
- */
-export async function getUserOrders() {
-  const supabase = createServiceRoleClient();
-  const user = await getUser();
-
-  if (!user) {
-    notFound();
-  }
-
-  try {
-    const userOrderRes = await supabase
-      .from("purchase")
-      .select("*")
-      .eq("user_id", user.id);
-
-    if (userOrderRes.error) {
-      throw new Error();
-    }
-
-    const userOrders: Database["public"]["Tables"]["purchase"]["Row"][] =
-      userOrderRes.data;
-
-    revalidatePath("/");
-
-    return userOrders;
   } catch (err) {
     console.log("err in getUserSubscriptions - ", err);
   }
@@ -625,7 +517,7 @@ export async function getUserSubscriptionsNotExpired() {
     //   .where(eq(subscriptions.userId, userId));
 
     const userSubscriptionsRes = await supabase
-      .from("subscription")
+      .from("subscriptions")
       .select("*")
       .eq("user_id", user.id)
       .neq("status", "expired");
@@ -634,7 +526,8 @@ export async function getUserSubscriptionsNotExpired() {
       throw new Error();
     }
 
-    const userSubscriptions: NewSubscription[] = userSubscriptionsRes.data;
+    const userSubscriptions: Database["public"]["Tables"]["subscriptions"]["Row"][] =
+      userSubscriptionsRes.data;
 
     revalidatePath("/");
 
@@ -657,7 +550,7 @@ export async function getUserSubscriptionsNotExpiredByUserId(userId: string) {
     //   .where(eq(subscriptions.userId, userId));
 
     const userSubscriptionsRes = await supabase
-      .from("subscription")
+      .from("subscriptions")
       .select("*")
       .eq("user_id", userId)
       .neq("status", "expired");
@@ -666,7 +559,8 @@ export async function getUserSubscriptionsNotExpiredByUserId(userId: string) {
       throw new Error();
     }
 
-    const userSubscriptions: NewSubscription[] = userSubscriptionsRes.data;
+    const userSubscriptions: Database["public"]["Tables"]["subscriptions"]["Row"][] =
+      userSubscriptionsRes.data;
 
     revalidatePath("/");
 
@@ -695,7 +589,7 @@ export async function getUserSubscriptionsNotExpiredByPlanId(planId: string) {
     //   .where(eq(subscriptions.userId, userId));
 
     const userSubscriptionsRes = await supabase
-      .from("subscription")
+      .from("subscriptions")
       .select("*")
       .eq("user_id", user.data.user.id)
       .eq("plan_id", planId)
@@ -705,45 +599,12 @@ export async function getUserSubscriptionsNotExpiredByPlanId(planId: string) {
       throw new Error(userSubscriptionsRes.error.message);
     }
 
-    const userSubscriptions: NewSubscription[] = userSubscriptionsRes.data;
+    const userSubscriptions: Database["public"]["Tables"]["subscriptions"]["Row"][] =
+      userSubscriptionsRes.data;
 
     revalidatePath("/");
 
     return userSubscriptions;
-  } catch (err) {
-    console.log("err in getUserSubscriptionsNotExpiredByPlanId - ", err);
-  }
-}
-
-/**
- * This action will get the orders for the current user.
- */
-export async function getUserPurchase() {
-  const supabase = createServiceRoleClient();
-  const serverSupabase = createClient();
-  const user = await serverSupabase.auth.getUser();
-
-  if (!user.data.user) {
-    return undefined;
-  }
-
-  try {
-    const userPurchaseRes = await supabase
-      .from("purchase")
-      .select("*")
-      .eq("user_id", user.data.user.id)
-      .eq("status", "paid");
-
-    if (userPurchaseRes.error) {
-      throw new Error(userPurchaseRes.error.message);
-    }
-
-    const userPurchases: Database["public"]["Tables"]["purchase"]["Row"][] =
-      userPurchaseRes.data;
-
-    revalidatePath("/");
-
-    return userPurchases;
   } catch (err) {
     console.log("err in getUserSubscriptionsNotExpiredByPlanId - ", err);
   }
@@ -843,7 +704,7 @@ export async function cancelSub(id: string) {
     //   .where(eq(subscriptions.lemonSqueezyId, id));
 
     const { error, data } = await supabase
-      .from("subscription")
+      .from("subscriptions")
       .update({
         status: cancelledSub.data.data.attributes.status,
         status_formatted: cancelledSub.data.data.attributes.status_formatted,
@@ -910,7 +771,7 @@ export async function pauseUserSubscription(id: string) {
     //   .where(eq(subscriptions.lemonSqueezyId, id));
 
     const { error, data } = await supabase
-      .from("subscription")
+      .from("subscriptions")
       .update({
         status: returnedSub.data?.data.attributes.status,
         status_formatted: returnedSub.data?.data.attributes.status_formatted,
@@ -968,7 +829,7 @@ export async function unpauseUserSubscription(id: string) {
     //   })
     //   .where(eq(subscriptions.lemonSqueezyId, id));
     const { error, data } = await supabase
-      .from("subscription")
+      .from("subscriptions")
       .update({
         status: returnedSub.data?.data.attributes.status,
         status_formatted: returnedSub.data?.data.attributes.status_formatted,
@@ -1047,7 +908,7 @@ export async function changePlan(currentPlanId: string, newPlanId: string) {
       //   .where(eq(subscriptions.lemonSqueezyId, subscription.lemonSqueezyId));
 
       await supabase
-        .from("subscription")
+        .from("subscriptions")
         .update({
           plan_id: newPlanId,
           price: newPlan.price,
