@@ -11,9 +11,9 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "PomoLog",
+  title: "Ninja Tab",
   description:
-    "With the PomoLog timer, achieve deep focus for efficient task management, while keeping track of and organizing your progress!",
+    "Quickly open, close, and mute tabs with shortcuts Like a Ninja!",
 };
 
 export default async function RootLayout({

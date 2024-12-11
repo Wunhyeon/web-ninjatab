@@ -20,10 +20,7 @@ const Feature = () => {
           <p>with shortcuts Like a Ninja!</p>
         </h3>
         <p className="text-muted-foreground my-6">
-          <Balancer>
-            Record your work time with a Pomodoro timer synced to Notion, and
-            visualize your performance with a heatmap.
-          </Balancer>
+          <Balancer>Manage your tabs with ease!</Balancer>
         </p>
         <div className="not-prose my-8 flex items-center gap-2 justify-center">
           <GetStartBtn />
