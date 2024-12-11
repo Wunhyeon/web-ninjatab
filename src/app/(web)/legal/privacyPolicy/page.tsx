@@ -5,27 +5,27 @@ const page = () => {
     <div className="bg-gray-100 text-gray-800 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-900 mb-4 border-b-2 pb-2">
-          PomoLog Privacy Policy
+          NinjaTab Privacy Policy
         </h1>
         <p className="text-lg mb-4">
-          <strong>Last Update Date: October 3, 2024</strong>
+          <strong>Last Update Date: December 3, 2024</strong>
         </p>
 
         <p className="mb-4">
-          PomoLog (
+          NinjaTab (
           <span className="italic">
             &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;
           </span>
           ) is committed to protecting your privacy. This Privacy Policy
           explains how we collect, use, disclose, and safeguard your information
-          when you use our Pomodoro timer embedded in Notion.
+          when you use our NinjaTab Chrome Extension.
         </p>
 
         <h2 className="text-2xl font-semibold text-gray-900 mb-3">
           1. Information We Collect
         </h2>
         <p className="mb-4">
-          When you sign up for PomoLog using Google OAuth, we collect the
+          When you sign up for NinjaTab using Google OAuth, we collect the
           following information from your Google account:
         </p>
         <ul className="list-disc list-inside mb-4">
@@ -45,8 +45,7 @@ const page = () => {
           We may use the collected information for the following purposes:
         </p>
         <ul className="list-disc list-inside mb-4">
-          <li>To provide and improve our Pomodoro timer service</li>
-          <li>To sync with your Notion database and log your activities</li>
+          <li>To provide and improve our NinjaTab service</li>
           <li>
             For analytics and statistical purposes to understand user engagement
           </li>
@@ -107,7 +106,7 @@ const page = () => {
           7. Children&apos;s Privacy
         </h2>
         <p className="mb-4">
-          PomoLog is safe for users of all ages. However, we do not knowingly
+          NinjaTab is safe for users of all ages. However, we do not knowingly
           collect personal information from children under 13 without parental
           consent.
         </p>
