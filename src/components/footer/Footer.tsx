@@ -43,7 +43,7 @@ export default function Footer() {
             <Link href="/legal/licenseNotice">License</Link>
             {/* <Link href="/cookie-policy">Cookie Policy</Link> */}
             <Link
-              href="https://joey.team/block/?id=9cU5pLkasKPZCLb5piwAqg3C9OF2&block_id=ThRk4exx8AW1gfTAznUx"
+              href="https://joey.team/block/?id=9cU5pLkasKPZCLb5piwAqg3C9OF2&block_id=Uv1NvTNfP8doMU8p6Jai"
               target="_blank"
             >
               Anonymous board

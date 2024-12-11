@@ -39,8 +39,8 @@ const PlanList = async () => {
       {/* <h2 className='flex items-center after:ml-5 after:h-px after:grow after:bg-surface-100 after:content-[""]'>
         Plans
       </h2> */}
-      <h2 className="text-center text-4xl font-bold">
-        Maximize Your Productivity!
+      <h2 className="text-center text-4xl font-bold mb-14">
+        To the top Ninja!
       </h2>
 
       <div className="mb-5 mt-3 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-5">
