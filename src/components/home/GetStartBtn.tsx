@@ -12,12 +12,14 @@ const GetStartBtn = () => {
       className="w-fit"
       asChild
       onClick={() => {
-        sendGAEvent("event", MAIN_GET_START.event, {
-          value: MAIN_GET_START.value,
-        });
+        // sendGAEvent("event", MAIN_GET_START.event, {
+        //   value: MAIN_GET_START.value,
+        // });
+        alert("We are preparing for registration on the Chrome Web Store.");
       }}
     >
-      <Link href="/my-timers">Get Started</Link>
+      <Link href="#">Get Started</Link>
+      {/* Get Started */}
     </Button>
   );
 };
