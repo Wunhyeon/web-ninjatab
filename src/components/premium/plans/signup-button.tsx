@@ -14,7 +14,8 @@ import { type NewPlan } from "@/lib/types";
 import { changePlan, getCheckoutURL } from "@/action/lemonSqueezyAction";
 import { sendGAEvent } from "@next/third-parties/google";
 import { PREMIUM_SUBSCRIBE_BTN } from "@/lib/GAEvent";
-import { surveyURL } from "@/lib/constant";
+import { LOGIN_AGAIN, surveyURL } from "@/lib/constant";
+import { createClient } from "@/utils/supabase/client";
 
 type ButtonElement = ElementRef<typeof Button>;
 type ButtonProps = ComponentProps<typeof Button> & {
@@ -37,6 +38,7 @@ export const SignupButton = forwardRef<ButtonElement, ButtonProps>(
     } = props;
 
     let isCurrent = currentPlan && plan.id === currentPlan.id;
+    const supabase = createClient();
 
     // eslint-disable-next-line no-nested-ternary -- allow
     const label = isCurrent
@@ -101,7 +103,12 @@ export const SignupButton = forwardRef<ButtonElement, ButtonProps>(
         //   });
         // }}
         // {...otherProps}
-        onClick={() => {
+        onClick={async () => {
+          const user = await supabase.auth.getUser();
+          if (!user.data.user) {
+            router.push(`/please-login?message=${LOGIN_AGAIN}`);
+            return;
+          }
           window.open(surveyURL, "_blank");
         }}
       >
