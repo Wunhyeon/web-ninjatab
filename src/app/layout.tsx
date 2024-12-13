@@ -14,6 +14,9 @@ export const metadata: Metadata = {
   title: "Ninja Tab",
   description:
     "Quickly open, close, and mute tabs with shortcuts Like a Ninja!",
+  verification: {
+    google: "y1UVNRzLk64HC3kSKMins7viBEWx2MgCfC01QfPCmNw",
+  },
 };
 
 export default async function RootLayout({
