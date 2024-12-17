@@ -21,3 +21,5 @@ export const LEMON_SQUEEZY_LINK =
   "https://jaehyeon.lemonsqueezy.com/buy/c97e65ed-c3a8-49f5-b5f1-48e9ebb813a3";
 
 export const surveyURL = "https://forms.gle/RaqE1E5ktTpAmiXRA";
+export const webstoreURL =
+  "https://chromewebstore.google.com/detail/ninja-tab/kpmbedmoneoiekmkbkjdkjaafhjidijj";
