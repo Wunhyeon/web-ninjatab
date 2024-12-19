@@ -61,56 +61,57 @@ export const SignupButton = forwardRef<ButtonElement, ButtonProps>(
         ref={ref}
         before={before}
         disabled={(loading || isCurrent) ?? props.disabled}
-        // onClick={async () => {
-        //   // If changing plans, call server action.
-        //   if (isChangingPlans) {
-        //     if (!currentPlan?.id) {
-        //       throw new Error("Current plan not found.");
-        //     }
-
-        //     if (!plan.id) {
-        //       throw new Error("New plan not found.");
-        //     }
-
-        //     setLoading(true);
-        //     await changePlan(currentPlan.id, plan.id);
-        //     setLoading(false);
-
-        //     return;
-        //   }
-
-        //   // Otherwise, create a checkout and open the Lemon.js modal.
-        //   let checkoutUrl: string | undefined = "";
-        //   try {
-        //     setLoading(true);
-        //     checkoutUrl = await getCheckoutURL(plan.variant_id, embed);
-        //   } catch (error) {
-        //     setLoading(false);
-        //     toast("Error creating a checkout.", {
-        //       description:
-        //         "Please check the server console for more information.",
-        //     });
-        //   } finally {
-        //     embed && setLoading(false);
-        //   }
-
-        //   embed
-        //     ? checkoutUrl && window.LemonSqueezy.Url.Open(checkoutUrl)
-        //     : router.push(checkoutUrl ?? "/");
-
-        //   sendGAEvent("event", PREMIUM_SUBSCRIBE_BTN.event, {
-        //     value: PREMIUM_SUBSCRIBE_BTN.value,
-        //   });
-        // }}
-        // {...otherProps}
         onClick={async () => {
-          const user = await supabase.auth.getUser();
-          if (!user.data.user) {
-            router.push(`/please-login?message=${LOGIN_AGAIN}`);
+          // If changing plans, call server action.
+          if (isChangingPlans) {
+            if (!currentPlan?.id) {
+              throw new Error("Current plan not found.");
+            }
+
+            if (!plan.id) {
+              throw new Error("New plan not found.");
+            }
+
+            setLoading(true);
+            await changePlan(currentPlan.id, plan.id);
+            setLoading(false);
+
             return;
           }
-          window.open(surveyURL, "_blank");
+
+          // Otherwise, create a checkout and open the Lemon.js modal.
+          let checkoutUrl: string | undefined = "";
+          try {
+            setLoading(true);
+            checkoutUrl = await getCheckoutURL(plan.variant_id, embed);
+          } catch (error) {
+            setLoading(false);
+            toast("Error creating a checkout.", {
+              description:
+                "Please check the server console for more information.",
+            });
+          } finally {
+            embed && setLoading(false);
+          }
+
+          embed
+            ? checkoutUrl && window.LemonSqueezy.Url.Open(checkoutUrl)
+            : router.push(checkoutUrl ?? "/");
+
+          sendGAEvent("event", PREMIUM_SUBSCRIBE_BTN.event, {
+            value: PREMIUM_SUBSCRIBE_BTN.value,
+          });
         }}
+        {...otherProps}
+
+        // onClick={async () => {
+        //   const user = await supabase.auth.getUser();
+        //   if (!user.data.user) {
+        //     router.push(`/please-login?message=${LOGIN_AGAIN}`);
+        //     return;
+        //   }
+        //   window.open(surveyURL, "_blank");
+        // }}
       >
         {label}
       </Button>
